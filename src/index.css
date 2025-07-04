@@ -56,6 +56,9 @@ All colors MUST be HSL.
     --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.3);
     --shadow-floating: 0 10px 40px -10px hsl(215 25% 15% / 0.15);
 
+    /* Animation Variables */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
