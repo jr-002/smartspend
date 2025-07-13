@@ -199,6 +199,15 @@ const DebtCard = ({ debt, rank }: { debt: Debt; rank: number }) => {
   const progressPercentage = ((debt.originalAmount - debt.balance) / debt.originalAmount) * 100;
   const payoffMonths = Math.ceil(debt.balance / debt.minimumPayment);
 
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-destructive text-destructive-foreground';
+      case 'medium': return 'bg-warning text-warning-foreground';
+      case 'low': return 'bg-success text-success-foreground';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
   return (
     <div className="p-6 border rounded-lg bg-card/50 hover:bg-card transition-colors">
       <div className="flex items-start justify-between mb-4">
@@ -210,9 +219,9 @@ const DebtCard = ({ debt, rank }: { debt: Debt; rank: number }) => {
             <h3 className="font-semibold text-lg text-foreground">{debt.name}</h3>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="outline">{debt.type}</Badge>
-              <Badge className={getPriorityColor(debt.priority)}>
-                {debt.priority} priority
-              </Badge>
+                        <Badge className={getPriorityColor(debt.priority)}>
+                          {debt.priority} priority
+                        </Badge>
             </div>
           </div>
         </div>

@@ -2,14 +2,18 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, TrendingUp, TrendingDown, Target, PieChart, Menu } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Target, PieChart, Menu, Brain, Bell, Calculator, Sparkles } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ThemeToggle } from "./ThemeToggle";
 import TransactionHistory from "./TransactionHistory";
 import BillPayments from "./BillPayments";
 import SavingsGoals from "./SavingsGoals";
 import InvestmentTracking from "./InvestmentTracking";
 import DebtManagement from "./DebtManagement";
 import FinancialEducation from "./FinancialEducation";
+import AIInsights from "./AIInsights";
+import SmartBudgeting from "./SmartBudgeting";
+import NotificationCenter from "./NotificationCenter";
 
 const EnhancedDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -71,6 +75,30 @@ const EnhancedDashboard = () => {
       >
         <Target className="w-4 h-4 mr-2" />
         Financial Education
+      </Button>
+      <Button
+        variant={activeTab === "insights" ? "default" : "ghost"}
+        className="w-full justify-start"
+        onClick={() => setActiveTab("insights")}
+      >
+        <Brain className="w-4 h-4 mr-2" />
+        AI Insights
+      </Button>
+      <Button
+        variant={activeTab === "budgeting" ? "default" : "ghost"}
+        className="w-full justify-start"
+        onClick={() => setActiveTab("budgeting")}
+      >
+        <Calculator className="w-4 h-4 mr-2" />
+        Smart Budgeting
+      </Button>
+      <Button
+        variant={activeTab === "notifications" ? "default" : "ghost"}
+        className="w-full justify-start"
+        onClick={() => setActiveTab("notifications")}
+      >
+        <Bell className="w-4 h-4 mr-2" />
+        Notifications
       </Button>
     </div>
   );
@@ -163,6 +191,51 @@ const EnhancedDashboard = () => {
               <PieChart className="w-6 h-6" />
               View Reports
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Insights Preview */}
+      <Card className="shadow-card bg-gradient-card border-0">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="w-5 h-5 text-primary" />
+              Latest AI Insights
+            </CardTitle>
+            <Button variant="outline" size="sm" onClick={() => setActiveTab("insights")}>
+              View All
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="p-1 bg-destructive/10 rounded text-destructive">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground">Food Spending Alert</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Your food expenses increased by 23% this month. Consider meal planning to save ₦8,000-12,000.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 bg-warning/5 border border-warning/20 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="p-1 bg-warning/10 rounded text-warning">
+                  <Target className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground">Emergency Fund Opportunity</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Increase monthly savings by ₦15,000 to reach your emergency fund goal 4 months earlier.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -269,9 +342,12 @@ const EnhancedDashboard = () => {
                 <p className="text-sm text-muted-foreground">Financial Wellness Assistant</p>
               </div>
             </div>
-            <Button variant="outline" size="sm">
-              Profile
-            </Button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button variant="outline" size="sm">
+                Profile
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -294,6 +370,9 @@ const EnhancedDashboard = () => {
             {activeTab === "investments" && <InvestmentTracking />}
             {activeTab === "debt" && <DebtManagement />}
             {activeTab === "education" && <FinancialEducation />}
+            {activeTab === "insights" && <AIInsights />}
+            {activeTab === "budgeting" && <SmartBudgeting />}
+            {activeTab === "notifications" && <NotificationCenter />}
           </div>
         </div>
       </div>
