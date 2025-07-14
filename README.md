@@ -1,18 +1,24 @@
-# Welcome to your Lovable project
+# FinAssist SmartSpend - Personal Finance Management Application
 
-## Project info
+## Overview
 
-**URL**: https://lovable.dev/projects/ba2e0ae4-6eca-4511-bd28-96554a5d68d7
+FinAssist SmartSpend is a comprehensive personal finance management application designed to help users take control of their financial life. The application offers features like smart budgeting, bill payments tracking, debt management, investment tracking, and AI-powered financial insights.
 
-## How can I edit this code?
+## Key Features
 
-There are several ways of editing your application.
+- **Smart Budgeting**: Create and manage budgets with intelligent categorization
+- **Bill Payments**: Track and manage upcoming bills and recurring payments
+- **Debt Management**: Monitor and plan debt repayment strategies
+- **Investment Tracking**: Keep track of your investment portfolio
+- **AI Insights**: Get personalized financial recommendations
+- **Analytics & Reports**: Visualize your financial data
+- **Savings Goals**: Set and track financial goals
+- **Transaction History**: Monitor all your financial transactions
+- **Multi-currency Support**: Handle transactions in different currencies
 
-**Use Lovable**
+## Getting Started
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ba2e0ae4-6eca-4511-bd28-96554a5d68d7) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+To run this project locally, follow these steps:
 
 **Use your preferred IDE**
 
@@ -60,14 +66,19 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/ba2e0ae4-6eca-4511-bd28-96554a5d68d7) and click on Share -> Publish.
+The application can be deployed to any hosting platform that supports Node.js applications. Some recommended platforms include:
 
-## Can I connect a custom domain to my Lovable project?
+- Vercel
+- Netlify
+- AWS Amplify
+- Heroku
 
-Yes, you can!
+## Contributing
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
