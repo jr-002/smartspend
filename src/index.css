@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,7 +9,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* SmartSpend Financial Design System */
+    /* SmartSpend Financial Design System - Light Mode */
     --background: 240 15% 97%;
     --foreground: 215 25% 15%;
 
@@ -62,58 +63,118 @@ All colors MUST be HSL.
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark Mode - Enhanced for Better Contrast */
+    --background: 220 15% 8%;
+    --foreground: 210 40% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 15% 10%;
+    --card-foreground: 210 40% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 15% 10%;
+    --popover-foreground: 210 40% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Enhanced Primary Colors for Dark Mode */
+    --primary: 145 65% 55%;
+    --primary-foreground: 220 15% 8%;
+    --primary-glow: 145 70% 65%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 15% 15%;
+    --secondary-foreground: 210 40% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 15% 12%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 175 60% 50%;
+    --accent-foreground: 220 15% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    /* Enhanced Alert Colors for Dark Mode */
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 210 40% 95%;
+    --warning: 45 85% 60%;
+    --warning-foreground: 220 15% 8%;
+    --success: 145 65% 55%;
+    --success-foreground: 220 15% 8%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 220 15% 18%;
+    --input: 220 15% 15%;
+    --ring: 145 65% 55%;
+
+    /* Dark Mode Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(145 70% 65%));
+    --gradient-card: linear-gradient(135deg, hsl(220 15% 10%), hsl(220 15% 12%));
+    --gradient-background: linear-gradient(180deg, hsl(220 15% 8%), hsl(220 15% 10%));
+
+    /* Enhanced Dark Mode Shadows */
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.4);
+    --shadow-floating: 0 10px 40px -10px hsl(0 0% 0% / 0.4);
+
+    /* Dark Mode Sidebar */
+    --sidebar-background: 220 15% 9%;
+    --sidebar-foreground: 210 40% 90%;
+    --sidebar-primary: 145 65% 55%;
+    --sidebar-primary-foreground: 220 15% 8%;
+    --sidebar-accent: 220 15% 12%;
+    --sidebar-accent-foreground: 210 40% 90%;
+    --sidebar-border: 220 15% 15%;
+    --sidebar-ring: 145 65% 55%;
+  }
+
+  /* System Theme Preference */
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) {
+      /* Apply dark theme variables when system prefers dark and no explicit light class */
+      --background: 220 15% 8%;
+      --foreground: 210 40% 95%;
+      --card: 220 15% 10%;
+      --card-foreground: 210 40% 95%;
+      --popover: 220 15% 10%;
+      --popover-foreground: 210 40% 95%;
+      --primary: 145 65% 55%;
+      --primary-foreground: 220 15% 8%;
+      --primary-glow: 145 70% 65%;
+      --secondary: 220 15% 15%;
+      --secondary-foreground: 210 40% 95%;
+      --muted: 220 15% 12%;
+      --muted-foreground: 215 20% 65%;
+      --accent: 175 60% 50%;
+      --accent-foreground: 220 15% 8%;
+      --destructive: 0 65% 55%;
+      --destructive-foreground: 210 40% 95%;
+      --warning: 45 85% 60%;
+      --warning-foreground: 220 15% 8%;
+      --success: 145 65% 55%;
+      --success-foreground: 220 15% 8%;
+      --border: 220 15% 18%;
+      --input: 220 15% 15%;
+      --ring: 145 65% 55%;
+      --gradient-primary: linear-gradient(135deg, hsl(145 65% 55%), hsl(145 70% 65%));
+      --gradient-success: linear-gradient(135deg, hsl(145 65% 55%), hsl(145 70% 65%));
+      --gradient-card: linear-gradient(135deg, hsl(220 15% 10%), hsl(220 15% 12%));
+      --gradient-background: linear-gradient(180deg, hsl(220 15% 8%), hsl(220 15% 10%));
+      --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+      --shadow-glow: 0 0 40px hsl(145 70% 65% / 0.4);
+      --shadow-floating: 0 10px 40px -10px hsl(0 0% 0% / 0.4);
+      --sidebar-background: 220 15% 9%;
+      --sidebar-foreground: 210 40% 90%;
+      --sidebar-primary: 145 65% 55%;
+      --sidebar-primary-foreground: 220 15% 8%;
+      --sidebar-accent: 220 15% 12%;
+      --sidebar-accent-foreground: 210 40% 90%;
+      --sidebar-border: 220 15% 15%;
+      --sidebar-ring: 145 65% 55%;
+    }
   }
 }
 
@@ -124,5 +185,83 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    transition: var(--transition-smooth);
+  }
+
+  /* Enhanced scrollbar styling for dark mode */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground;
+  }
+
+  /* Dark mode specific enhancements */
+  .dark {
+    color-scheme: dark;
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+
+  /* Selection colors */
+  ::selection {
+    background: hsl(var(--primary) / 0.2);
+    color: hsl(var(--primary-foreground));
+  }
+
+  .dark ::selection {
+    background: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+  }
+
+  /* Focus ring enhancements */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Enhanced backdrop blur for glass effects */
+  .backdrop-blur-glass {
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+  }
+}
+
+/* Additional utility classes for theme enhancements */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-glass bg-card/80 shadow-floating;
+  }
+
+  .dark .glass-card {
+    @apply bg-card/60 shadow-floating;
+  }
+
+  .theme-transition {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   }
 }
