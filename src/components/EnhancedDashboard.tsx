@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, TrendingUp, TrendingDown, Target, PieChart, Menu, Brain, Bell, Calculator, Sparkles } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "./ThemeToggle";
@@ -14,9 +13,43 @@ import FinancialEducation from "./FinancialEducation";
 import AIInsights from "./AIInsights";
 import SmartBudgeting from "./SmartBudgeting";
 import NotificationCenter from "./NotificationCenter";
+import WelcomeScreen from "./WelcomeScreen";
+import EmptyState from "./EmptyState";
+
+interface UserData {
+  name: string;
+  monthlyIncome: number;
+  currency: string;
+  isSetup: boolean;
+}
 
 const EnhancedDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [userData, setUserData] = useState<UserData>({
+    name: "",
+    monthlyIncome: 0,
+    currency: "₦",
+    isSetup: false
+  });
+
+  // Load user data from localStorage on mount
+  useEffect(() => {
+    const savedUserData = localStorage.getItem("smartspend-user");
+    if (savedUserData) {
+      setUserData(JSON.parse(savedUserData));
+    }
+  }, []);
+
+  const handleWelcomeComplete = (data: { name: string; monthlyIncome: number; currency: string }) => {
+    const newUserData = { ...data, isSetup: true };
+    setUserData(newUserData);
+    localStorage.setItem("smartspend-user", JSON.stringify(newUserData));
+  };
+
+  // Show welcome screen if user hasn't completed setup
+  if (!userData.isSetup) {
+    return <WelcomeScreen onComplete={handleWelcomeComplete} />;
+  }
 
   const NavigationMenu = () => (
     <div className="space-y-2">
@@ -105,7 +138,26 @@ const EnhancedDashboard = () => {
 
   const OverviewContent = () => (
     <div className="space-y-6">
-      {/* Quick Stats */}
+      {/* Welcome Message */}
+      <Card className="shadow-card bg-gradient-primary text-primary-foreground border-0">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">
+                Welcome back, {userData.name}!
+              </h2>
+              <p className="opacity-90">
+                Ready to take control of your finances today?
+              </p>
+            </div>
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+              <Sparkles className="w-8 h-8" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Stats - Empty State */}
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="shadow-card bg-gradient-card border-0">
           <CardHeader className="pb-3">
@@ -114,10 +166,9 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">₦125,430</div>
-            <div className="flex items-center text-sm text-success mt-1">
-              <TrendingUp className="w-4 h-4 mr-1" />
-              +12.5% from last month
+            <div className="text-2xl font-bold text-foreground">{userData.currency}0.00</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              Add transactions to see your balance
             </div>
           </CardContent>
         </Card>
@@ -129,10 +180,9 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">₦45,280</div>
-            <div className="flex items-center text-sm text-warning mt-1">
-              <TrendingDown className="w-4 h-4 mr-1" />
-              85% of budget used
+            <div className="text-2xl font-bold text-foreground">{userData.currency}0.00</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              No expenses tracked yet
             </div>
           </CardContent>
         </Card>
@@ -144,10 +194,9 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">₦825,000</div>
-            <div className="flex items-center text-sm text-success mt-1">
-              <Target className="w-4 h-4 mr-1" />
-              4 active goals
+            <div className="text-2xl font-bold text-foreground">0</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              No goals set yet
             </div>
           </CardContent>
         </Card>
@@ -159,10 +208,9 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">₦3,650,000</div>
-            <div className="flex items-center text-sm text-success mt-1">
-              <TrendingUp className="w-4 h-4 mr-1" />
-              +8.2% this year
+            <div className="text-2xl font-bold text-foreground">{userData.currency}0.00</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              Start investing for your future
             </div>
           </CardContent>
         </Card>
@@ -175,141 +223,72 @@ const EnhancedDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button className="h-20 flex-col gap-2 bg-gradient-primary">
+            <Button 
+              className="h-20 flex-col gap-2 bg-gradient-primary"
+              onClick={() => setActiveTab("transactions")}
+            >
               <Plus className="w-6 h-6" />
               Add Transaction
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col gap-2"
+              onClick={() => setActiveTab("savings")}
+            >
               <Target className="w-6 h-6" />
               New Goal
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col gap-2"
+              onClick={() => setActiveTab("investments")}
+            >
               <TrendingUp className="w-6 h-6" />
               Invest
             </Button>
-            <Button variant="outline" className="h-20 flex-col gap-2">
+            <Button 
+              variant="outline" 
+              className="h-20 flex-col gap-2"
+              onClick={() => setActiveTab("insights")}
+            >
               <PieChart className="w-6 h-6" />
-              View Reports
+              View Insights
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* AI Insights Preview */}
+      {/* Getting Started Tips */}
       <Card className="shadow-card bg-gradient-card border-0">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-primary" />
-              Latest AI Insights
-            </CardTitle>
-            <Button variant="outline" size="sm" onClick={() => setActiveTab("insights")}>
-              View All
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="w-5 h-5 text-primary" />
+            Getting Started Tips
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-              <div className="flex items-start gap-3">
-                <div className="p-1 bg-destructive/10 rounded text-destructive">
-                  <TrendingUp className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-foreground">Food Spending Alert</h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Your food expenses increased by 23% this month. Consider meal planning to save ₦8,000-12,000.
-                  </p>
-                </div>
-              </div>
+              <h4 className="font-medium text-foreground mb-2">1. Track Your First Transaction</h4>
+              <p className="text-sm text-muted-foreground">
+                Start by adding a recent expense to see how SmartSpend categorizes and tracks your spending.
+              </p>
+            </div>
+            <div className="p-4 bg-success/5 border border-success/20 rounded-lg">
+              <h4 className="font-medium text-foreground mb-2">2. Set Your First Savings Goal</h4>
+              <p className="text-sm text-muted-foreground">
+                Whether it's an emergency fund or vacation, setting goals helps you stay motivated.
+              </p>
             </div>
             <div className="p-4 bg-warning/5 border border-warning/20 rounded-lg">
-              <div className="flex items-start gap-3">
-                <div className="p-1 bg-warning/10 rounded text-warning">
-                  <Target className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-foreground">Emergency Fund Opportunity</h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Increase monthly savings by ₦15,000 to reach your emergency fund goal 4 months earlier.
-                  </p>
-                </div>
-              </div>
+              <h4 className="font-medium text-foreground mb-2">3. Create a Budget</h4>
+              <p className="text-sm text-muted-foreground">
+                Use our Smart Budgeting feature to create a personalized budget based on your income.
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
-
-      {/* Recent Activity Preview */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Grocery Shopping</p>
-                  <p className="text-sm text-muted-foreground">Today</p>
-                </div>
-                <span className="font-semibold text-destructive">-₦15,420</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Salary Payment</p>
-                  <p className="text-sm text-muted-foreground">Yesterday</p>
-                </div>
-                <span className="font-semibold text-success">+₦250,000</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Uber Ride</p>
-                  <p className="text-sm text-muted-foreground">2 days ago</p>
-                </div>
-                <span className="font-semibold text-destructive">-₦2,500</span>
-              </div>
-            </div>
-            <Button variant="outline" className="w-full mt-4" onClick={() => setActiveTab("transactions")}>
-              View All Transactions
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardHeader>
-            <CardTitle>Upcoming Bills</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Electricity Bill</p>
-                  <p className="text-sm text-muted-foreground">Due in 5 days</p>
-                </div>
-                <span className="font-semibold">₦12,500</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Internet Subscription</p>
-                  <p className="text-sm text-muted-foreground">Due in 3 days</p>
-                </div>
-                <span className="font-semibold">₦8,000</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Car Insurance</p>
-                  <p className="text-sm text-muted-foreground">Due in 10 days</p>
-                </div>
-                <span className="font-semibold">₦45,000</span>
-              </div>
-            </div>
-            <Button variant="outline" className="w-full mt-4" onClick={() => setActiveTab("bills")}>
-              Manage Bills
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 
@@ -344,8 +323,15 @@ const EnhancedDashboard = () => {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <Button variant="outline" size="sm">
-                Profile
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  localStorage.removeItem("smartspend-user");
+                  setUserData({ name: "", monthlyIncome: 0, currency: "₦", isSetup: false });
+                }}
+              >
+                Reset App
               </Button>
             </div>
           </div>

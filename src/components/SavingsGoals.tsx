@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Target, Plus, Calendar, TrendingUp } from "lucide-react";
+import { Plus, Target, Trash2 } from "lucide-react";
+import EmptyState from "./EmptyState";
 
 interface SavingsGoal {
   id: string;
@@ -11,164 +14,285 @@ interface SavingsGoal {
   targetAmount: number;
   currentAmount: number;
   deadline: string;
-  category: string;
-  color: string;
+  description: string;
 }
 
 const SavingsGoals = () => {
-  const [goals] = useState<SavingsGoal[]>([
-    {
-      id: "1",
-      name: "Vacation to Dubai",
-      targetAmount: 500000,
-      currentAmount: 180000,
-      deadline: "2025-12-31",
-      category: "Travel",
-      color: "bg-blue-500"
-    },
-    {
-      id: "2",
-      name: "New Car Deposit",
-      targetAmount: 1000000,
-      currentAmount: 650000,
-      deadline: "2025-08-15",
-      category: "Transportation",
-      color: "bg-green-500"
-    },
-    {
-      id: "3",
-      name: "Emergency Fund",
-      targetAmount: 300000,
-      currentAmount: 120000,
-      deadline: "2025-06-30",
-      category: "Emergency",
-      color: "bg-red-500"
-    },
-    {
-      id: "4",
-      name: "New Laptop",
-      targetAmount: 150000,
-      currentAmount: 95000,
-      deadline: "2025-03-31",
-      category: "Technology",
-      color: "bg-purple-500"
+  const [goals, setGoals] = useState<SavingsGoal[]>([]);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newGoal, setNewGoal] = useState({
+    name: "",
+    targetAmount: 0,
+    currentAmount: 0,
+    deadline: "",
+    description: ""
+  });
+
+  const handleAddGoal = () => {
+    if (!newGoal.name || !newGoal.targetAmount || !newGoal.deadline) {
+      return;
     }
-  ]);
 
-  const getProgressPercentage = (current: number, target: number) => {
-    return Math.min((current / target) * 100, 100);
+    const goal: SavingsGoal = {
+      id: Date.now().toString(),
+      name: newGoal.name,
+      targetAmount: newGoal.targetAmount,
+      currentAmount: newGoal.currentAmount || 0,
+      deadline: newGoal.deadline,
+      description: newGoal.description
+    };
+
+    setGoals([...goals, goal]);
+    setNewGoal({ name: "", targetAmount: 0, currentAmount: 0, deadline: "", description: "" });
+    setIsAddDialogOpen(false);
   };
 
-  const getDaysRemaining = (deadline: string) => {
-    const today = new Date();
-    const deadlineDate = new Date(deadline);
-    const diffTime = deadlineDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+  const handleDeleteGoal = (id: string) => {
+    setGoals(goals.filter(g => g.id !== id));
   };
 
-  const getMonthlyTarget = (goal: SavingsGoal) => {
-    const remaining = goal.targetAmount - goal.currentAmount;
-    const daysRemaining = getDaysRemaining(goal.deadline);
-    const monthsRemaining = Math.max(daysRemaining / 30, 1);
-    return Math.ceil(remaining / monthsRemaining);
+  const updateGoalProgress = (id: string, amount: number) => {
+    setGoals(goals.map(goal => 
+      goal.id === id 
+        ? { ...goal, currentAmount: Math.max(0, goal.currentAmount + amount) }
+        : goal
+    ));
   };
+
+  if (goals.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Savings Goals</h2>
+            <p className="text-muted-foreground">Set and track your financial goals</p>
+          </div>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create Goal
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Savings Goal</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Goal Name</Label>
+                  <Input
+                    id="name"
+                    value={newGoal.name}
+                    onChange={(e) => setNewGoal({...newGoal, name: e.target.value})}
+                    placeholder="e.g., Emergency Fund"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description">Description (Optional)</Label>
+                  <Input
+                    id="description"
+                    value={newGoal.description}
+                    onChange={(e) => setNewGoal({...newGoal, description: e.target.value})}
+                    placeholder="Brief description of your goal"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="targetAmount">Target Amount</Label>
+                  <Input
+                    id="targetAmount"
+                    type="number"
+                    value={newGoal.targetAmount || ""}
+                    onChange={(e) => setNewGoal({...newGoal, targetAmount: parseFloat(e.target.value) || 0})}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="currentAmount">Current Amount (Optional)</Label>
+                  <Input
+                    id="currentAmount"
+                    type="number"
+                    value={newGoal.currentAmount || ""}
+                    onChange={(e) => setNewGoal({...newGoal, currentAmount: parseFloat(e.target.value) || 0})}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="deadline">Target Date</Label>
+                  <Input
+                    id="deadline"
+                    type="date"
+                    value={newGoal.deadline}
+                    onChange={(e) => setNewGoal({...newGoal, deadline: e.target.value})}
+                  />
+                </div>
+                <Button onClick={handleAddGoal} className="w-full">
+                  Create Goal
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+        
+        <EmptyState type="goals" onAdd={() => setIsAddDialogOpen(true)} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-card bg-gradient-card border-0">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Target className="w-6 h-6" />
-              Savings Goals
-            </CardTitle>
-            <Button className="bg-gradient-primary">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Goal
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Savings Goals</h2>
+          <p className="text-muted-foreground">Set and track your financial goals</p>
+        </div>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="w-4 h-4" />
+              Create Goal
             </Button>
-          </div>
-        </CardHeader>
-        
-        <CardContent>
-          <div className="grid gap-6">
-            {goals.map((goal) => {
-              const progressPercentage = getProgressPercentage(goal.currentAmount, goal.targetAmount);
-              const daysRemaining = getDaysRemaining(goal.deadline);
-              const monthlyTarget = getMonthlyTarget(goal);
-              
-              return (
-                <div key={goal.id} className="p-6 border rounded-lg bg-card/50 hover:bg-card transition-colors">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full ${goal.color}`}></div>
-                      <div>
-                        <h3 className="font-semibold text-lg text-foreground">{goal.name}</h3>
-                        <Badge variant="outline" className="mt-1">
-                          {goal.category}
-                        </Badge>
-                      </div>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Savings Goal</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Goal Name</Label>
+                <Input
+                  id="name"
+                  value={newGoal.name}
+                  onChange={(e) => setNewGoal({...newGoal, name: e.target.value})}
+                  placeholder="e.g., Emergency Fund"
+                />
+              </div>
+              <div>
+                <Label htmlFor="description">Description (Optional)</Label>
+                <Input
+                  id="description"
+                  value={newGoal.description}
+                  onChange={(e) => setNewGoal({...newGoal, description: e.target.value})}
+                  placeholder="Brief description of your goal"
+                />
+              </div>
+              <div>
+                <Label htmlFor="targetAmount">Target Amount</Label>
+                <Input
+                  id="targetAmount"
+                  type="number"
+                  value={newGoal.targetAmount || ""}
+                  onChange={(e) => setNewGoal({...newGoal, targetAmount: parseFloat(e.target.value) || 0})}
+                  placeholder="0.00"
+                />
+              </div>
+              <div>
+                <Label htmlFor="currentAmount">Current Amount (Optional)</Label>
+                <Input
+                  id="currentAmount"
+                  type="number"
+                  value={newGoal.currentAmount || ""}
+                  onChange={(e) => setNewGoal({...newGoal, currentAmount: parseFloat(e.target.value) || 0})}
+                  placeholder="0.00"
+                />
+              </div>
+              <div>
+                <Label htmlFor="deadline">Target Date</Label>
+                <Input
+                  id="deadline"
+                  type="date"
+                  value={newGoal.deadline}
+                  onChange={(e) => setNewGoal({...newGoal, deadline: e.target.value})}
+                />
+              </div>
+              <Button onClick={handleAddGoal} className="w-full">
+                Create Goal
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Goals Grid */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {goals.map((goal) => {
+          const progress = (goal.currentAmount / goal.targetAmount) * 100;
+          const daysLeft = Math.ceil((new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+          
+          return (
+            <Card key={goal.id} className="shadow-card bg-gradient-card border-0">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
+                      <Target className="w-5 h-5 text-success" />
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-foreground">
-                        ₦{goal.currentAmount.toLocaleString()}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        of ₦{goal.targetAmount.toLocaleString()}
-                      </p>
+                    <div>
+                      <CardTitle className="text-lg">{goal.name}</CardTitle>
+                      {goal.description && (
+                        <p className="text-sm text-muted-foreground">{goal.description}</p>
+                      )}
                     </div>
                   </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-semibold text-foreground">
-                        {progressPercentage.toFixed(1)}%
-                      </span>
-                    </div>
-                    <Progress value={progressPercentage} className="h-3" />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium text-foreground">
-                            {daysRemaining > 0 ? `${daysRemaining} days left` : 'Overdue'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Due: {new Date(goal.deadline).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium text-foreground">
-                            ₦{monthlyTarget.toLocaleString()}/month
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Recommended saving
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">
-                          Edit
-                        </Button>
-                        <Button size="sm" className="flex-1 bg-gradient-primary">
-                          Add Money
-                        </Button>
-                      </div>
-                    </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteGoal(goal.id)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Progress</span>
+                    <span>{progress.toFixed(1)}%</span>
+                  </div>
+                  <Progress value={progress} className="h-2" />
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-2xl font-bold">₦{goal.currentAmount.toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">of ₦{goal.targetAmount.toLocaleString()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">{daysLeft > 0 ? `${daysLeft} days left` : 'Overdue'}</p>
+                    <p className="text-xs text-muted-foreground">{goal.deadline}</p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const amount = parseFloat(prompt("Enter amount to add:") || "0");
+                      if (amount > 0) updateGoalProgress(goal.id, amount);
+                    }}
+                    className="flex-1"
+                  >
+                    Add Money
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const amount = parseFloat(prompt("Enter amount to withdraw:") || "0");
+                      if (amount > 0) updateGoalProgress(goal.id, -amount);
+                    }}
+                    className="flex-1"
+                  >
+                    Withdraw
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 };
