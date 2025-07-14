@@ -21,7 +21,10 @@ const EnhancedDashboard = () => {
   const { user, profile, signOut } = useAuth();
 
   const handleSignOut = async () => {
-    await signOut();
+    const { error } = await signOut();
+    if (error) {
+      console.error("Sign out error:", error);
+    }
   };
 
   const selectedCurrency = getCurrencyByCode(profile?.currency || "NGN");

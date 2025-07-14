@@ -49,8 +49,21 @@ const WelcomeScreen = () => {
           setError(error.message);
         }
       } else {
+        // Validate form data before signup
+        if (!formData.email || !formData.password || !formData.name) {
+          setError("Please fill in all required fields");
+          setLoading(false);
+          return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
           setError("Passwords do not match");
+          setLoading(false);
+          return;
+        }
+
+        if (formData.password.length < 6) {
+          setError("Password must be at least 6 characters long");
           setLoading(false);
           return;
         }
@@ -63,10 +76,14 @@ const WelcomeScreen = () => {
 
         if (error) {
           setError(error.message);
+        } else {
+          // Show success message for signup
+          setError(null);
         }
       }
     } catch (err) {
       setError("An unexpected error occurred");
+      console.error("Auth error:", err);
     }
 
     setLoading(false);

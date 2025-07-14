@@ -96,14 +96,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .insert([
-          {
-            id: userId,
-            name: userData.name,
-            monthly_income: userData.monthlyIncome,
-            currency: userData.currency,
-          }
-        ])
+        .insert({
+          id: userId,
+          name: userData.name,
+          monthly_income: userData.monthlyIncome,
+          currency: userData.currency,
+        })
         .select()
         .single();
 
