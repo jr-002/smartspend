@@ -107,7 +107,7 @@ const WelcomeScreen = () => {
       <Card className="w-full max-w-md shadow-card bg-gradient-card border-0">
         <CardHeader className="text-center">
           <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-glow">
-            <Sparkles className="w-8 h-8 text-primary-foreground" />
+            <span className="text-primary-foreground font-bold text-2xl">S</span>
           </div>
           <CardTitle className="text-2xl font-bold text-foreground">
             Welcome to SmartSpend
