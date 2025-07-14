@@ -1,74 +1,77 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Target, Trash2 } from "lucide-react";
+import { Plus, Target, Trash2, Loader2 } from "lucide-react";
 import EmptyState from "./EmptyState";
 import { formatCurrency } from "@/utils/currencies";
-
-interface SavingsGoal {
-  id: string;
-  name: string;
-  targetAmount: number;
-  currentAmount: number;
-  deadline: string;
-  description: string;
-}
+import { useSavingsGoals, type NewSavingsGoal } from "@/hooks/useSavingsGoals";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SavingsGoals = () => {
-  const [goals, setGoals] = useState<SavingsGoal[]>([]);
+  const { goals, loading, addGoal, updateGoalProgress, deleteGoal } = useSavingsGoals();
+  const { profile } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [userCurrency, setUserCurrency] = useState("NGN");
-  const [newGoal, setNewGoal] = useState({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [newGoal, setNewGoal] = useState<NewSavingsGoal>({
     name: "",
-    targetAmount: 0,
-    currentAmount: 0,
+    target_amount: 0,
+    current_amount: 0,
     deadline: "",
     description: ""
   });
 
-  // Load user currency
-  useEffect(() => {
-    const savedUserData = localStorage.getItem("smartspend-user");
-    if (savedUserData) {
-      const userData = JSON.parse(savedUserData);
-      setUserCurrency(userData.currency || "NGN");
-    }
-  }, []);
-
   const handleAddGoal = () => {
-    if (!newGoal.name || !newGoal.targetAmount || !newGoal.deadline) {
+    if (!newGoal.name || !newGoal.target_amount || !newGoal.deadline) {
       return;
     }
 
-    const goal: SavingsGoal = {
-      id: Date.now().toString(),
-      name: newGoal.name,
-      targetAmount: newGoal.targetAmount,
-      currentAmount: newGoal.currentAmount || 0,
-      deadline: newGoal.deadline,
-      description: newGoal.description
-    };
-
-    setGoals([...goals, goal]);
-    setNewGoal({ name: "", targetAmount: 0, currentAmount: 0, deadline: "", description: "" });
-    setIsAddDialogOpen(false);
+    setIsSubmitting(true);
+    const success = await addGoal(newGoal);
+    
+    if (success) {
+      setNewGoal({ name: "", target_amount: 0, current_amount: 0, deadline: "", description: "" });
+      setIsAddDialogOpen(false);
+    }
+    
+    setIsSubmitting(false);
   };
 
   const handleDeleteGoal = (id: string) => {
-    setGoals(goals.filter(g => g.id !== id));
+    if (window.confirm("Are you sure you want to delete this savings goal?")) {
+      await deleteGoal(id);
+    }
   };
 
-  const updateGoalProgress = (id: string, amount: number) => {
-    setGoals(goals.map(goal => 
-      goal.id === id 
-        ? { ...goal, currentAmount: Math.max(0, goal.currentAmount + amount) }
-        : goal
-    ));
+  const handleUpdateProgress = async (id: string, amount: number) => {
+    await updateGoalProgress(id, amount);
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Savings Goals</h2>
+            <p className="text-muted-foreground">Set and track your financial goals</p>
+          </div>
+        </div>
+        
+        <Card className="shadow-card bg-gradient-card border-0">
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span className="text-muted-foreground">Loading savings goals...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (goals.length === 0) {
     return (
@@ -113,8 +116,8 @@ const SavingsGoals = () => {
                   <Input
                     id="targetAmount"
                     type="number"
-                    value={newGoal.targetAmount || ""}
-                    onChange={(e) => setNewGoal({...newGoal, targetAmount: parseFloat(e.target.value) || 0})}
+                    value={newGoal.target_amount || ""}
+                    onChange={(e) => setNewGoal({...newGoal, target_amount: parseFloat(e.target.value) || 0})}
                     placeholder="0.00"
                   />
                 </div>
@@ -123,8 +126,8 @@ const SavingsGoals = () => {
                   <Input
                     id="currentAmount"
                     type="number"
-                    value={newGoal.currentAmount || ""}
-                    onChange={(e) => setNewGoal({...newGoal, currentAmount: parseFloat(e.target.value) || 0})}
+                    value={newGoal.current_amount || ""}
+                    onChange={(e) => setNewGoal({...newGoal, current_amount: parseFloat(e.target.value) || 0})}
                     placeholder="0.00"
                   />
                 </div>
@@ -137,8 +140,30 @@ const SavingsGoals = () => {
                     onChange={(e) => setNewGoal({...newGoal, deadline: e.target.value})}
                   />
                 </div>
-                <Button onClick={handleAddGoal} className="w-full">
-                  Create Goal
+                <Button 
+                  onClick={handleAddGoal} 
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Goal"
+                  )}
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Goal"
+                  )}
                 </Button>
               </div>
             </DialogContent>
@@ -227,7 +252,7 @@ const SavingsGoals = () => {
       {/* Goals Grid */}
       <div className="grid md:grid-cols-2 gap-6">
         {goals.map((goal) => {
-          const progress = (goal.currentAmount / goal.targetAmount) * 100;
+          const progress = (goal.current_amount / goal.target_amount) * 100;
           const daysLeft = Math.ceil((new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
           
           return (
@@ -266,8 +291,8 @@ const SavingsGoals = () => {
                 
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-2xl font-bold">{formatCurrency(goal.currentAmount, userCurrency)}</p>
-                    <p className="text-sm text-muted-foreground">of {formatCurrency(goal.targetAmount, userCurrency)}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(goal.current_amount, profile?.currency || "NGN")}</p>
+                    <p className="text-sm text-muted-foreground">of {formatCurrency(goal.target_amount, profile?.currency || "NGN")}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">{daysLeft > 0 ? `${daysLeft} days left` : 'Overdue'}</p>
@@ -281,7 +306,7 @@ const SavingsGoals = () => {
                     size="sm"
                     onClick={() => {
                       const amount = parseFloat(prompt("Enter amount to add:") || "0");
-                      if (amount > 0) updateGoalProgress(goal.id, amount);
+                      if (amount > 0) handleUpdateProgress(goal.id, amount);
                     }}
                     className="flex-1"
                   >
@@ -292,7 +317,7 @@ const SavingsGoals = () => {
                     size="sm"
                     onClick={() => {
                       const amount = parseFloat(prompt("Enter amount to withdraw:") || "0");
-                      if (amount > 0) updateGoalProgress(goal.id, -amount);
+                      if (amount > 0) handleUpdateProgress(goal.id, -amount);
                     }}
                     className="flex-1"
                   >

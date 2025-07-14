@@ -16,11 +16,13 @@ import NotificationCenter from "./NotificationCenter";
 import { formatCurrency, getCurrencyByCode } from "@/utils/currencies";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTransactions } from "@/hooks/useTransactions";
+import { useSavingsGoals } from "@/hooks/useSavingsGoals";
 
 const EnhancedDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const { user, profile, signOut } = useAuth();
   const { transactions, loading: transactionsLoading } = useTransactions();
+  const { goals } = useSavingsGoals();
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -49,7 +51,7 @@ const EnhancedDashboard = () => {
     .reduce((sum, t) => sum + t.amount, 0);
     
   const currentBalance = totalIncome - totalExpenses;
-  const savingsGoalsCount = 0; // Will be updated when we implement savings goals
+  const savingsGoalsCount = goals.length;
 
   const NavigationMenu = () => (
     <div className="space-y-2">
@@ -206,7 +208,7 @@ const EnhancedDashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold text-foreground">{savingsGoalsCount}</div>
             <div className="text-sm text-muted-foreground mt-1">
-              No goals set yet
+              {savingsGoalsCount === 0 ? "No goals set yet" : `${savingsGoalsCount} active goal${savingsGoalsCount === 1 ? '' : 's'}`}
             </div>
           </CardContent>
         </Card>
