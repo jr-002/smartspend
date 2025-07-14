@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, TrendingUp, TrendingDown, Target, PieChart, Menu, Brain, Bell, Calculator, Sparkles } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Target, PieChart, Menu, Brain, Bell, Calculator, Sparkles, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "./ThemeToggle";
 import TransactionHistory from "./TransactionHistory";
@@ -13,46 +13,18 @@ import FinancialEducation from "./FinancialEducation";
 import AIInsights from "./AIInsights";
 import SmartBudgeting from "./SmartBudgeting";
 import NotificationCenter from "./NotificationCenter";
-import WelcomeScreen from "./WelcomeScreen";
-import EmptyState from "./EmptyState";
 import { formatCurrency, getCurrencyByCode } from "@/utils/currencies";
-
-interface UserData {
-  name: string;
-  monthlyIncome: number;
-  currency: string;
-  isSetup: boolean;
-}
+import { useAuth } from "@/contexts/AuthContext";
 
 const EnhancedDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const [userData, setUserData] = useState<UserData>({
-    name: "",
-    monthlyIncome: 0,
-    currency: "NGN",
-    isSetup: false
-  });
+  const { user, profile, signOut } = useAuth();
 
-  // Load user data from localStorage on mount
-  useEffect(() => {
-    const savedUserData = localStorage.getItem("smartspend-user");
-    if (savedUserData) {
-      setUserData(JSON.parse(savedUserData));
-    }
-  }, []);
-
-  const handleWelcomeComplete = (data: { name: string; monthlyIncome: number; currency: string }) => {
-    const newUserData = { ...data, isSetup: true };
-    setUserData(newUserData);
-    localStorage.setItem("smartspend-user", JSON.stringify(newUserData));
+  const handleSignOut = async () => {
+    await signOut();
   };
 
-  // Show welcome screen if user hasn't completed setup
-  if (!userData.isSetup) {
-    return <WelcomeScreen onComplete={handleWelcomeComplete} />;
-  }
-
-  const selectedCurrency = getCurrencyByCode(userData.currency);
+  const selectedCurrency = getCurrencyByCode(profile?.currency || "NGN");
 
   const NavigationMenu = () => (
     <div className="space-y-2">
@@ -147,7 +119,7 @@ const EnhancedDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold mb-2">
-                Welcome back, {userData.name}!
+                Welcome back, {profile?.name}!
               </h2>
               <p className="opacity-90">
                 Ready to take control of your finances today?
@@ -175,7 +147,7 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, userData.currency)}</div>
+            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, profile?.currency || "NGN")}</div>
             <div className="text-sm text-muted-foreground mt-1">
               Add transactions to see your balance
             </div>
@@ -189,7 +161,7 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, userData.currency)}</div>
+            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, profile?.currency || "NGN")}</div>
             <div className="text-sm text-muted-foreground mt-1">
               No expenses tracked yet
             </div>
@@ -217,7 +189,7 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, userData.currency)}</div>
+            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, profile?.currency || "NGN")}</div>
             <div className="text-sm text-muted-foreground mt-1">
               Start investing for your future
             </div>
@@ -335,12 +307,11 @@ const EnhancedDashboard = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => {
-                  localStorage.removeItem("smartspend-user");
-                  setUserData({ name: "", monthlyIncome: 0, currency: "NGN", isSetup: false });
-                }}
+                onClick={handleSignOut}
+                className="flex items-center gap-2"
               >
-                Reset App
+                <LogOut className="w-4 h-4" />
+                Sign Out
               </Button>
             </div>
           </div>

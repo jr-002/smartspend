@@ -1,36 +1,87 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Wallet, Target, TrendingUp, Brain, Sparkles } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Wallet, Target, TrendingUp, Brain, Sparkles, Mail, Lock, User, DollarSign } from "lucide-react";
 import CurrencySelector from "./CurrencySelector";
 import { getDefaultCurrency } from "@/utils/currencies";
+import { useAuth } from "@/contexts/AuthContext";
 
-interface WelcomeScreenProps {
-  onComplete: (userData: { name: string; monthlyIncome: number; currency: string }) => void;
-}
-
-const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
+const WelcomeScreen = () => {
   const [step, setStep] = useState(1);
-  const [userData, setUserData] = useState({
+  const [isLogin, setIsLogin] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
     name: "",
     monthlyIncome: 0,
     currency: getDefaultCurrency().code
   });
 
+  const { signUp, signIn } = useAuth();
+
   const handleNext = () => {
-    if (step < 3) {
+    if (step < 4) {
       setStep(step + 1);
-    } else {
-      onComplete(userData);
     }
   };
 
   const handleBack = () => {
     if (step > 1) {
       setStep(step - 1);
+    }
+  };
+
+  const handleAuth = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (isLogin) {
+        const { error } = await signIn(formData.email, formData.password);
+        if (error) {
+          setError(error.message);
+        }
+      } else {
+        if (formData.password !== formData.confirmPassword) {
+          setError("Passwords do not match");
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await signUp(formData.email, formData.password, {
+          name: formData.name,
+          monthlyIncome: formData.monthlyIncome,
+          currency: formData.currency
+        });
+
+        if (error) {
+          setError(error.message);
+        }
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+    }
+
+    setLoading(false);
+  };
+
+  const canProceed = () => {
+    switch (step) {
+      case 2:
+        return formData.email && formData.password && (!isLogin ? formData.confirmPassword : true);
+      case 3:
+        return !isLogin ? formData.name.trim() : true;
+      case 4:
+        return !isLogin ? formData.currency : true;
+      default:
+        return true;
     }
   };
 
@@ -50,6 +101,14 @@ const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
         </CardHeader>
 
         <CardContent className="space-y-6">
+          {error && (
+            <Alert className="border-destructive bg-destructive/10">
+              <AlertDescription className="text-destructive">
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {step === 1 && (
             <div className="space-y-4">
               <div className="text-center">
@@ -77,44 +136,161 @@ const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
                   <p className="text-sm font-medium">AI Insights</p>
                 </div>
               </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setIsLogin(true);
+                    setStep(2);
+                  }}
+                >
+                  Sign In
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={() => {
+                    setIsLogin(false);
+                    setStep(2);
+                  }}
+                >
+                  Sign Up
+                </Button>
+              </div>
             </div>
           )}
 
           {step === 2 && (
             <div className="space-y-4">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold">
+                  {isLogin ? "Welcome back!" : "Create your account"}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {isLogin ? "Sign in to continue" : "Join thousands of users managing their finances"}
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="email" className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="password" className="flex items-center gap-2">
+                    <Lock className="w-4 h-4" />
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    className="mt-1"
+                  />
+                </div>
+
+                {!isLogin && (
+                  <div>
+                    <Label htmlFor="confirmPassword" className="flex items-center gap-2">
+                      <Lock className="w-4 h-4" />
+                      Confirm Password
+                    </Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm your password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                      className="mt-1"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="text-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsLogin(!isLogin);
+                    setError(null);
+                  }}
+                >
+                  {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && !isLogin && (
+            <div className="space-y-4">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold">Tell us about yourself</h3>
+                <p className="text-sm text-muted-foreground">
+                  This helps us personalize your experience
+                </p>
+              </div>
+
               <div>
-                <Label htmlFor="name">What should we call you?</Label>
+                <Label htmlFor="name" className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Full Name
+                </Label>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="Enter your name"
-                  value={userData.name}
-                  onChange={(e) => setUserData({...userData, name: e.target.value})}
+                  placeholder="Enter your full name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
                   className="mt-1"
                 />
               </div>
             </div>
           )}
 
-          {step === 3 && (
+          {step === 4 && !isLogin && (
             <div className="space-y-4">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold">Financial preferences</h3>
+                <p className="text-sm text-muted-foreground">
+                  Help us provide better recommendations
+                </p>
+              </div>
+
               <div>
-                <Label htmlFor="currency">Choose Your Currency</Label>
+                <Label htmlFor="currency">Preferred Currency</Label>
                 <CurrencySelector
-                  value={userData.currency}
-                  onValueChange={(currency) => setUserData({...userData, currency})}
+                  value={formData.currency}
+                  onValueChange={(currency) => setFormData({...formData, currency})}
                   className="mt-1"
                 />
               </div>
               
               <div>
-                <Label htmlFor="income">Monthly Income (Optional)</Label>
+                <Label htmlFor="income" className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  Monthly Income (Optional)
+                </Label>
                 <Input
                   id="income"
                   type="number"
                   placeholder="0"
-                  value={userData.monthlyIncome || ""}
-                  onChange={(e) => setUserData({...userData, monthlyIncome: parseFloat(e.target.value) || 0})}
+                  value={formData.monthlyIncome || ""}
+                  onChange={(e) => setFormData({...formData, monthlyIncome: parseFloat(e.target.value) || 0})}
                   className="mt-1"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
@@ -126,26 +302,46 @@ const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
 
           <div className="flex justify-between pt-4">
             {step > 1 && (
-              <Button variant="outline" onClick={handleBack}>
+              <Button variant="outline" onClick={handleBack} disabled={loading}>
                 Back
               </Button>
             )}
-            <Button 
-              onClick={handleNext}
-              disabled={step === 2 && !userData.name.trim()}
-              className="ml-auto"
-            >
-              {step === 3 ? "Get Started" : "Next"}
-            </Button>
+            
+            {(step === 2 && isLogin) || (step === 4 && !isLogin) ? (
+              <Button 
+                onClick={handleAuth}
+                disabled={!canProceed() || loading}
+                className="ml-auto"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    {isLogin ? "Signing in..." : "Creating account..."}
+                  </>
+                ) : (
+                  isLogin ? "Sign In" : "Create Account"
+                )}
+              </Button>
+            ) : (
+              step < 4 && (
+                <Button 
+                  onClick={handleNext}
+                  disabled={!canProceed()}
+                  className="ml-auto"
+                >
+                  Next
+                </Button>
+              )
+            )}
           </div>
 
           <div className="flex justify-center space-x-2">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
                 className={`w-2 h-2 rounded-full ${
                   i === step ? "bg-primary" : "bg-muted"
-                }`}
+                } ${isLogin && i > 2 ? "hidden" : ""}`}
               />
             ))}
           </div>
