@@ -25,7 +25,6 @@ const SavingsGoals = () => {
     description: ""
   });
 
-  const handleAddGoal = () => {
   const handleAddGoal = async () => {
     if (!newGoal.name || !newGoal.target_amount || !newGoal.deadline) {
       return;
@@ -42,7 +41,7 @@ const SavingsGoals = () => {
     setIsSubmitting(false);
   };
 
-  const handleDeleteGoal = (id: string) => {
+  const handleDeleteGoal = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this savings goal?")) {
       await deleteGoal(id);
     }
