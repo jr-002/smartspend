@@ -331,7 +331,11 @@ const EnhancedDashboard = () => {
               </Sheet>
               
               <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
-                <span className="text-primary-foreground font-bold text-lg">S</span>
+                <img 
+                  src="/Picture1.png" 
+                  alt="SmartSpend Logo" 
+                  className="w-8 h-8 object-contain"
+                />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">SmartSpend</h1>

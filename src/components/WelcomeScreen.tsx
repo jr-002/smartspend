@@ -107,7 +107,11 @@ const WelcomeScreen = () => {
       <Card className="w-full max-w-md shadow-card bg-gradient-card border-0">
         <CardHeader className="text-center">
           <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-glow">
-            <span className="text-primary-foreground font-bold text-2xl">S</span>
+            <img 
+              src="/Picture1.png" 
+              alt="SmartSpend Logo" 
+              className="w-12 h-12 object-contain"
+            />
           </div>
           <CardTitle className="text-2xl font-bold text-foreground">
             Welcome to SmartSpend

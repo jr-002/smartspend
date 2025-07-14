@@ -14,7 +14,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       <div className="min-h-screen bg-gradient-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-glow animate-pulse">
-            <span className="text-primary-foreground font-bold text-lg">S</span>
+            <img 
+              src="/Picture1.png" 
+              alt="SmartSpend Logo" 
+              className="w-12 h-12 object-contain"
+            />
           </div>
           <p className="text-muted-foreground">Loading...</p>
         </div>
