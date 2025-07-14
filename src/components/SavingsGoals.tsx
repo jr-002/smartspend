@@ -26,6 +26,7 @@ const SavingsGoals = () => {
   });
 
   const handleAddGoal = () => {
+  const handleAddGoal = async () => {
     if (!newGoal.name || !newGoal.target_amount || !newGoal.deadline) {
       return;
     }
@@ -153,17 +154,6 @@ const SavingsGoals = () => {
                   ) : (
                     "Create Goal"
                   )}
-                  className="w-full"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Goal"
-                  )}
                 </Button>
               </div>
             </DialogContent>
@@ -217,8 +207,8 @@ const SavingsGoals = () => {
                 <Input
                   id="targetAmount"
                   type="number"
-                  value={newGoal.targetAmount || ""}
-                  onChange={(e) => setNewGoal({...newGoal, targetAmount: parseFloat(e.target.value) || 0})}
+                  value={newGoal.target_amount || ""}
+                  onChange={(e) => setNewGoal({...newGoal, target_amount: parseFloat(e.target.value) || 0})}
                   placeholder="0.00"
                 />
               </div>
@@ -227,8 +217,8 @@ const SavingsGoals = () => {
                 <Input
                   id="currentAmount"
                   type="number"
-                  value={newGoal.currentAmount || ""}
-                  onChange={(e) => setNewGoal({...newGoal, currentAmount: parseFloat(e.target.value) || 0})}
+                  value={newGoal.current_amount || ""}
+                  onChange={(e) => setNewGoal({...newGoal, current_amount: parseFloat(e.target.value) || 0})}
                   placeholder="0.00"
                 />
               </div>
@@ -241,8 +231,19 @@ const SavingsGoals = () => {
                   onChange={(e) => setNewGoal({...newGoal, deadline: e.target.value})}
                 />
               </div>
-              <Button onClick={handleAddGoal} className="w-full">
-                Create Goal
+              <Button 
+                onClick={handleAddGoal} 
+                className="w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Goal"
+                )}
               </Button>
             </div>
           </DialogContent>
