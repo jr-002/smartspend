@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Search, Filter, Trash2 } from "lucide-react";
 import EmptyState from "./EmptyState";
+import { formatCurrency } from "@/utils/currencies";
 
 interface Transaction {
   id: string;
@@ -22,12 +23,22 @@ const TransactionHistory = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [userCurrency, setUserCurrency] = useState("NGN");
   const [newTransaction, setNewTransaction] = useState({
     description: "",
     amount: 0,
     category: "",
     type: "expense" as "income" | "expense"
   });
+
+  // Load user currency
+  useEffect(() => {
+    const savedUserData = localStorage.getItem("smartspend-user");
+    if (savedUserData) {
+      const userData = JSON.parse(savedUserData);
+      setUserCurrency(userData.currency || "NGN");
+    }
+  }, []);
 
   const categories = [
     "Food & Dining", "Transportation", "Shopping", "Entertainment", 
@@ -276,7 +287,7 @@ const TransactionHistory = () => {
                   <span className={`font-semibold ${
                     transaction.type === "income" ? "text-success" : "text-destructive"
                   }`}>
-                    {transaction.type === "income" ? "+" : "-"}₦{transaction.amount.toLocaleString()}
+                    {transaction.type === "income" ? "+" : "-"}{formatCurrency(transaction.amount, userCurrency)}
                   </span>
                   <Button
                     variant="ghost"

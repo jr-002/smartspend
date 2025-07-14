@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from "@/components/ui/progress";
 import { Plus, Target, Trash2 } from "lucide-react";
 import EmptyState from "./EmptyState";
+import { formatCurrency } from "@/utils/currencies";
 
 interface SavingsGoal {
   id: string;
@@ -20,6 +21,7 @@ interface SavingsGoal {
 const SavingsGoals = () => {
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [userCurrency, setUserCurrency] = useState("NGN");
   const [newGoal, setNewGoal] = useState({
     name: "",
     targetAmount: 0,
@@ -27,6 +29,15 @@ const SavingsGoals = () => {
     deadline: "",
     description: ""
   });
+
+  // Load user currency
+  useEffect(() => {
+    const savedUserData = localStorage.getItem("smartspend-user");
+    if (savedUserData) {
+      const userData = JSON.parse(savedUserData);
+      setUserCurrency(userData.currency || "NGN");
+    }
+  }, []);
 
   const handleAddGoal = () => {
     if (!newGoal.name || !newGoal.targetAmount || !newGoal.deadline) {
@@ -255,8 +266,8 @@ const SavingsGoals = () => {
                 
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-2xl font-bold">₦{goal.currentAmount.toLocaleString()}</p>
-                    <p className="text-sm text-muted-foreground">of ₦{goal.targetAmount.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(goal.currentAmount, userCurrency)}</p>
+                    <p className="text-sm text-muted-foreground">of {formatCurrency(goal.targetAmount, userCurrency)}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">{daysLeft > 0 ? `${daysLeft} days left` : 'Overdue'}</p>

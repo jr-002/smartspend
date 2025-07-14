@@ -15,6 +15,7 @@ import SmartBudgeting from "./SmartBudgeting";
 import NotificationCenter from "./NotificationCenter";
 import WelcomeScreen from "./WelcomeScreen";
 import EmptyState from "./EmptyState";
+import { formatCurrency, getCurrencyByCode } from "@/utils/currencies";
 
 interface UserData {
   name: string;
@@ -28,7 +29,7 @@ const EnhancedDashboard = () => {
   const [userData, setUserData] = useState<UserData>({
     name: "",
     monthlyIncome: 0,
-    currency: "₦",
+    currency: "NGN",
     isSetup: false
   });
 
@@ -50,6 +51,8 @@ const EnhancedDashboard = () => {
   if (!userData.isSetup) {
     return <WelcomeScreen onComplete={handleWelcomeComplete} />;
   }
+
+  const selectedCurrency = getCurrencyByCode(userData.currency);
 
   const NavigationMenu = () => (
     <div className="space-y-2">
@@ -149,6 +152,12 @@ const EnhancedDashboard = () => {
               <p className="opacity-90">
                 Ready to take control of your finances today?
               </p>
+              {selectedCurrency && (
+                <div className="flex items-center gap-2 mt-2 opacity-90">
+                  <span className="text-lg">{selectedCurrency.flag}</span>
+                  <span className="text-sm">Using {selectedCurrency.name} ({selectedCurrency.code})</span>
+                </div>
+              )}
             </div>
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
               <Sparkles className="w-8 h-8" />
@@ -166,7 +175,7 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{userData.currency}0.00</div>
+            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, userData.currency)}</div>
             <div className="text-sm text-muted-foreground mt-1">
               Add transactions to see your balance
             </div>
@@ -180,7 +189,7 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{userData.currency}0.00</div>
+            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, userData.currency)}</div>
             <div className="text-sm text-muted-foreground mt-1">
               No expenses tracked yet
             </div>
@@ -208,7 +217,7 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{userData.currency}0.00</div>
+            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, userData.currency)}</div>
             <div className="text-sm text-muted-foreground mt-1">
               Start investing for your future
             </div>
@@ -318,7 +327,7 @@ const EnhancedDashboard = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">SmartSpend</h1>
-                <p className="text-sm text-muted-foreground">Financial Wellness Assistant</p>
+                <p className="text-sm text-muted-foreground">Global Financial Wellness Assistant</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -328,7 +337,7 @@ const EnhancedDashboard = () => {
                 size="sm"
                 onClick={() => {
                   localStorage.removeItem("smartspend-user");
-                  setUserData({ name: "", monthlyIncome: 0, currency: "₦", isSetup: false });
+                  setUserData({ name: "", monthlyIncome: 0, currency: "NGN", isSetup: false });
                 }}
               >
                 Reset App

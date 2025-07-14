@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Wallet, Target, TrendingUp, Brain, Sparkles } from "lucide-react";
+import CurrencySelector from "./CurrencySelector";
+import { getDefaultCurrency } from "@/utils/currencies";
 
 interface WelcomeScreenProps {
   onComplete: (userData: { name: string; monthlyIncome: number; currency: string }) => void;
@@ -15,7 +17,7 @@ const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
   const [userData, setUserData] = useState({
     name: "",
     monthlyIncome: 0,
-    currency: "₦"
+    currency: getDefaultCurrency().code
   });
 
   const handleNext = () => {
@@ -43,7 +45,7 @@ const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
             Welcome to SmartSpend
           </CardTitle>
           <p className="text-muted-foreground">
-            Your Personal Financial Wellness Assistant
+            Your Global Financial Wellness Assistant
           </p>
         </CardHeader>
 
@@ -53,7 +55,7 @@ const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
               <div className="text-center">
                 <h3 className="text-lg font-semibold mb-2">Let's get started!</h3>
                 <p className="text-sm text-muted-foreground">
-                  SmartSpend helps you track expenses, manage budgets, and achieve your financial goals.
+                  SmartSpend helps you track expenses, manage budgets, and achieve your financial goals globally.
                 </p>
               </div>
               
@@ -97,27 +99,24 @@ const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
           {step === 3 && (
             <div className="space-y-4">
               <div>
+                <Label htmlFor="currency">Choose Your Currency</Label>
+                <CurrencySelector
+                  value={userData.currency}
+                  onValueChange={(currency) => setUserData({...userData, currency})}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
                 <Label htmlFor="income">Monthly Income (Optional)</Label>
-                <div className="flex mt-1">
-                  <select 
-                    className="px-3 py-2 border border-border rounded-l-md bg-card text-foreground"
-                    value={userData.currency}
-                    onChange={(e) => setUserData({...userData, currency: e.target.value})}
-                  >
-                    <option value="₦">₦</option>
-                    <option value="$">$</option>
-                    <option value="€">€</option>
-                    <option value="£">£</option>
-                  </select>
-                  <Input
-                    id="income"
-                    type="number"
-                    placeholder="0"
-                    value={userData.monthlyIncome || ""}
-                    onChange={(e) => setUserData({...userData, monthlyIncome: parseFloat(e.target.value) || 0})}
-                    className="rounded-l-none border-l-0"
-                  />
-                </div>
+                <Input
+                  id="income"
+                  type="number"
+                  placeholder="0"
+                  value={userData.monthlyIncome || ""}
+                  onChange={(e) => setUserData({...userData, monthlyIncome: parseFloat(e.target.value) || 0})}
+                  className="mt-1"
+                />
                 <p className="text-xs text-muted-foreground mt-1">
                   This helps us provide better budget recommendations
                 </p>
