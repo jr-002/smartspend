@@ -5,67 +5,52 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Search, Filter, Trash2 } from "lucide-react";
+import { Plus, Search, Filter, Trash2, Loader2 } from "lucide-react";
 import EmptyState from "./EmptyState";
 import { formatCurrency } from "@/utils/currencies";
-
-interface Transaction {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  date: string;
-  type: "income" | "expense";
-}
+import { useTransactions, type NewTransaction } from "@/hooks/useTransactions";
+import { useAuth } from "@/contexts/AuthContext";
 
 const TransactionHistory = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const { transactions, loading, addTransaction, deleteTransaction } = useTransactions();
+  const { profile } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
-  const [userCurrency, setUserCurrency] = useState("NGN");
-  const [newTransaction, setNewTransaction] = useState({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [newTransaction, setNewTransaction] = useState<NewTransaction>({
     description: "",
     amount: 0,
     category: "",
-    type: "expense" as "income" | "expense"
+    type: "expense"
   });
-
-  // Load user currency
-  useEffect(() => {
-    const savedUserData = localStorage.getItem("smartspend-user");
-    if (savedUserData) {
-      const userData = JSON.parse(savedUserData);
-      setUserCurrency(userData.currency || "NGN");
-    }
-  }, []);
 
   const categories = [
     "Food & Dining", "Transportation", "Shopping", "Entertainment", 
     "Bills & Utilities", "Healthcare", "Education", "Travel", "Other"
   ];
 
-  const handleAddTransaction = () => {
+  const handleAddTransaction = async () => {
     if (!newTransaction.description || !newTransaction.amount || !newTransaction.category) {
       return;
     }
 
-    const transaction: Transaction = {
-      id: Date.now().toString(),
-      description: newTransaction.description,
-      amount: newTransaction.amount,
-      category: newTransaction.category,
-      date: new Date().toISOString().split('T')[0],
-      type: newTransaction.type
-    };
-
-    setTransactions([transaction, ...transactions]);
-    setNewTransaction({ description: "", amount: 0, category: "", type: "expense" });
-    setIsAddDialogOpen(false);
+    setIsSubmitting(true);
+    const success = await addTransaction(newTransaction);
+    
+    if (success) {
+      setNewTransaction({ description: "", amount: 0, category: "", type: "expense" });
+      setIsAddDialogOpen(false);
+    }
+    
+    setIsSubmitting(false);
   };
 
-  const handleDeleteTransaction = (id: string) => {
-    setTransactions(transactions.filter(t => t.id !== id));
+  const handleDeleteTransaction = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this transaction?")) {
+      await deleteTransaction(id);
+    }
   };
 
   const filteredTransactions = transactions.filter(transaction => {
@@ -73,6 +58,28 @@ const TransactionHistory = () => {
     const matchesCategory = filterCategory === "all" || transaction.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Transaction History</h2>
+            <p className="text-muted-foreground">Track your income and expenses</p>
+          </div>
+        </div>
+        
+        <Card className="shadow-card bg-gradient-card border-0">
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span className="text-muted-foreground">Loading transactions...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (transactions.length === 0) {
     return (
@@ -146,8 +153,19 @@ const TransactionHistory = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button onClick={handleAddTransaction} className="w-full">
-                  Add Transaction
+                <Button 
+                  onClick={handleAddTransaction} 
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add Transaction"
+                  )}
                 </Button>
               </div>
             </DialogContent>
@@ -230,8 +248,19 @@ const TransactionHistory = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleAddTransaction} className="w-full">
-                Add Transaction
+              <Button 
+                onClick={handleAddTransaction} 
+                className="w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  "Add Transaction"
+                )}
               </Button>
             </div>
           </DialogContent>
@@ -270,7 +299,7 @@ const TransactionHistory = () => {
       {/* Transactions List */}
       <Card className="shadow-card bg-gradient-card border-0">
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle>Recent Transactions ({filteredTransactions.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -280,14 +309,14 @@ const TransactionHistory = () => {
                   <h4 className="font-medium text-foreground">{transaction.description}</h4>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                     <span>{transaction.category}</span>
-                    <span>{transaction.date}</span>
+                    <span>{new Date(transaction.date).toLocaleDateString()}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className={`font-semibold ${
                     transaction.type === "income" ? "text-success" : "text-destructive"
                   }`}>
-                    {transaction.type === "income" ? "+" : "-"}{formatCurrency(transaction.amount, userCurrency)}
+                    {transaction.type === "income" ? "+" : "-"}{formatCurrency(transaction.amount, profile?.currency || "NGN")}
                   </span>
                   <Button
                     variant="ghost"

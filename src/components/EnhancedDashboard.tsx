@@ -15,10 +15,12 @@ import SmartBudgeting from "./SmartBudgeting";
 import NotificationCenter from "./NotificationCenter";
 import { formatCurrency, getCurrencyByCode } from "@/utils/currencies";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTransactions } from "@/hooks/useTransactions";
 
 const EnhancedDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const { user, profile, signOut } = useAuth();
+  const { transactions, loading: transactionsLoading } = useTransactions();
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -28,6 +30,26 @@ const EnhancedDashboard = () => {
   };
 
   const selectedCurrency = getCurrencyByCode(profile?.currency || "NGN");
+  
+  // Calculate real financial data from transactions
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  
+  const currentMonthTransactions = transactions.filter(t => {
+    const transactionDate = new Date(t.date);
+    return transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
+  });
+  
+  const totalIncome = currentMonthTransactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+    
+  const totalExpenses = currentMonthTransactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+    
+  const currentBalance = totalIncome - totalExpenses;
+  const savingsGoalsCount = 0; // Will be updated when we implement savings goals
 
   const NavigationMenu = () => (
     <div className="space-y-2">
@@ -150,9 +172,11 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, profile?.currency || "NGN")}</div>
+            <div className={`text-2xl font-bold ${currentBalance >= 0 ? 'text-success' : 'text-destructive'}`}>
+              {formatCurrency(currentBalance, profile?.currency || "NGN")}
+            </div>
             <div className="text-sm text-muted-foreground mt-1">
-              Add transactions to see your balance
+              {transactionsLoading ? "Loading..." : "This month's balance"}
             </div>
           </CardContent>
         </Card>
@@ -164,9 +188,11 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, profile?.currency || "NGN")}</div>
+            <div className="text-2xl font-bold text-foreground">
+              {formatCurrency(totalExpenses, profile?.currency || "NGN")}
+            </div>
             <div className="text-sm text-muted-foreground mt-1">
-              No expenses tracked yet
+              {transactionsLoading ? "Loading..." : `${currentMonthTransactions.filter(t => t.type === 'expense').length} transactions`}
             </div>
           </CardContent>
         </Card>
@@ -178,7 +204,7 @@ const EnhancedDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">0</div>
+            <div className="text-2xl font-bold text-foreground">{savingsGoalsCount}</div>
             <div className="text-sm text-muted-foreground mt-1">
               No goals set yet
             </div>
@@ -188,13 +214,15 @@ const EnhancedDashboard = () => {
         <Card className="shadow-card bg-gradient-card border-0">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Investment Portfolio
+              Monthly Income
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{formatCurrency(0, profile?.currency || "NGN")}</div>
+            <div className="text-2xl font-bold text-success">
+              {formatCurrency(totalIncome, profile?.currency || "NGN")}
+            </div>
             <div className="text-sm text-muted-foreground mt-1">
-              Start investing for your future
+              {transactionsLoading ? "Loading..." : `${currentMonthTransactions.filter(t => t.type === 'income').length} income sources`}
             </div>
           </CardContent>
         </Card>
@@ -255,7 +283,10 @@ const EnhancedDashboard = () => {
             <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
               <h4 className="font-medium text-foreground mb-2">1. Track Your First Transaction</h4>
               <p className="text-sm text-muted-foreground">
-                Start by adding a recent expense to see how SmartSpend categorizes and tracks your spending.
+                {transactions.length === 0 
+                  ? "Start by adding a recent expense to see how SmartSpend categorizes and tracks your spending."
+                  : `Great! You've added ${transactions.length} transaction${transactions.length === 1 ? '' : 's'}. Keep tracking to see better insights.`
+                }
               </p>
             </div>
             <div className="p-4 bg-success/5 border border-success/20 rounded-lg">
