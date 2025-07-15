@@ -13,7 +13,11 @@ import {
   BookOpen,
   Bell,
   Settings,
-  User
+  User,
+  MessageCircle,
+  Trophy,
+  Users,
+  AlertTriangle
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,6 +34,11 @@ import FinancialEducation from "@/components/FinancialEducation";
 import NotificationCenter from "@/components/NotificationCenter";
 import TransactionHistory from "@/components/TransactionHistory";
 import DebtManagement from "@/components/DebtManagement";
+import AIFinancialCoach from "@/components/AIFinancialCoach";
+import GamifiedSavings from "@/components/GamifiedSavings";
+import SmartIncomeSplitter from "@/components/SmartIncomeSplitter";
+import CommunityBudgetTemplates from "@/components/CommunityBudgetTemplates";
+import FinancialRiskPredictor from "@/components/FinancialRiskPredictor";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -50,6 +59,11 @@ const Index = () => {
     { id: "analytics", label: "Analytics", icon: PieChart, component: AnalyticsReports },
     { id: "ai-insights", label: "AI Insights", icon: Brain, component: AIInsights },
     { id: "education", label: "Education", icon: BookOpen, component: FinancialEducation },
+    { id: "ai-coach", label: "AI Coach", icon: MessageCircle, component: AIFinancialCoach },
+    { id: "gamified", label: "Rewards", icon: Trophy, component: GamifiedSavings },
+    { id: "income-splitter", label: "Income Splitter", icon: Calculator, component: SmartIncomeSplitter },
+    { id: "community", label: "Community", icon: Users, component: CommunityBudgetTemplates },
+    { id: "risk-predictor", label: "Risk Predictor", icon: AlertTriangle, component: FinancialRiskPredictor },
     { id: "notifications", label: "Notifications", icon: Bell, component: NotificationCenter },
   ];
 
@@ -94,7 +108,7 @@ const Index = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Navigation Tabs */}
           <div className="overflow-x-auto">
-            <TabsList className="grid grid-cols-11 w-full min-w-max bg-card/50 backdrop-blur-sm">
+            <TabsList className="grid grid-cols-16 w-full min-w-max bg-card/50 backdrop-blur-sm">
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 return (
