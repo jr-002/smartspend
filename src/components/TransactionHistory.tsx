@@ -1,338 +1,441 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Search, Filter, Trash2, Loader2 } from "lucide-react";
-import EmptyState from "./EmptyState";
-import { formatCurrency } from "@/utils/currencies";
-import { useTransactions, type NewTransaction } from "@/hooks/useTransactions";
+import React, { useState, useEffect } from 'react';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Edit, Trash2 } from "lucide-react";
+import { useTransactions, Transaction, NewTransaction } from "@/hooks/useTransactions";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatCurrency } from "@/utils/currencies";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import { CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
+import { PopoverClose } from "@radix-ui/react-popover";
+import { ReloadIcon } from "@radix-ui/react-icons";
+import { DatePicker } from "@/components/date-picker";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 const TransactionHistory = () => {
-  const { transactions, loading, addTransaction, deleteTransaction } = useTransactions();
+  const { transactions, loading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const { profile } = useAuth();
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterCategory, setFilterCategory] = useState("all");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [newTransaction, setNewTransaction] = useState<NewTransaction>({
-    description: "",
+    description: '',
     amount: 0,
-    category: "",
-    type: "expense"
+    category: '',
+    transaction_type: 'expense',
+    date: new Date().toISOString().split('T')[0]
   });
 
-  const categories = [
-    "Food & Dining", "Transportation", "Shopping", "Entertainment", 
-    "Bills & Utilities", "Healthcare", "Education", "Travel", "Other"
-  ];
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const { toast } = useToast();
 
-  const handleAddTransaction = async () => {
-    if (!newTransaction.description || !newTransaction.amount || !newTransaction.category) {
+  const formSchema = z.object({
+    description: z.string().min(2, {
+      message: "Description must be at least 2 characters.",
+    }),
+    amount: z.number(),
+    category: z.string().min(2, {
+      message: "Category must be at least 2 characters.",
+    }),
+    transaction_type: z.enum(['income', 'expense']),
+    date: z.date(),
+  })
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      description: '',
+      amount: 0,
+      category: '',
+      transaction_type: 'expense',
+      date: new Date(),
+    },
+  })
+
+  const resetForm = () => {
+    setNewTransaction({
+      description: '',
+      amount: 0,
+      category: '',
+      transaction_type: 'expense',
+      date: new Date().toISOString().split('T')[0]
+    });
+    setEditingTransaction(null);
+    setIsDialogOpen(false);
+  };
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const transactionData = {
+      description: values.description,
+      amount: values.amount,
+      category: values.category,
+      transaction_type: values.transaction_type,
+      date: values.date.toISOString().split('T')[0]
+    };
+
+    if (editingTransaction) {
+      const success = await updateTransaction(editingTransaction.id, transactionData);
+      if (success) {
+        toast({
+          title: "Success",
+          description: "Transaction updated successfully.",
+        });
+      }
+    } else {
+      const success = await addTransaction(transactionData);
+      if (success) {
+        toast({
+          title: "Success",
+          description: "Transaction added successfully.",
+        });
+      }
+    }
+
+    resetForm();
+  }
+
+  const handleSubmit = async () => {
+    if (!newTransaction.description || !newTransaction.amount || !newTransaction.category || !newTransaction.transaction_type) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
       return;
     }
 
-    setIsSubmitting(true);
-    const success = await addTransaction(newTransaction);
-    
-    if (success) {
-      setNewTransaction({ description: "", amount: 0, category: "", type: "expense" });
-      setIsAddDialogOpen(false);
+    if (editingTransaction) {
+      const success = await updateTransaction(editingTransaction.id, newTransaction);
+      if (success) {
+        toast({
+          title: "Success",
+          description: "Transaction updated successfully.",
+        });
+      }
+    } else {
+      const success = await addTransaction(newTransaction);
+      if (success) {
+        toast({
+          title: "Success",
+          description: "Transaction added successfully.",
+        });
+      }
     }
-    
-    setIsSubmitting(false);
+
+    resetForm();
   };
 
-  const handleDeleteTransaction = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this transaction?")) {
-      await deleteTransaction(id);
+  const handleEdit = (transaction: Transaction) => {
+    setNewTransaction({
+      description: transaction.description,
+      amount: transaction.amount,
+      category: transaction.category,
+      transaction_type: transaction.transaction_type,
+      date: transaction.date
+    });
+    setEditingTransaction(transaction);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    const success = await deleteTransaction(id);
+    if (success) {
+      toast({
+        title: "Success",
+        description: "Transaction deleted successfully.",
+      });
     }
   };
 
   const filteredTransactions = transactions.filter(transaction => {
-    const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === "all" || transaction.category === filterCategory;
-    return matchesSearch && matchesCategory;
+    const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filterType === 'all' || transaction.transaction_type === filterType;
+    const matchesCategory = filterCategory === 'all' || transaction.category === filterCategory;
+    
+    return matchesSearch && matchesType && matchesCategory;
   });
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Transaction History</h2>
-            <p className="text-muted-foreground">Track your income and expenses</p>
-          </div>
-        </div>
-        
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardContent className="flex items-center justify-center py-12">
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              <span className="text-muted-foreground">Loading transactions...</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const totalIncome = transactions
+    .filter(t => t.transaction_type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
 
-  if (transactions.length === 0) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Transaction History</h2>
-            <p className="text-muted-foreground">Track your income and expenses</p>
-          </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+  const totalExpenses = transactions
+    .filter(t => t.transaction_type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  return (
+    <Card className="w-full shadow-card bg-gradient-card border-0">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-foreground">Transaction History</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-4 flex items-center space-x-4">
+          <Input
+            type="text"
+            placeholder="Search transactions..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm"
+          />
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="income">Income</SelectItem>
+              <SelectItem value="expense">Expense</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {/* Add categories dynamically if you have a list */}
+              <SelectItem value="Food">Food</SelectItem>
+              <SelectItem value="Shopping">Shopping</SelectItem>
+              <SelectItem value="Salary">Salary</SelectItem>
+              {/* ... */}
+            </SelectContent>
+          </Select>
+          <Dialog>
             <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="w-4 h-4" />
+              <Button variant="outline">
                 Add Transaction
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Add New Transaction</DialogTitle>
+                <DialogTitle>{editingTransaction ? 'Edit Transaction' : 'Add Transaction'}</DialogTitle>
+                <DialogDescription>
+                  Make changes to your transaction here. Click save when you're done.
+                </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    value={newTransaction.description}
-                    onChange={(e) => setNewTransaction({...newTransaction, description: e.target.value})}
-                    placeholder="e.g., Grocery shopping"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="amount">Amount</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    value={newTransaction.amount || ""}
-                    onChange={(e) => setNewTransaction({...newTransaction, amount: parseFloat(e.target.value) || 0})}
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select 
-                    value={newTransaction.category} 
-                    onValueChange={(value) => setNewTransaction({...newTransaction, category: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="type">Type</Label>
-                  <Select 
-                    value={newTransaction.type} 
-                    onValueChange={(value: "income" | "expense") => setNewTransaction({...newTransaction, type: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="expense">Expense</SelectItem>
-                      <SelectItem value="income">Income</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button 
-                  onClick={handleAddTransaction} 
-                  className="w-full"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    "Add Transaction"
-                  )}
-                </Button>
+              <div className="grid gap-4 py-4">
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Description" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Amount</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="Amount" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Category" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="transaction_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Type</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="income">Income</SelectItem>
+                              <SelectItem value="expense">Expense</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Date of travel</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-[240px] pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                  date > new Date()
+                                }
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit">Submit</Button>
+                  </form>
+                </Form>
               </div>
             </DialogContent>
           </Dialog>
         </div>
-        
-        <EmptyState type="transactions" onAdd={() => setIsAddDialogOpen(true)} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Transaction History</h2>
-          <p className="text-muted-foreground">Track your income and expenses</p>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center">
+                    <div className="flex items-center justify-center">
+                      <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                      Loading transactions...
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading && filteredTransactions.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center">
+                    No transactions found.
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading && filteredTransactions.map((transaction) => (
+                <TableRow key={transaction.id}>
+                  <TableCell>{transaction.date}</TableCell>
+                  <TableCell>{transaction.description}</TableCell>
+                  <TableCell>
+                    <Badge variant={transaction.transaction_type === 'income' ? 'default' : 'destructive'}>
+                      {transaction.transaction_type === 'income' ? 'Income' : 'Expense'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{transaction.category}</TableCell>
+                  <TableCell className={transaction.transaction_type === 'income' ? 'text-success' : 'text-destructive'}>
+                    {transaction.transaction_type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount, profile?.currency || "USD")}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(transaction)}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(transaction.id)}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              Add Transaction
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Transaction</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  value={newTransaction.description}
-                  onChange={(e) => setNewTransaction({...newTransaction, description: e.target.value})}
-                  placeholder="e.g., Grocery shopping"
-                />
-              </div>
-              <div>
-                <Label htmlFor="amount">Amount</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  value={newTransaction.amount || ""}
-                  onChange={(e) => setNewTransaction({...newTransaction, amount: parseFloat(e.target.value) || 0})}
-                  placeholder="0.00"
-                />
-              </div>
-              <div>
-                <Label htmlFor="category">Category</Label>
-                <Select 
-                  value={newTransaction.category} 
-                  onValueChange={(value) => setNewTransaction({...newTransaction, category: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="type">Type</Label>
-                <Select 
-                  value={newTransaction.type} 
-                  onValueChange={(value: "income" | "expense") => setNewTransaction({...newTransaction, type: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="expense">Expense</SelectItem>
-                    <SelectItem value="income">Income</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button 
-                onClick={handleAddTransaction} 
-                className="w-full"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Adding...
-                  </>
-                ) : (
-                  "Add Transaction"
-                )}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Search and Filter */}
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Search transactions..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+        <div className="mt-4 flex justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Total Income: <span className="text-success">{formatCurrency(totalIncome, profile?.currency || "USD")}</span>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Total Expenses: <span className="text-destructive">{formatCurrency(totalExpenses, profile?.currency || "USD")}</span>
+            </p>
           </div>
         </div>
-        <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-48">
-            <Filter className="w-4 h-4 mr-2" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories.map(category => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Transactions List */}
-      <Card className="shadow-card bg-gradient-card border-0">
-        <CardHeader>
-          <CardTitle>Recent Transactions ({filteredTransactions.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {filteredTransactions.map((transaction) => (
-              <div key={transaction.id} className="flex items-center justify-between p-4 bg-card/50 rounded-lg border border-border/50">
-                <div className="flex-1">
-                  <h4 className="font-medium text-foreground">{transaction.description}</h4>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                    <span>{transaction.category}</span>
-                    <span>{new Date(transaction.date).toLocaleDateString()}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className={`font-semibold ${
-                    transaction.type === "income" ? "text-success" : "text-destructive"
-                  }`}>
-                    {transaction.type === "income" ? "+" : "-"}{formatCurrency(transaction.amount, profile?.currency || "NGN")}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteTransaction(transaction.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

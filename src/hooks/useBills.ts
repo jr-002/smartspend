@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -52,7 +53,7 @@ export const useBills = () => {
         throw fetchError;
       }
 
-      setBills(data || []);
+      setBills((data || []) as Bill[]);
     } catch (err) {
       console.error('Error fetching bills:', err);
       setError('Failed to load bills');
@@ -96,7 +97,7 @@ export const useBills = () => {
         throw insertError;
       }
 
-      setBills(prev => [...prev, data]);
+      setBills(prev => [...prev, data as Bill]);
       toast({
         title: "Success",
         description: "Bill added successfully.",
@@ -138,7 +139,7 @@ export const useBills = () => {
 
       setBills(prev => 
         prev.map(bill => 
-          bill.id === id ? { ...bill, ...data } : bill
+          bill.id === id ? { ...bill, ...(data as Bill) } : bill
         )
       );
 

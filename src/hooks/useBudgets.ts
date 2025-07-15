@@ -46,7 +46,7 @@ export const useBudgets = () => {
         throw fetchError;
       }
 
-      setBudgets(data || []);
+      setBudgets((data || []) as Budget[]);
     } catch (err) {
       console.error('Error fetching budgets:', err);
       setError('Failed to load budgets');
@@ -86,7 +86,7 @@ export const useBudgets = () => {
         throw insertError;
       }
 
-      setBudgets(prev => [...prev, data]);
+      setBudgets(prev => [...prev, data as Budget]);
       toast({
         title: "Success",
         description: "Budget added successfully.",
@@ -128,7 +128,7 @@ export const useBudgets = () => {
 
       setBudgets(prev => 
         prev.map(budget => 
-          budget.id === id ? { ...budget, ...data } : budget
+          budget.id === id ? { ...budget, ...(data as Budget) } : budget
         )
       );
 

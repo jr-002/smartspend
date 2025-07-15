@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -55,7 +56,7 @@ export const useDebts = () => {
         throw fetchError;
       }
 
-      setDebts(data || []);
+      setDebts((data || []) as Debt[]);
     } catch (err) {
       console.error('Error fetching debts:', err);
       setError('Failed to load debts');
@@ -100,7 +101,7 @@ export const useDebts = () => {
         throw insertError;
       }
 
-      setDebts(prev => [...prev, data]);
+      setDebts(prev => [...prev, data as Debt]);
       toast({
         title: "Success",
         description: "Debt added successfully.",
@@ -142,7 +143,7 @@ export const useDebts = () => {
 
       setDebts(prev => 
         prev.map(debt => 
-          debt.id === id ? { ...debt, ...data } : debt
+          debt.id === id ? { ...debt, ...(data as Debt) } : debt
         )
       );
 
