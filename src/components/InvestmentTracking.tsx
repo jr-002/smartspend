@@ -409,42 +409,41 @@ const InvestmentTracking = () => {
                 </div>
               </DialogContent>
             </Dialog>
-            </Button>
           </div>
         </CardHeader>
         
         <CardContent>
           <div className="space-y-4">
-            {investments.map((investment) => (
+            {investments.map((investment) => {
               const change = investment.current_value - investment.initial_investment;
               const changePercent = investment.initial_investment > 0 ? (change / investment.initial_investment) * 100 : 0;
               
-              <div key={investment.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                <div>
-                  <h3 className="font-semibold text-foreground">{investment.name}</h3>
-                  <Badge variant="outline" className="mt-1">
-                    {investment.type}
-                  </Badge>
+              return (
+                <div key={investment.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                  <div>
+                    <h3 className="font-semibold text-foreground">{investment.name}</h3>
+                    <Badge variant="outline" className="mt-1">
+                      {investment.type}
+                    </Badge>
+                    <p className="text-sm text-muted-foreground mt-1">
                       Purchased: {new Date(investment.purchase_date).toLocaleDateString()}
-                    Last updated: {new Date(investment.lastUpdated).toLocaleDateString()}
-                  </p>
-                </div>
-                
-                <div className="text-right">
+                    </p>
+                  </div>
+                  
+                  <div className="text-right">
+                    <p className="font-semibold">
                       {formatCurrency(investment.current_value, profile?.currency || "USD")}
-                    ₦{investment.currentValue.toLocaleString()}
-                    <div className={`flex items-center gap-1 ${
-                      change >= 0 ? 'text-success' : 'text-destructive'
-                    investment.change >= 0 ? 'text-success' : 'text-destructive'
+                    </p>
+                    <div className={`flex items-center gap-1 ${change >= 0 ? 'text-success' : 'text-destructive'}`}>
                       {change >= 0 ? 
-                    {investment.change >= 0 ? 
-                      <TrendingUp className="w-4 h-4" /> : 
-                      <TrendingDown className="w-4 h-4" />
-                    }
+                        <TrendingUp className="w-4 h-4" /> : 
+                        <TrendingDown className="w-4 h-4" />
+                      }
+                      <span>
                         {change >= 0 ? '+' : ''}{formatCurrency(Math.abs(change), profile?.currency || "USD")} 
                         ({changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%)
-                      ({investment.changePercent >= 0 ? '+' : ''}{investment.changePercent}%)
-                    </span>
+                      </span>
+                    </div>
                     <div className="flex gap-2 mt-2">
                       <Button
                         variant="outline"
@@ -465,8 +464,8 @@ const InvestmentTracking = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
