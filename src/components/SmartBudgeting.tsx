@@ -13,23 +13,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/utils/currencies";
 
-interface BudgetPrediction {
-  category: string;
-  suggestedAmount: number;
-  confidence: number;
-  reasoning: string;
-  trend: 'increasing' | 'decreasing' | 'stable';
-  seasonalFactor: number;
-}
-
-interface BudgetRecommendation {
-  totalBudget: number;
-  categories: BudgetPrediction[];
-  savingsRate: number;
-  emergencyFund: number;
-  insights: string[];
-}
-
 interface BudgetCategory {
   id: string;
   name: string;
@@ -47,7 +30,7 @@ const SmartBudgeting = () => {
   
   const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([]);
   const [predictions, setPredictions] = useState<Record<string, number>>({});
-  const [aiRecommendations, setAiRecommendations] = useState<BudgetRecommendation | null>(null);
+  const [aiRecommendations, setAiRecommendations] = useState<any>(null);
   const [isGeneratingBudget, setIsGeneratingBudget] = useState(false);
   const [isGeneratingPredictions, setIsGeneratingPredictions] = useState(false);
   const [predictiveAnalysis, setPredictiveAnalysis] = useState({
@@ -108,7 +91,7 @@ const SmartBudgeting = () => {
         setAiRecommendations(data.recommendations);
         
         // Apply recommendations to create budget categories
-        const newCategories: BudgetCategory[] = data.recommendations.categories.map((rec: BudgetPrediction, index: number) => ({
+        const newCategories: BudgetCategory[] = data.recommendations.categories.map((rec: any, index: number) => ({
           id: `ai-${index}`,
           name: rec.category,
           budgeted: rec.suggestedAmount,
@@ -188,7 +171,7 @@ const SmartBudgeting = () => {
         await addBudget({
           category: recommendation.category,
           amount: recommendation.suggestedAmount,
-          period: 'monthly'
+          period: 'monthly' as 'weekly' | 'monthly' | 'yearly'
         });
       }
 

@@ -8,22 +8,12 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { useNotificationTriggers } from "@/hooks/useNotificationTriggers";
 import { useAuth } from "@/contexts/AuthContext";
 
-interface NotificationSettings {
-  budgetAlerts: boolean;
-  billReminders: boolean;
-  goalUpdates: boolean;
-  investmentAlerts: boolean;
-  spendingAlerts: boolean;
-  weeklyReports: boolean;
-  pushNotifications: boolean;
-}
-
 const NotificationCenter = () => {
   const { notifications, loading, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
   const { profile } = useAuth();
   useNotificationTriggers(); // Initialize notification triggers
 
-  const [settings, setSettings] = useState<NotificationSettings>({
+  const [settings, setSettings] = useState({
     budgetAlerts: true,
     billReminders: true,
     goalUpdates: true,
@@ -44,7 +34,7 @@ const NotificationCenter = () => {
   }, []);
 
   // Save settings to localStorage
-  const updateSetting = (key: keyof NotificationSettings, value: boolean) => {
+  const updateSetting = (key: string, value: boolean) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
     localStorage.setItem('notification-settings', JSON.stringify(newSettings));
@@ -226,7 +216,7 @@ const NotificationCenter = () => {
                       
                       <p className="text-xs text-muted-foreground">
                         {new Date(notification.created_at).toLocaleString()}
-                      </p>
+                      onCheckedChange={(checked) => updateSetting(key, checked)}
                     </div>
                   </div>
                 </div>

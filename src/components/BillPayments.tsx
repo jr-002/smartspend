@@ -333,7 +333,7 @@ const BillPayments = () => {
                         <span className="text-sm text-muted-foreground">
                           Due: {new Date(bill.due_date).toLocaleDateString()}
                           {bill.status === 'pending' && (
-                            <span className={`ml-2 ${daysUntilDue <= 3 ? 'text-destructive' : 'text-warning'}`}>
+                                ({daysUntilDue >= 0 ? `${daysUntilDue} days left` : 'Overdue'})
                               ({daysUntilDue > 0 ? `${daysUntilDue} days left` : 'Overdue'})
                             </span>
                           )}

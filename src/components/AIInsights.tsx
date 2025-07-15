@@ -6,18 +6,8 @@ import { Brain, TrendingUp, AlertTriangle, Target, Lightbulb, Sparkles } from "l
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
-export interface Insight {
-  id: string;
-  type: 'spending' | 'saving' | 'investment' | 'budget' | 'goal';
-  title: string;
-  description: string;
-  impact: 'high' | 'medium' | 'low';
-  action: string;
-  priority: number;
-}
-
 const AIInsights = () => {
-  const [insights, setInsights] = useState<Insight[]>([]);
+  const [insights, setInsights] = useState<any[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useAuth();
 
