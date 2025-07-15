@@ -49,7 +49,18 @@ export const useTransactions = () => {
         throw fetchError;
       }
 
-      setTransactions(data || []);
+      // Transform the data to ensure proper typing
+      const transformedData: Transaction[] = (data || []).map(item => ({
+        id: item.id,
+        description: item.description,
+        amount: item.amount,
+        category: item.category,
+        date: item.date,
+        transaction_type: item.transaction_type as "income" | "expense",
+        created_at: item.created_at,
+      }));
+
+      setTransactions(transformedData);
     } catch (err) {
       console.error('Error fetching transactions:', err);
       setError('Failed to load transactions');
@@ -91,7 +102,18 @@ export const useTransactions = () => {
         throw insertError;
       }
 
-      setTransactions(prev => [data, ...prev]);
+      // Transform the returned data to ensure proper typing
+      const transformedTransaction: Transaction = {
+        id: data.id,
+        description: data.description,
+        amount: data.amount,
+        category: data.category,
+        date: data.date,
+        transaction_type: data.transaction_type as "income" | "expense",
+        created_at: data.created_at,
+      };
+
+      setTransactions(prev => [transformedTransaction, ...prev]);
       toast({
         title: "Success",
         description: "Transaction added successfully.",
@@ -131,9 +153,20 @@ export const useTransactions = () => {
         throw updateError;
       }
 
+      // Transform the returned data to ensure proper typing
+      const transformedTransaction: Transaction = {
+        id: data.id,
+        description: data.description,
+        amount: data.amount,
+        category: data.category,
+        date: data.date,
+        transaction_type: data.transaction_type as "income" | "expense",
+        created_at: data.created_at,
+      };
+
       setTransactions(prev => 
         prev.map(transaction => 
-          transaction.id === id ? { ...transaction, ...data } : transaction
+          transaction.id === id ? { ...transaction, ...transformedTransaction } : transaction
         )
       );
 
