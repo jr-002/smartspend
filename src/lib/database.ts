@@ -1,5 +1,6 @@
-import { supabase } from './supabase'
-import type { Database } from '../types/supabase'
+
+import { supabase } from '@/integrations/supabase/client'
+import type { Database } from '@/integrations/supabase/types'
 
 // Types
 type Profile = Database['public']['Tables']['profiles']['Row']
@@ -8,7 +9,6 @@ type Budget = Database['public']['Tables']['budgets']['Row']
 type SavingsGoal = Database['public']['Tables']['savings_goals']['Row']
 type Bill = Database['public']['Tables']['bills']['Row']
 type Debt = Database['public']['Tables']['debts']['Row']
-type Investment = Database['public']['Tables']['investments']['Row']
 
 // Profile functions
 export async function getProfile(userId: string) {
@@ -146,30 +146,6 @@ export async function updateDebt(userId: string, debtId: string, updates: Partia
     .from('debts')
     .update(updates)
     .eq('id', debtId)
-    .eq('user_id', userId)
-    .select()
-    .single()
-  
-  if (error) throw error
-  return data
-}
-
-// Investments functions
-export async function getInvestments(userId: string) {
-  const { data, error } = await supabase
-    .from('investments')
-    .select('*')
-    .eq('user_id', userId)
-  
-  if (error) throw error
-  return data
-}
-
-export async function updateInvestment(userId: string, investmentId: string, updates: Partial<Investment>) {
-  const { data, error } = await supabase
-    .from('investments')
-    .update(updates)
-    .eq('id', investmentId)
     .eq('user_id', userId)
     .select()
     .single()

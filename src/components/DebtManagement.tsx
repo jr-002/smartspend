@@ -1,65 +1,61 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard, AlertTriangle, Calculator, TrendingDown } from "lucide-react";
-
-interface Debt {
-  id: string;
-  name: string;
-  type: string;
-  balance: number;
-  originalAmount: number;
-  interestRate: number;
-  minimumPayment: number;
-  dueDate: string;
-  priority: 'high' | 'medium' | 'low';
-}
+import { CreditCard, AlertTriangle, Calculator, TrendingDown, Plus, Loader2 } from "lucide-react";
+import { useDebts } from "@/hooks/useDebts";
+import { useAuth } from "@/contexts/AuthContext";
+import { formatCurrency } from "@/utils/currencies";
+import EmptyState from "./EmptyState";
 
 const DebtManagement = () => {
-  const [debts] = useState<Debt[]>([
-    {
-      id: "1",
-      name: "Credit Card - GTBank",
-      type: "Credit Card",
-      balance: 85000,
-      originalAmount: 120000,
-      interestRate: 24.0,
-      minimumPayment: 8500,
-      dueDate: "2025-01-25",
-      priority: "high"
-    },
-    {
-      id: "2",
-      name: "Personal Loan - Access Bank",
-      type: "Personal Loan",
-      balance: 450000,
-      originalAmount: 600000,
-      interestRate: 18.5,
-      minimumPayment: 25000,
-      dueDate: "2025-01-30",
-      priority: "medium"
-    },
-    {
-      id: "3",
-      name: "Car Loan - First Bank",
-      type: "Auto Loan",
-      balance: 1200000,
-      originalAmount: 2000000,
-      interestRate: 15.0,
-      minimumPayment: 45000,
-      dueDate: "2025-02-05",
-      priority: "low"
-    }
-  ]);
-
+  const { debts, loading } = useDebts();
+  const { profile } = useAuth();
   const [strategy, setStrategy] = useState<'snowball' | 'avalanche'>('avalanche');
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Debt Management</h2>
+            <p className="text-muted-foreground">Track and manage your debts</p>
+          </div>
+        </div>
+        
+        <Card className="shadow-card bg-gradient-card border-0">
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span className="text-muted-foreground">Loading debts...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (debts.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Debt Management</h2>
+            <p className="text-muted-foreground">Track and manage your debts</p>
+          </div>
+        </div>
+        
+        <EmptyState type="debts" />
+      </div>
+    );
+  }
+
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
-  const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimumPayment, 0);
-  const totalOriginalAmount = debts.reduce((sum, debt) => sum + debt.originalAmount, 0);
+  const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
+  const totalOriginalAmount = debts.reduce((sum, debt) => sum + debt.original_amount, 0);
   const totalPaidOff = totalOriginalAmount - totalDebt;
 
   const getPriorityColor = (priority: string) => {
@@ -71,23 +67,12 @@ const DebtManagement = () => {
     }
   };
 
-  const getProgressPercentage = (paid: number, original: number) => {
-    return ((original - paid) / original) * 100;
-  };
-
   const getSortedDebts = () => {
     if (strategy === 'snowball') {
       return [...debts].sort((a, b) => a.balance - b.balance);
     } else {
-      return [...debts].sort((a, b) => b.interestRate - a.interestRate);
+      return [...debts].sort((a, b) => b.interest_rate - a.interest_rate);
     }
-  };
-
-  const calculatePayoffTime = (debt: Debt, extraPayment: number = 0) => {
-    const monthlyPayment = debt.minimumPayment + extraPayment;
-    const monthlyRate = debt.interestRate / 100 / 12;
-    const months = Math.log(1 + (debt.balance * monthlyRate) / monthlyPayment) / Math.log(1 + monthlyRate);
-    return Math.ceil(months);
   };
 
   return (
@@ -99,7 +84,9 @@ const DebtManagement = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Debt</p>
-                <p className="text-2xl font-bold text-destructive">₦{totalDebt.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-destructive">
+                  {formatCurrency(totalDebt, profile?.currency || "USD")}
+                </p>
               </div>
               <CreditCard className="w-8 h-8 text-destructive" />
             </div>
@@ -111,7 +98,9 @@ const DebtManagement = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Monthly Payments</p>
-                <p className="text-2xl font-bold text-foreground">₦{totalMinimumPayment.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {formatCurrency(totalMinimumPayment, profile?.currency || "USD")}
+                </p>
               </div>
               <Calculator className="w-8 h-8 text-primary" />
             </div>
@@ -123,7 +112,9 @@ const DebtManagement = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Paid Off</p>
-                <p className="text-2xl font-bold text-success">₦{totalPaidOff.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-success">
+                  {formatCurrency(totalPaidOff, profile?.currency || "USD")}
+                </p>
               </div>
               <TrendingDown className="w-8 h-8 text-success" />
             </div>
@@ -136,7 +127,7 @@ const DebtManagement = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Progress</p>
                 <p className="text-2xl font-bold text-foreground">
-                  {((totalPaidOff / totalOriginalAmount) * 100).toFixed(1)}%
+                  {totalOriginalAmount > 0 ? ((totalPaidOff / totalOriginalAmount) * 100).toFixed(1) : 0}%
                 </p>
               </div>
               <AlertTriangle className="w-8 h-8 text-warning" />
@@ -168,7 +159,7 @@ const DebtManagement = () => {
               
               <div className="space-y-4">
                 {getSortedDebts().map((debt, index) => (
-                  <DebtCard key={debt.id} debt={debt} rank={index + 1} />
+                  <DebtCard key={debt.id} debt={debt} rank={index + 1} currency={profile?.currency || "USD"} />
                 ))}
               </div>
             </TabsContent>
@@ -184,7 +175,7 @@ const DebtManagement = () => {
               
               <div className="space-y-4">
                 {getSortedDebts().map((debt, index) => (
-                  <DebtCard key={debt.id} debt={debt} rank={index + 1} />
+                  <DebtCard key={debt.id} debt={debt} rank={index + 1} currency={profile?.currency || "USD"} />
                 ))}
               </div>
             </TabsContent>
@@ -195,9 +186,24 @@ const DebtManagement = () => {
   );
 };
 
-const DebtCard = ({ debt, rank }: { debt: Debt; rank: number }) => {
-  const progressPercentage = ((debt.originalAmount - debt.balance) / debt.originalAmount) * 100;
-  const payoffMonths = Math.ceil(debt.balance / debt.minimumPayment);
+interface DebtCardProps {
+  debt: {
+    id: string;
+    name: string;
+    type: string;
+    balance: number;
+    original_amount: number;
+    interest_rate: number;
+    minimum_payment: number;
+    priority: string;
+  };
+  rank: number;
+  currency: string;
+}
+
+const DebtCard = ({ debt, rank, currency }: DebtCardProps) => {
+  const progressPercentage = ((debt.original_amount - debt.balance) / debt.original_amount) * 100;
+  const payoffMonths = Math.ceil(debt.balance / debt.minimum_payment);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -219,16 +225,16 @@ const DebtCard = ({ debt, rank }: { debt: Debt; rank: number }) => {
             <h3 className="font-semibold text-lg text-foreground">{debt.name}</h3>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="outline">{debt.type}</Badge>
-                        <Badge className={getPriorityColor(debt.priority)}>
-                          {debt.priority} priority
-                        </Badge>
+              <Badge className={getPriorityColor(debt.priority)}>
+                {debt.priority} priority
+              </Badge>
             </div>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold text-foreground">₦{debt.balance.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-foreground">{formatCurrency(debt.balance, currency)}</p>
           <p className="text-sm text-muted-foreground">
-            {debt.interestRate}% APR
+            {debt.interest_rate}% APR
           </p>
         </div>
       </div>
@@ -245,7 +251,7 @@ const DebtCard = ({ debt, rank }: { debt: Debt; rank: number }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t">
           <div>
             <p className="text-sm font-medium text-foreground">Minimum Payment</p>
-            <p className="text-lg font-bold text-foreground">₦{debt.minimumPayment.toLocaleString()}</p>
+            <p className="text-lg font-bold text-foreground">{formatCurrency(debt.minimum_payment, currency)}</p>
           </div>
           
           <div>

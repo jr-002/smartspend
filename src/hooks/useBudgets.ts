@@ -4,33 +4,30 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
-export interface Transaction {
+export interface Budget {
   id: string;
-  description: string;
-  amount: number;
   category: string;
-  date: string;
-  transaction_type: "income" | "expense";
+  amount: number;
+  period: 'weekly' | 'monthly' | 'yearly';
   created_at?: string;
+  updated_at?: string;
 }
 
-export interface NewTransaction {
-  description: string;
-  amount: number;
+export interface NewBudget {
   category: string;
-  transaction_type: "income" | "expense";
-  date?: string;
+  amount: number;
+  period?: 'weekly' | 'monthly' | 'yearly';
 }
 
-export const useTransactions = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+export const useBudgets = () => {
+  const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchTransactions = async () => {
+  const fetchBudgets = async () => {
     if (!user) {
-      setTransactions([]);
+      setBudgets([]);
       setLoading(false);
       return;
     }
@@ -40,22 +37,22 @@ export const useTransactions = () => {
       setError(null);
 
       const { data, error: fetchError } = await supabase
-        .from('transactions')
+        .from('budgets')
         .select('*')
         .eq('user_id', user.id)
-        .order('date', { ascending: false });
+        .order('category', { ascending: true });
 
       if (fetchError) {
         throw fetchError;
       }
 
-      setTransactions(data || []);
+      setBudgets(data || []);
     } catch (err) {
-      console.error('Error fetching transactions:', err);
-      setError('Failed to load transactions');
+      console.error('Error fetching budgets:', err);
+      setError('Failed to load budgets');
       toast({
         title: "Error",
-        description: "Failed to load transactions. Please try again.",
+        description: "Failed to load budgets. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -63,11 +60,11 @@ export const useTransactions = () => {
     }
   };
 
-  const addTransaction = async (newTransaction: NewTransaction): Promise<boolean> => {
+  const addBudget = async (newBudget: NewBudget): Promise<boolean> => {
     if (!user) {
       toast({
         title: "Error",
-        description: "You must be logged in to add transactions.",
+        description: "You must be logged in to add budgets.",
         variant: "destructive",
       });
       return false;
@@ -75,14 +72,12 @@ export const useTransactions = () => {
 
     try {
       const { data, error: insertError } = await supabase
-        .from('transactions')
+        .from('budgets')
         .insert({
           user_id: user.id,
-          description: newTransaction.description,
-          amount: newTransaction.amount,
-          category: newTransaction.category,
-          transaction_type: newTransaction.transaction_type,
-          date: newTransaction.date || new Date().toISOString().split('T')[0],
+          category: newBudget.category,
+          amount: newBudget.amount,
+          period: newBudget.period || 'monthly',
         })
         .select()
         .single();
@@ -91,28 +86,28 @@ export const useTransactions = () => {
         throw insertError;
       }
 
-      setTransactions(prev => [data, ...prev]);
+      setBudgets(prev => [...prev, data]);
       toast({
         title: "Success",
-        description: "Transaction added successfully.",
+        description: "Budget added successfully.",
       });
       return true;
     } catch (err) {
-      console.error('Error adding transaction:', err);
+      console.error('Error adding budget:', err);
       toast({
         title: "Error",
-        description: "Failed to add transaction. Please try again.",
+        description: "Failed to add budget. Please try again.",
         variant: "destructive",
       });
       return false;
     }
   };
 
-  const updateTransaction = async (id: string, updates: Partial<NewTransaction>): Promise<boolean> => {
+  const updateBudget = async (id: string, updates: Partial<NewBudget>): Promise<boolean> => {
     if (!user) {
       toast({
         title: "Error",
-        description: "You must be logged in to update transactions.",
+        description: "You must be logged in to update budgets.",
         variant: "destructive",
       });
       return false;
@@ -120,7 +115,7 @@ export const useTransactions = () => {
 
     try {
       const { data, error: updateError } = await supabase
-        .from('transactions')
+        .from('budgets')
         .update(updates)
         .eq('id', id)
         .eq('user_id', user.id)
@@ -131,33 +126,33 @@ export const useTransactions = () => {
         throw updateError;
       }
 
-      setTransactions(prev => 
-        prev.map(transaction => 
-          transaction.id === id ? { ...transaction, ...data } : transaction
+      setBudgets(prev => 
+        prev.map(budget => 
+          budget.id === id ? { ...budget, ...data } : budget
         )
       );
 
       toast({
         title: "Success",
-        description: "Transaction updated successfully.",
+        description: "Budget updated successfully.",
       });
       return true;
     } catch (err) {
-      console.error('Error updating transaction:', err);
+      console.error('Error updating budget:', err);
       toast({
         title: "Error",
-        description: "Failed to update transaction. Please try again.",
+        description: "Failed to update budget. Please try again.",
         variant: "destructive",
       });
       return false;
     }
   };
 
-  const deleteTransaction = async (id: string): Promise<boolean> => {
+  const deleteBudget = async (id: string): Promise<boolean> => {
     if (!user) {
       toast({
         title: "Error",
-        description: "You must be logged in to delete transactions.",
+        description: "You must be logged in to delete budgets.",
         variant: "destructive",
       });
       return false;
@@ -165,7 +160,7 @@ export const useTransactions = () => {
 
     try {
       const { error: deleteError } = await supabase
-        .from('transactions')
+        .from('budgets')
         .delete()
         .eq('id', id)
         .eq('user_id', user.id);
@@ -174,17 +169,17 @@ export const useTransactions = () => {
         throw deleteError;
       }
 
-      setTransactions(prev => prev.filter(transaction => transaction.id !== id));
+      setBudgets(prev => prev.filter(budget => budget.id !== id));
       toast({
         title: "Success",
-        description: "Transaction deleted successfully.",
+        description: "Budget deleted successfully.",
       });
       return true;
     } catch (err) {
-      console.error('Error deleting transaction:', err);
+      console.error('Error deleting budget:', err);
       toast({
         title: "Error",
-        description: "Failed to delete transaction. Please try again.",
+        description: "Failed to delete budget. Please try again.",
         variant: "destructive",
       });
       return false;
@@ -192,16 +187,16 @@ export const useTransactions = () => {
   };
 
   useEffect(() => {
-    fetchTransactions();
+    fetchBudgets();
   }, [user]);
 
   return {
-    transactions,
+    budgets,
     loading,
     error,
-    addTransaction,
-    updateTransaction,
-    deleteTransaction,
-    refetch: fetchTransactions,
+    addBudget,
+    updateBudget,
+    deleteBudget,
+    refetch: fetchBudgets,
   };
 };
