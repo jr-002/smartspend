@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Brain, TrendingUp, AlertTriangle, Target, Lightbulb, Sparkles } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 
-interface Insight {
+export interface Insight {
   id: string;
   type: 'spending' | 'saving' | 'investment' | 'budget' | 'goal';
   title: string;
@@ -17,54 +19,75 @@ interface Insight {
 const AIInsights = () => {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { user } = useAuth();
 
   const generateInsights = () => {
     setIsGenerating(true);
     
     // Simulate AI analysis
     setTimeout(() => {
-      const newInsights: Insight[] = [
-        {
-          id: "1",
-          type: "spending",
-          title: "Food Spending Alert",
-          description: "Your food expenses have increased by 23% this month compared to your average. You've spent ₦45,200 on dining and groceries.",
-          impact: "high",
-          action: "Consider meal planning and cooking at home 2-3 more times per week to save ₦8,000-12,000",
-          priority: 1
-        },
-        {
-          id: "2",
-          type: "saving",
-          title: "Emergency Fund Opportunity",
-          description: "Based on your income pattern, you could build a 6-month emergency fund faster by increasing your savings rate slightly.",
-          impact: "medium",
-          action: "Increase your monthly savings by ₦15,000 to reach your emergency fund goal 4 months earlier",
-          priority: 2
-        },
-        {
-          id: "3",
-          type: "investment",
-          title: "Portfolio Rebalancing Needed",
-          description: "Your stock allocation is currently 65%, which exceeds your target of 60%. Consider rebalancing for better risk management.",
-          impact: "medium",
-          action: "Move ₦150,000 from stocks to treasury bills to maintain your desired asset allocation",
-          priority: 3
-        },
-        {
-          id: "4",
-          type: "budget",
-          title: "Transportation Efficiency",
-          description: "You could save ₦6,500 monthly by optimizing your transportation choices. Uber rides account for 40% of transport costs.",
-          impact: "high",
-          action: "Consider using public transport 2-3 times per week or carpooling options",
-          priority: 4
-        }
-      ];
-      
-      setInsights(newInsights.sort((a, b) => a.priority - b.priority));
+      generateAIInsights();
+    }, 1000);
+  };
+
+  const generateAIInsights = async () => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to generate insights.",
+        variant: "destructive",
+      });
       setIsGenerating(false);
-    }, 2000);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/ai-insights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.insights && Array.isArray(data.insights)) {
+        setInsights(data.insights.sort((a, b) => a.priority - b.priority));
+        toast({
+          title: "Success",
+          description: "AI insights generated successfully!",
+        });
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('Error generating AI insights:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate AI insights. Please try again.",
+        variant: "destructive",
+      });
+      
+      // Fallback to demo insights if API fails
+      setInsights([
+        {
+          id: "fallback-1",
+          type: "spending",
+          title: "Analysis Unavailable",
+          description: "Unable to connect to AI service. Please check your internet connection and try again.",
+          impact: "medium",
+          action: "Retry generating insights or review your financial data manually.",
+          priority: 1
+        }
+      ]);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   useEffect(() => {
@@ -117,7 +140,7 @@ const AIInsights = () => {
             {isGenerating ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                Analyzing...
+                Generating AI Insights...
               </>
             ) : (
               <>
@@ -128,7 +151,7 @@ const AIInsights = () => {
           </Button>
         </div>
         <p className="text-muted-foreground">
-          Personalized recommendations based on your financial behavior and goals
+          AI-powered personalized recommendations based on your financial behavior and goals
         </p>
       </CardHeader>
       
@@ -183,7 +206,7 @@ const AIInsights = () => {
               <Brain className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">No insights available</h3>
               <p className="text-muted-foreground mb-4">
-                Add more transactions and financial data to get personalized insights
+                Add more transactions and financial data to get AI-powered personalized insights
               </p>
               <Button onClick={generateInsights} className="bg-gradient-primary">
                 Generate Insights
