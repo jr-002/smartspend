@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Wallet, Target, TrendingUp, Brain, Sparkles, Mail, Lock, User, DollarSign } from "lucide-react";
+import { Wallet, Target, TrendingUp, Brain, Sparkles, Mail, Lock, User, DollarSign, CheckCircle } from "lucide-react";
 import CurrencySelector from "./CurrencySelector";
 import { getDefaultCurrency } from "@/utils/currencies";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +15,7 @@ const WelcomeScreen = () => {
   const [isLogin, setIsLogin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   
   const [formData, setFormData] = useState({
     email: "",
@@ -41,6 +43,7 @@ const WelcomeScreen = () => {
   const handleAuth = async () => {
     setLoading(true);
     setError(null);
+    setShowVerificationMessage(false);
 
     try {
       if (isLogin) {
@@ -77,7 +80,8 @@ const WelcomeScreen = () => {
         if (error) {
           setError(error.message);
         } else {
-          // Show success message for signup
+          // Show verification message on successful signup
+          setShowVerificationMessage(true);
           setError(null);
         }
       }
@@ -101,6 +105,78 @@ const WelcomeScreen = () => {
         return true;
     }
   };
+
+  // Show verification message screen
+  if (showVerificationMessage) {
+    return (
+      <div className="min-h-screen bg-gradient-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-card bg-gradient-card border-0">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-gradient-success rounded-full flex items-center justify-center mx-auto mb-4 shadow-glow">
+              <CheckCircle className="w-10 h-10 text-white" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-foreground">
+              Check Your Email
+            </CardTitle>
+            <p className="text-muted-foreground">
+              We've sent you a verification link
+            </p>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            <div className="text-center space-y-4">
+              <div className="p-4 bg-success/10 rounded-lg border border-success/20">
+                <Mail className="w-8 h-8 text-success mx-auto mb-2" />
+                <p className="text-sm font-medium text-success">Verification Email Sent!</p>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  We've sent a verification link to:
+                </p>
+                <p className="font-medium text-foreground">{formData.email}</p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Please check your email and click the verification link to activate your account.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Don't see the email? Check your spam folder or wait a few minutes.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setShowVerificationMessage(false);
+                  setIsLogin(true);
+                  setStep(2);
+                }}
+              >
+                Back to Sign In
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  setShowVerificationMessage(false);
+                  setStep(1);
+                }}
+              >
+                Start Over
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-background flex items-center justify-center p-4">
