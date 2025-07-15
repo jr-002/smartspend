@@ -26,7 +26,7 @@ const SavingsGoals = () => {
   });
 
   const handleAddGoal = async () => {
-    if (!newGoal.name || !newGoal.target_amount || !newGoal.deadline) {
+    if (!newGoal.name || !newGoal.target_amount) {
       return;
     }
 

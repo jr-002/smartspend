@@ -19,7 +19,7 @@ export interface NewSavingsGoal {
   description?: string;
   target_amount: number;
   current_amount?: number;
-  deadline: string;
+  deadline?: string;
 }
 
 export const useSavingsGoals = () => {
@@ -82,7 +82,7 @@ export const useSavingsGoals = () => {
           description: newGoal.description,
           target_amount: newGoal.target_amount,
           current_amount: newGoal.current_amount || 0,
-          deadline: newGoal.deadline,
+          deadline: newGoal.deadline || null,
         })
         .select()
         .single();

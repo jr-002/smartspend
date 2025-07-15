@@ -98,17 +98,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            name: userData.name,
-            monthly_income: userData.monthlyIncome,
-            currency: userData.currency
-          }
-        }
       });
 
       if (error) {
         return { error };
+      }
+
+      // Create profile after successful signup
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            name: userData.name,
+            monthly_income: userData.monthlyIncome,
+            currency: userData.currency
+          });
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+        }
       }
 
       return { error: null };

@@ -19,7 +19,7 @@ export interface NewTransaction {
   amount: number;
   category: string;
   transaction_type: "income" | "expense";
-  date?: string;
+  date: string;
 }
 
 export const useTransactions = () => {
@@ -93,7 +93,7 @@ export const useTransactions = () => {
           amount: newTransaction.amount,
           category: newTransaction.category,
           transaction_type: newTransaction.transaction_type,
-          date: newTransaction.date || new Date().toISOString().split('T')[0],
+          date: newTransaction.date,
         })
         .select()
         .single();

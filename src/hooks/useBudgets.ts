@@ -16,7 +16,7 @@ export interface Budget {
 export interface NewBudget {
   category: string;
   amount: number;
-  period?: 'weekly' | 'monthly' | 'yearly';
+  period: 'weekly' | 'monthly' | 'yearly';
 }
 
 export const useBudgets = () => {
@@ -77,7 +77,7 @@ export const useBudgets = () => {
           user_id: user.id,
           category: newBudget.category,
           amount: newBudget.amount,
-          period: newBudget.period || 'monthly',
+          period: newBudget.period,
         })
         .select()
         .single();
