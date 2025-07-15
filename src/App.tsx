@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useNotificationTriggers } from "@/hooks/useNotificationTriggers";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 

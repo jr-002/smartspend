@@ -1,19 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Bell, Settings, AlertTriangle, TrendingUp, Target, CreditCard, Calendar } from "lucide-react";
-
-interface Notification {
-  id: string;
-  type: 'budget' | 'bill' | 'goal' | 'investment' | 'spending';
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  priority: 'high' | 'medium' | 'low';
-}
+import { Bell, Settings, AlertTriangle, TrendingUp, Target, CreditCard, Calendar, Loader2 } from "lucide-react";
+import { useNotifications } from "@/hooks/useNotifications";
+import { useNotificationTriggers } from "@/hooks/useNotificationTriggers";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NotificationSettings {
   budgetAlerts: boolean;
@@ -26,53 +19,9 @@ interface NotificationSettings {
 }
 
 const NotificationCenter = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      type: "budget",
-      title: "Budget Alert",
-      message: "You've spent 85% of your food budget for this month (₦42,500 of ₦50,000).",
-      timestamp: "2025-01-15T10:30:00Z",
-      read: false,
-      priority: "high"
-    },
-    {
-      id: "2",
-      type: "bill",
-      title: "Bill Due Soon",
-      message: "Your electricity bill of ₦12,500 is due in 3 days.",
-      timestamp: "2025-01-15T09:15:00Z",
-      read: false,
-      priority: "medium"
-    },
-    {
-      id: "3",
-      type: "goal",
-      title: "Savings Goal Update",
-      message: "Great progress! You're 65% toward your vacation goal.",
-      timestamp: "2025-01-14T16:45:00Z",
-      read: true,
-      priority: "low"
-    },
-    {
-      id: "4",
-      type: "investment",
-      title: "Portfolio Performance",
-      message: "Your investments gained ₦15,000 this week (+2.1%).",
-      timestamp: "2025-01-14T14:20:00Z",
-      read: true,
-      priority: "medium"
-    },
-    {
-      id: "5",
-      type: "spending",
-      title: "Unusual Spending",
-      message: "Your shopping expenses this week are 40% higher than usual.",
-      timestamp: "2025-01-13T11:30:00Z",
-      read: false,
-      priority: "high"
-    }
-  ]);
+  const { notifications, loading, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  const { profile } = useAuth();
+  useNotificationTriggers(); // Initialize notification triggers
 
   const [settings, setSettings] = useState<NotificationSettings>({
     budgetAlerts: true,
@@ -86,22 +35,19 @@ const NotificationCenter = () => {
 
   const [showSettings, setShowSettings] = useState(false);
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notif => 
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
-  };
+  // Load settings from localStorage
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('notification-settings');
+    if (savedSettings) {
+      setSettings(JSON.parse(savedSettings));
+    }
+  }, []);
 
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notif => ({ ...notif, read: true }))
-    );
-  };
-
-  const clearNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
+  // Save settings to localStorage
+  const updateSetting = (key: keyof NotificationSettings, value: boolean) => {
+    const newSettings = { ...settings, [key]: value };
+    setSettings(newSettings);
+    localStorage.setItem('notification-settings', JSON.stringify(newSettings));
   };
 
   const getNotificationIcon = (type: string) => {
@@ -131,15 +77,23 @@ const NotificationCenter = () => {
       case 'goal': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'investment': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       case 'spending': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'system': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const updateSetting = (key: keyof NotificationSettings, value: boolean) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-  };
+  if (loading) {
+    return (
+      <Card className="shadow-card bg-gradient-card border-0">
+        <CardContent className="flex items-center justify-center py-12">
+          <div className="flex items-center gap-2">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <span className="text-muted-foreground">Loading notifications...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="shadow-card bg-gradient-card border-0">
@@ -258,7 +212,7 @@ const NotificationCenter = () => {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => clearNotification(notification.id)}
+                            onClick={() => deleteNotification(notification.id)}
                             className="text-muted-foreground hover:text-destructive"
                           >
                             ×
@@ -271,7 +225,7 @@ const NotificationCenter = () => {
                       </p>
                       
                       <p className="text-xs text-muted-foreground">
-                        {new Date(notification.timestamp).toLocaleString()}
+                        {new Date(notification.created_at).toLocaleString()}
                       </p>
                     </div>
                   </div>
