@@ -51,10 +51,12 @@ const SmartBudgeting = () => {
   const [isGeneratingBudget, setIsGeneratingBudget] = useState(false);
   const [isGeneratingPredictions, setIsGeneratingPredictions] = useState(false);
   const [predictiveAnalysis, setPredictiveAnalysis] = useState({
-  const [newBudget, setNewBudget] = useState({
-    category: "",
-    amount: 0,
-    period: "monthly" as const
+    monthlyIncome: 0,
+    projectedExpenses: 0,
+    projectedSavings: 0,
+    savingsRate: 0,
+    budgetVariance: 0,
+    riskLevel: "low" as "low" | "medium" | "high"
   });
 
   // Calculate current month spending by category
@@ -79,16 +81,11 @@ const SmartBudgeting = () => {
         title: "Error",
         description: "You must be logged in to generate AI budget recommendations.",
         variant: "destructive",
-    if (!newBudget.category || !newBudget.amount || !newBudget.period) {
+      });
       return;
     }
 
     setIsGeneratingBudget(true);
-    const success = await addBudget({
-      category: newBudget.category,
-      amount: newBudget.amount,
-      period: newBudget.period
-    });
     try {
       const response = await fetch('/api/budget-ai', {
         method: 'POST',
@@ -215,8 +212,7 @@ const SmartBudgeting = () => {
 
     const currentMonthSpending = getCurrentMonthSpending();
     
-    // Create budget categories from existing budgets
-      setNewBudget({ category: "", amount: 0, period: "monthly" });
+    const categories = budgets.map(budget => ({
       id: budget.id,
       name: budget.category,
       budgeted: budget.amount,
