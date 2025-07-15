@@ -1,5 +1,5 @@
+
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -38,18 +38,32 @@ export const useInvestments = () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // Mock data for now - replace with actual Supabase call when investments table is created
+      const mockInvestments: Investment[] = [
+        {
+          id: '1',
+          name: 'Tech Stocks Portfolio',
+          type: 'Stocks',
+          current_value: 15000,
+          initial_investment: 12000,
+          purchase_date: '2024-01-15',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: '2',
+          name: 'Real Estate Fund',
+          type: 'REIT',
+          current_value: 8500,
+          initial_investment: 8000,
+          purchase_date: '2024-02-20',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ];
 
-      const { data, error: fetchError } = await supabase
-        .from('investments')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('purchase_date', { ascending: false });
-
-      if (fetchError) {
-        throw fetchError;
-      }
-
-      setInvestments(data || []);
+      setInvestments(mockInvestments);
     } catch (err) {
       console.error('Error fetching investments:', err);
       setError('Failed to load investments');
@@ -74,24 +88,19 @@ export const useInvestments = () => {
     }
 
     try {
-      const { data, error: insertError } = await supabase
-        .from('investments')
-        .insert({
-          user_id: user.id,
-          name: newInvestment.name,
-          type: newInvestment.type,
-          current_value: newInvestment.current_value,
-          initial_investment: newInvestment.initial_investment,
-          purchase_date: newInvestment.purchase_date || new Date().toISOString().split('T')[0],
-        })
-        .select()
-        .single();
+      // Mock implementation - replace with actual Supabase call
+      const mockInvestment: Investment = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: newInvestment.name,
+        type: newInvestment.type,
+        current_value: newInvestment.current_value,
+        initial_investment: newInvestment.initial_investment,
+        purchase_date: newInvestment.purchase_date || new Date().toISOString().split('T')[0],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-      if (insertError) {
-        throw insertError;
-      }
-
-      setInvestments(prev => [data, ...prev]);
+      setInvestments(prev => [mockInvestment, ...prev]);
       toast({
         title: "Success",
         description: "Investment added successfully.",
@@ -119,21 +128,12 @@ export const useInvestments = () => {
     }
 
     try {
-      const { data, error: updateError } = await supabase
-        .from('investments')
-        .update({ current_value: currentValue })
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .select()
-        .single();
-
-      if (updateError) {
-        throw updateError;
-      }
-
+      // Mock implementation - replace with actual Supabase call
       setInvestments(prev => 
         prev.map(investment => 
-          investment.id === id ? { ...investment, ...data } : investment
+          investment.id === id 
+            ? { ...investment, current_value: currentValue, updated_at: new Date().toISOString() }
+            : investment
         )
       );
 
@@ -164,16 +164,7 @@ export const useInvestments = () => {
     }
 
     try {
-      const { error: deleteError } = await supabase
-        .from('investments')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (deleteError) {
-        throw deleteError;
-      }
-
+      // Mock implementation - replace with actual Supabase call
       setInvestments(prev => prev.filter(investment => investment.id !== id));
       toast({
         title: "Success",

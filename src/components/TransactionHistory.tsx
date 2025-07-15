@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -15,7 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -26,27 +26,19 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Loader2 } from "lucide-react";
 import { useTransactions, Transaction, NewTransaction } from "@/hooks/useTransactions";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/utils/currencies";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-import { CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
-import { PopoverClose } from "@radix-ui/react-popover";
-import { ReloadIcon } from "@radix-ui/react-icons";
-import { DatePicker } from "@/components/date-picker";
+import { DatePicker } from "@/components/DatePicker";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -55,14 +47,6 @@ const TransactionHistory = () => {
   const { transactions, loading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const { profile } = useAuth();
   
-  const [newTransaction, setNewTransaction] = useState<NewTransaction>({
-    description: '',
-    amount: 0,
-    category: '',
-    transaction_type: 'expense',
-    date: new Date().toISOString().split('T')[0]
-  });
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,7 +58,9 @@ const TransactionHistory = () => {
     description: z.string().min(2, {
       message: "Description must be at least 2 characters.",
     }),
-    amount: z.number(),
+    amount: z.number().positive({
+      message: "Amount must be positive.",
+    }),
     category: z.string().min(2, {
       message: "Category must be at least 2 characters.",
     }),
@@ -94,12 +80,12 @@ const TransactionHistory = () => {
   })
 
   const resetForm = () => {
-    setNewTransaction({
+    form.reset({
       description: '',
       amount: 0,
       category: '',
       transaction_type: 'expense',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date(),
     });
     setEditingTransaction(null);
     setIsDialogOpen(false);
@@ -135,44 +121,13 @@ const TransactionHistory = () => {
     resetForm();
   }
 
-  const handleSubmit = async () => {
-    if (!newTransaction.description || !newTransaction.amount || !newTransaction.category || !newTransaction.transaction_type) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (editingTransaction) {
-      const success = await updateTransaction(editingTransaction.id, newTransaction);
-      if (success) {
-        toast({
-          title: "Success",
-          description: "Transaction updated successfully.",
-        });
-      }
-    } else {
-      const success = await addTransaction(newTransaction);
-      if (success) {
-        toast({
-          title: "Success",
-          description: "Transaction added successfully.",
-        });
-      }
-    }
-
-    resetForm();
-  };
-
   const handleEdit = (transaction: Transaction) => {
-    setNewTransaction({
+    form.reset({
       description: transaction.description,
       amount: transaction.amount,
       category: transaction.category,
-      transaction_type: transaction.transaction_type,
-      date: transaction.date
+      transaction_type: transaction.transaction_type as 'income' | 'expense',
+      date: new Date(transaction.date)
     });
     setEditingTransaction(transaction);
     setIsDialogOpen(true);
@@ -235,14 +190,12 @@ const TransactionHistory = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {/* Add categories dynamically if you have a list */}
               <SelectItem value="Food">Food</SelectItem>
               <SelectItem value="Shopping">Shopping</SelectItem>
               <SelectItem value="Salary">Salary</SelectItem>
-              {/* ... */}
             </SelectContent>
           </Select>
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">
                 Add Transaction
@@ -278,7 +231,12 @@ const TransactionHistory = () => {
                         <FormItem>
                           <FormLabel>Amount</FormLabel>
                           <FormControl>
-                            <Input type="number" placeholder="Amount" {...field} />
+                            <Input 
+                              type="number" 
+                              placeholder="Amount" 
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -303,7 +261,7 @@ const TransactionHistory = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Type</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select type" />
@@ -323,38 +281,14 @@ const TransactionHistory = () => {
                       name="date"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel>Date of travel</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-[240px] pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) =>
-                                  date > new Date()
-                                }
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
+                          <FormLabel>Date</FormLabel>
+                          <FormControl>
+                            <DatePicker
+                              date={field.value}
+                              onSelect={field.onChange}
+                              placeholder="Pick a date"
+                            />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -383,7 +317,7 @@ const TransactionHistory = () => {
                 <TableRow>
                   <TableCell colSpan={6} className="text-center">
                     <div className="flex items-center justify-center">
-                      <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Loading transactions...
                     </div>
                   </TableCell>
