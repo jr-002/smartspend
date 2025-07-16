@@ -45,166 +45,287 @@ const EnhancedDashboard = () => {
   const totalBudgets = budgets.length;
 
   return (
-    <div className="space-y-6">
-      {/* Overview Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardContent className="p-6">
+    <div className="space-y-8">
+      {/* Enhanced Overview Section with animations */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="glass-card hover-lift border-0 group relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Current Balance</p>
-                <p className="text-2xl font-bold text-foreground">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">Current Balance</p>
+                <p className={`text-3xl font-bold tracking-tight ${
+                  balance >= 0 ? 'text-success' : 'text-destructive'
+                }`}>
                   {formatCurrency(balance, profile?.currency || "USD")}
                 </p>
+                <div className="flex items-center gap-1 text-xs">
+                  <div className={`w-2 h-2 rounded-full ${balance >= 0 ? 'bg-success' : 'bg-destructive'}`} />
+                  <span className="text-muted-foreground">
+                    {balance >= 0 ? 'Positive' : 'Negative'} balance
+                  </span>
+                </div>
               </div>
-              <CreditCard className="w-8 h-8 text-primary" />
+              <div className="p-3 bg-primary/10 rounded-2xl">
+                <CreditCard className="w-8 h-8 text-primary" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardContent className="p-6">
+        <Card className="glass-card hover-lift border-0 group relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Income</p>
-                <p className="text-2xl font-bold text-success">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">Total Income</p>
+                <p className="text-3xl font-bold text-success tracking-tight">
                   {formatCurrency(totalIncome, profile?.currency || "USD")}
                 </p>
+                <div className="flex items-center gap-1 text-xs">
+                  <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                  <span className="text-muted-foreground">This month</span>
+                </div>
               </div>
-              <ArrowUp className="w-8 h-8 text-success" />
+              <div className="p-3 bg-success/10 rounded-2xl">
+                <ArrowUp className="w-8 h-8 text-success" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardContent className="p-6">
+        <Card className="glass-card hover-lift border-0 group relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Expenses</p>
-                <p className="text-2xl font-bold text-destructive">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">Total Expenses</p>
+                <p className="text-3xl font-bold text-destructive tracking-tight">
                   {formatCurrency(totalExpenses, profile?.currency || "USD")}
                 </p>
+                <div className="flex items-center gap-1 text-xs">
+                  <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                  <span className="text-muted-foreground">This month</span>
+                </div>
               </div>
-              <ArrowDown className="w-8 h-8 text-destructive" />
+              <div className="p-3 bg-destructive/10 rounded-2xl">
+                <ArrowDown className="w-8 h-8 text-destructive" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardContent className="p-6">
+        <Card className="glass-card hover-lift border-0 group relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Savings</p>
-                <p className="text-2xl font-bold text-foreground">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">Savings Goal</p>
+                <p className="text-3xl font-bold text-warning tracking-tight">
                   {formatCurrency(12345, profile?.currency || "USD")}
                 </p>
+                <div className="flex items-center gap-1 text-xs">
+                  <div className="w-2 h-2 rounded-full bg-warning animate-pulse" />
+                  <span className="text-muted-foreground">Target progress</span>
+                </div>
               </div>
-              <PiggyBank className="w-8 h-8 text-warning" />
+              <div className="p-3 bg-warning/10 rounded-2xl">
+                <PiggyBank className="w-8 h-8 text-warning" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Financial Snapshot */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Enhanced Financial Snapshot */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Recent Transactions */}
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <ArrowUpDown className="w-5 h-5 text-primary" />
+        <Card className="glass-card hover-lift border-0 group">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl font-bold text-foreground flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-xl">
+                <ArrowUpDown className="w-5 h-5 text-primary" />
+              </div>
               Recent Transactions
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {transactions.slice(0, 5).map((transaction) => (
-                <div key={transaction.id} className="flex items-center justify-between p-3 bg-card/50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      transaction.transaction_type === 'income' ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'
-                    }`}>
-                      {transaction.transaction_type === 'income' ? '+' : '-'}
+          <CardContent className="space-y-4">
+            {transactions.length > 0 ? (
+              <>
+                <div className="space-y-3">
+                  {transactions.slice(0, 5).map((transaction) => (
+                    <div key={transaction.id} className="glass-card p-4 hover:shadow-glow transition-all duration-200 group/item">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold ${
+                            transaction.transaction_type === 'income' 
+                              ? 'bg-success/20 text-success' 
+                              : 'bg-destructive/20 text-destructive'
+                          }`}>
+                            {transaction.transaction_type === 'income' ? '+' : '-'}
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-semibold text-foreground group-hover/item:text-primary transition-colors">
+                              {transaction.description}
+                            </p>
+                            <p className="text-sm text-muted-foreground capitalize">
+                              {transaction.category}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right space-y-1">
+                          <p className={`font-bold text-lg ${
+                            transaction.transaction_type === 'income' ? 'text-success' : 'text-destructive'
+                          }`}>
+                            {transaction.transaction_type === 'income' ? '+' : '-'}
+                            {formatCurrency(transaction.amount, profile?.currency || "USD")}
+                          </p>
+                          <p className="text-sm text-muted-foreground">{transaction.date}</p>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-foreground">{transaction.description}</p>
-                      <p className="text-sm text-muted-foreground">{transaction.category}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-semibold ${
-                      transaction.transaction_type === 'income' ? 'text-success' : 'text-destructive'
-                    }`}>
-                      {transaction.transaction_type === 'income' ? '+' : '-'}
-                      {formatCurrency(transaction.amount, profile?.currency || "USD")}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{transaction.date}</p>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <Button variant="outline" className="w-full mt-4">
-              View All Transactions
-            </Button>
+                <Button variant="outline" className="w-full hover-lift">
+                  View All Transactions
+                </Button>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <ArrowUpDown className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No transactions yet</p>
+                <p className="text-sm text-muted-foreground">Start by adding your first transaction</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Bills Overview */}
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <FileText className="w-5 h-5 text-warning" />
+        <Card className="glass-card hover-lift border-0 group">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl font-bold text-foreground flex items-center gap-3">
+              <div className="p-2 bg-warning/10 rounded-xl">
+                <FileText className="w-5 h-5 text-warning" />
+              </div>
               Bills Overview
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">Paid</p>
-                <p className="text-2xl font-bold text-success">{billsPaid}</p>
+          <CardContent className="space-y-6">
+            {bills.length > 0 ? (
+              <>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="glass-card p-4 text-center hover-lift">
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Paid</p>
+                    <p className="text-3xl font-bold text-success">{billsPaid}</p>
+                    <div className="w-8 h-1 bg-success rounded-full mx-auto mt-2" />
+                  </div>
+                  <div className="glass-card p-4 text-center hover-lift">
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Pending</p>
+                    <p className="text-3xl font-bold text-warning">{billsPending}</p>
+                    <div className="w-8 h-1 bg-warning rounded-full mx-auto mt-2" />
+                  </div>
+                  <div className="glass-card p-4 text-center hover-lift">
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Overdue</p>
+                    <p className="text-3xl font-bold text-destructive">{billsOverdue}</p>
+                    <div className="w-8 h-1 bg-destructive rounded-full mx-auto mt-2" />
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-foreground">Payment Progress</span>
+                    <span className="text-sm text-muted-foreground">
+                      {(billsPaid / bills.length * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                  <Progress value={(billsPaid / bills.length) * 100} className="h-3" />
+                  <p className="text-sm text-muted-foreground">
+                    {billsPaid} of {bills.length} bills completed
+                  </p>
+                </div>
+                
+                <Button variant="outline" className="w-full hover-lift">
+                  Manage Bills
+                </Button>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No bills added</p>
+                <p className="text-sm text-muted-foreground">Add your first bill to track payments</p>
               </div>
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold text-warning">{billsPending}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">Overdue</p>
-                <p className="text-2xl font-bold text-destructive">{billsOverdue}</p>
-              </div>
-            </div>
-            <Progress value={(billsPaid / bills.length) * 100} className="h-2" />
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>{billsPaid} of {bills.length} bills paid</span>
-              <span>{(billsPaid / bills.length * 100).toFixed(1)}%</span>
-            </div>
-            <Button variant="outline" className="w-full">
-              Manage Bills
-            </Button>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Budget Overview */}
-      <Card className="shadow-card bg-gradient-card border-0">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
-            <Coins className="w-5 h-5 text-success" />
+      {/* Enhanced Budget Overview */}
+      <Card className="glass-card hover-lift border-0">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-bold text-foreground flex items-center gap-3">
+            <div className="p-2 bg-success/10 rounded-xl">
+              <Coins className="w-5 h-5 text-success" />
+            </div>
             Budget Overview
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">You have {totalBudgets} budgets set up.</p>
-          {budgets.map((budget) => (
-            <div key={budget.id} className="space-y-1">
+        <CardContent className="space-y-6">
+          {budgets.length > 0 ? (
+            <>
               <div className="flex items-center justify-between">
-                <p className="font-medium text-foreground">{budget.category}</p>
-                <p className="text-sm text-muted-foreground">{formatCurrency(budget.amount, profile?.currency || "USD")}</p>
+                <p className="text-foreground font-medium">
+                  Active Budgets ({totalBudgets})
+                </p>
+                <Badge variant="secondary" className="bg-success/20 text-success">
+                  On Track
+                </Badge>
               </div>
-              <Progress value={50} className="h-2" />
+              
+              <div className="grid gap-4">
+                {budgets.map((budget) => (
+                  <div key={budget.id} className="glass-card p-4 hover-lift group/budget">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-primary/20 rounded-xl flex items-center justify-center">
+                          <Coins className="w-4 h-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground capitalize">{budget.category}</p>
+                          <p className="text-sm text-muted-foreground">Monthly Budget</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-foreground">
+                          {formatCurrency(budget.amount, profile?.currency || "USD")}
+                        </p>
+                        <p className="text-sm text-muted-foreground">allocated</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Progress</span>
+                        <span className="font-medium text-foreground">50%</span>
+                      </div>
+                      <Progress value={50} className="h-2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <Button variant="outline" className="w-full hover-lift">
+                Manage All Budgets
+              </Button>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <Coins className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No budgets created</p>
+              <p className="text-sm text-muted-foreground">Create your first budget to track spending</p>
+              <Button className="mt-4 hover-lift">
+                Create Budget
+              </Button>
             </div>
-          ))}
-          <Button variant="outline" className="w-full">
-            Manage Budgets
-          </Button>
+          )}
         </CardContent>
       </Card>
     </div>

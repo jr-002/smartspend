@@ -71,31 +71,42 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+      {/* Enhanced Header with glass effect */}
+      <header className="glass-card border-b border-border/50 sticky top-0 z-50 backdrop-blur-glass">
+        <div className="container mx-auto px-4 lg:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
-                <img 
-                  src="/Picture1.png" 
-                  alt="SmartSpend Logo" 
-                  className="w-8 h-8 object-contain"
-                />
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow animate-pulse-glow">
+                  <img 
+                    src="/Picture1.png" 
+                    alt="SmartSpend Logo" 
+                    className="w-8 h-8 object-contain"
+                  />
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">SmartSpend</h1>
-                <p className="text-sm text-muted-foreground">Financial Wellness Assistant</p>
+              <div className="hidden sm:block">
+                <h1 className="text-2xl font-bold text-foreground tracking-tight">SmartSpend</h1>
+                <p className="text-sm text-muted-foreground font-medium">Financial Wellness Assistant</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-foreground">{profile?.name || user?.email}</span>
+            <div className="flex items-center gap-3 lg:gap-4">
+              <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-card/50 rounded-full border border-border/50">
+                <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <span className="text-sm font-medium text-foreground max-w-32 truncate">
+                  {profile?.name || user?.email}
+                </span>
               </div>
               <ThemeToggle />
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSignOut}
+                className="border-border/50 hover:border-border transition-colors"
+              >
                 Sign Out
               </Button>
             </div>
@@ -103,38 +114,97 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          {/* Navigation Tabs */}
-          <div className="overflow-x-auto">
-            <TabsList className="grid grid-cols-16 w-full min-w-max bg-card/50 backdrop-blur-sm">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <TabsTrigger 
-                    key={item.id} 
-                    value={item.id}
-                    className="flex items-center gap-2 px-3 py-2 text-sm whitespace-nowrap"
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="hidden sm:inline">{item.label}</span>
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
+      {/* Enhanced Main Content with better spacing */}
+      <main className="container mx-auto px-4 lg:px-6 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          {/* Enhanced Navigation with better responsive design */}
+          <div className="relative">
+            <div className="overflow-x-auto scrollbar-hide">
+              <TabsList className="glass-card inline-flex h-14 items-center justify-start rounded-2xl p-1 min-w-max shadow-floating">
+                {menuItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <TabsTrigger 
+                      key={item.id} 
+                      value={item.id}
+                      className={`
+                        inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium
+                        transition-all duration-200 ease-in-out rounded-xl whitespace-nowrap
+                        ${isActive 
+                          ? 'bg-primary text-primary-foreground shadow-card transform scale-105' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                        }
+                      `}
+                    >
+                      <Icon className={`w-4 h-4 ${isActive ? 'animate-pulse' : ''}`} />
+                      <span className="hidden sm:inline">{item.label}</span>
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+            </div>
+            
+            {/* Gradient fade for scroll indication */}
+            <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-background to-transparent pointer-events-none" />
           </div>
 
-          {/* Tab Content */}
+          {/* Enhanced Tab Content with animations */}
           {menuItems.map((item) => (
-            <TabsContent key={item.id} value={item.id} className="space-y-6">
-              <item.component />
+            <TabsContent 
+              key={item.id} 
+              value={item.id} 
+              className="space-y-8 animate-fade-in focus:outline-none"
+            >
+              <div className="space-y-6">
+                {/* Page Header */}
+                <div className="flex items-center gap-3 pb-2">
+                  <div className="p-2 bg-primary/10 rounded-xl">
+                    <item.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
+                      {item.label}
+                    </h2>
+                    <p className="text-muted-foreground">
+                      {getPageDescription(item.id)}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Component Content */}
+                <div className="animate-slide-up">
+                  <item.component />
+                </div>
+              </div>
             </TabsContent>
           ))}
         </Tabs>
-      </div>
+      </main>
     </div>
   );
+
+  function getPageDescription(pageId: string): string {
+    const descriptions: Record<string, string> = {
+      dashboard: "Overview of your financial health and recent activity",
+      transactions: "Track and manage all your financial transactions",
+      budgeting: "Smart budgeting tools powered by AI insights",
+      goals: "Set and track your savings and financial goals",
+      bills: "Manage and automate your bill payments",
+      investments: "Track your investment portfolio and performance",
+      debts: "Manage and strategize your debt repayment",
+      analytics: "Detailed financial analytics and reports",
+      "ai-insights": "Personalized AI-powered financial insights",
+      education: "Learn about personal finance and investments",
+      "ai-coach": "Get personalized financial coaching from AI",
+      gamified: "Earn rewards for achieving financial milestones",
+      "income-splitter": "Automatically allocate your income efficiently",
+      community: "Discover budget templates from the community",
+      "risk-predictor": "AI-powered financial risk assessment",
+      notifications: "Manage your financial alerts and reminders"
+    };
+    return descriptions[pageId] || "Manage your financial data";
+  }
 };
 
 export default Index;
