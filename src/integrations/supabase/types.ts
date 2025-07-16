@@ -155,6 +155,81 @@ export type Database = {
           },
         ]
       }
+      investments: {
+        Row: {
+          created_at: string
+          current_value: number
+          id: string
+          initial_investment: number
+          name: string
+          purchase_date: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: number
+          id?: string
+          initial_investment: number
+          name: string
+          purchase_date?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: number
+          id?: string
+          initial_investment?: number
+          name?: string
+          purchase_date?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          id: string
+          message: string
+          priority: Database["public"]["Enums"]["notification_priority"]
+          read: boolean
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          message: string
+          priority?: Database["public"]["Enums"]["notification_priority"]
+          read?: boolean
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          message?: string
+          priority?: Database["public"]["Enums"]["notification_priority"]
+          read?: boolean
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -275,7 +350,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      notification_priority: "high" | "medium" | "low"
+      notification_type:
+        | "budget"
+        | "bill"
+        | "goal"
+        | "investment"
+        | "spending"
+        | "system"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -402,6 +484,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      notification_priority: ["high", "medium", "low"],
+      notification_type: [
+        "budget",
+        "bill",
+        "goal",
+        "investment",
+        "spending",
+        "system",
+      ],
+    },
   },
 } as const

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -26,7 +27,7 @@ export interface NotificationSettings {
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<NotificationSettings>({
     budgetAlerts: true,
@@ -50,44 +51,17 @@ export const useNotifications = () => {
       setLoading(true);
       setError(null);
 
-      // Mock notifications data until table is created
-      const mockNotifications: Notification[] = [
-        {
-          id: '1',
-          title: 'Budget Alert',
-          message: 'You have exceeded 80% of your food budget for this month',
-          type: 'budget',
-          priority: 'high',
-          read: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          title: 'Bill Reminder',
-          message: 'Your electricity bill is due in 3 days',
-          type: 'bill',
-          priority: 'medium',
-          read: false,
-          created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-          updated_at: new Date(Date.now() - 86400000).toISOString()
-        },
-        {
-          id: '3',
-          title: 'Savings Goal Achievement',
-          message: 'Congratulations! You reached 75% of your vacation savings goal',
-          type: 'goal',
-          priority: 'low',
-          read: true,
-          created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-          updated_at: new Date(Date.now() - 172800000).toISOString()
-        }
-      ];
+      const { data, error: fetchError } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setNotifications(mockNotifications);
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      setNotifications((data || []) as Notification[]);
     } catch (err) {
       console.error('Error fetching notifications:', err);
       setError('Failed to load notifications');
@@ -112,14 +86,25 @@ export const useNotifications = () => {
     }
 
     try {
-      const newNotification: Notification = {
-        ...notification,
-        id: Date.now().toString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      const { data, error: insertError } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: user.id,
+          title: notification.title,
+          message: notification.message,
+          type: notification.type,
+          priority: notification.priority,
+          read: notification.read,
+          data: notification.data,
+        })
+        .select()
+        .single();
 
-      setNotifications(prev => [newNotification, ...prev]);
+      if (insertError) {
+        throw insertError;
+      }
+
+      setNotifications(prev => [data as Notification, ...prev]);
       
       toast({
         title: "Notification Created",
@@ -138,11 +123,25 @@ export const useNotifications = () => {
   };
 
   const markAsRead = async (id: string): Promise<boolean> => {
+    if (!user) return false;
+
     try {
+      const { data, error: updateError } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        throw updateError;
+      }
+
       setNotifications(prev => 
         prev.map(notification => 
           notification.id === id 
-            ? { ...notification, read: true, updated_at: new Date().toISOString() }
+            ? { ...notification, read: true, updated_at: data.updated_at }
             : notification
         )
       );
@@ -154,7 +153,19 @@ export const useNotifications = () => {
   };
 
   const markAllAsRead = async (): Promise<boolean> => {
+    if (!user) return false;
+
     try {
+      const { error: updateError } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+
+      if (updateError) {
+        throw updateError;
+      }
+
       setNotifications(prev => 
         prev.map(notification => ({ 
           ...notification, 
@@ -180,7 +191,19 @@ export const useNotifications = () => {
   };
 
   const deleteNotification = async (id: string): Promise<boolean> => {
+    if (!user) return false;
+
     try {
+      const { error: deleteError } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
       setNotifications(prev => prev.filter(notification => notification.id !== id));
       
       toast({

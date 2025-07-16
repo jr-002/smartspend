@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -23,11 +24,10 @@ export interface NewInvestment {
 
 export const useInvestments = () => {
   const [investments, setInvestments] = useState<Investment[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Since investments table doesn't exist, we'll use mock data for now
   const fetchInvestments = async () => {
     if (!user) {
       setInvestments([]);
@@ -39,34 +39,17 @@ export const useInvestments = () => {
       setLoading(true);
       setError(null);
 
-      // Mock data for investments until table is created
-      const mockInvestments: Investment[] = [
-        {
-          id: '1',
-          name: 'S&P 500 Index Fund',
-          type: 'Index Fund',
-          current_value: 10500,
-          initial_investment: 10000,
-          purchase_date: '2024-01-15',
-          created_at: '2024-01-15T10:00:00Z',
-          updated_at: '2024-01-15T10:00:00Z'
-        },
-        {
-          id: '2',
-          name: 'Tesla Stock',
-          type: 'Stock',
-          current_value: 2800,
-          initial_investment: 3000,
-          purchase_date: '2024-02-01',
-          created_at: '2024-02-01T10:00:00Z',
-          updated_at: '2024-02-01T10:00:00Z'
-        }
-      ];
+      const { data, error: fetchError } = await supabase
+        .from('investments')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('purchase_date', { ascending: false });
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setInvestments(mockInvestments);
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      setInvestments((data || []) as Investment[]);
     } catch (err) {
       console.error('Error fetching investments:', err);
       setError('Failed to load investments');
@@ -91,19 +74,24 @@ export const useInvestments = () => {
     }
 
     try {
-      // Mock adding investment
-      const mockInvestment: Investment = {
-        id: Date.now().toString(),
-        name: newInvestment.name,
-        type: newInvestment.type,
-        current_value: newInvestment.current_value,
-        initial_investment: newInvestment.initial_investment,
-        purchase_date: newInvestment.purchase_date || new Date().toISOString().split('T')[0],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      const { data, error: insertError } = await supabase
+        .from('investments')
+        .insert({
+          user_id: user.id,
+          name: newInvestment.name,
+          type: newInvestment.type,
+          current_value: newInvestment.current_value,
+          initial_investment: newInvestment.initial_investment,
+          purchase_date: newInvestment.purchase_date || new Date().toISOString().split('T')[0],
+        })
+        .select()
+        .single();
 
-      setInvestments(prev => [mockInvestment, ...prev]);
+      if (insertError) {
+        throw insertError;
+      }
+
+      setInvestments(prev => [data as Investment, ...prev]);
       toast({
         title: "Success",
         description: "Investment added successfully.",
@@ -131,10 +119,22 @@ export const useInvestments = () => {
     }
 
     try {
+      const { data, error: updateError } = await supabase
+        .from('investments')
+        .update({ current_value: currentValue })
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        throw updateError;
+      }
+
       setInvestments(prev => 
         prev.map(investment => 
           investment.id === id 
-            ? { ...investment, current_value: currentValue, updated_at: new Date().toISOString() }
+            ? { ...investment, ...(data as Investment) }
             : investment
         )
       );
@@ -166,6 +166,16 @@ export const useInvestments = () => {
     }
 
     try {
+      const { error: deleteError } = await supabase
+        .from('investments')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
       setInvestments(prev => prev.filter(investment => investment.id !== id));
       toast({
         title: "Success",
