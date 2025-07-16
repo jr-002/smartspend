@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -467,3 +468,100 @@ const FinancialRiskPredictor = () => {
 };
 
 export default FinancialRiskPredictor;
+=======
+import { useState, useEffect } from 'react';
+import { Card } from './ui/card';
+import { Progress } from './ui/progress';
+
+export interface FinancialRiskPredictorProps {
+  userId: string;
+  transactions: any[];
+  bills: any[];
+  debts: any[];
+  investments: any[];
+}
+
+export function FinancialRiskPredictor({
+  userId,
+  transactions,
+  bills,
+  debts,
+  investments,
+}: FinancialRiskPredictorProps) {
+  const [predictions, setPredictions] = useState<string>('');
+  const [healthScore, setHealthScore] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const analyzeRisk = async () => {
+      try {
+        const financialData = {
+          transactions,
+          bills,
+          debts,
+          investments,
+        };
+
+        const res = await fetch('/api/risk-prediction', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ financialData }),
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to get risk analysis');
+        }
+
+        const data = await res.json();
+        setPredictions(data.riskPredictions);
+        setHealthScore(data.healthScore);
+      } catch (error) {
+        console.error('Error analyzing financial risk:', error);
+        setPredictions('Unable to generate risk predictions at this time.');
+        setHealthScore(50); // Default score on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      analyzeRisk();
+    }
+  }, [userId, transactions, bills, debts, investments]);
+
+  const getHealthColor = (score: number) => {
+    if (score >= 80) return 'bg-green-500';
+    if (score >= 60) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+
+  if (loading) {
+    return <Card className="p-6">Loading risk analysis...</Card>;
+  }
+
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-4">Financial Risk Analysis</h2>
+      
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-2">Financial Health Score</h3>
+        <div className="space-y-2">
+          <Progress value={healthScore} className={getHealthColor(healthScore)} />
+          <p className="text-sm text-muted-foreground">
+            Score: {healthScore}/100
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-semibold mb-2">Risk Predictions</h3>
+        <div className="bg-muted p-4 rounded-lg whitespace-pre-wrap">
+          {predictions}
+        </div>
+      </div>
+    </Card>
+  );
+}
+>>>>>>> c224187 (chore: update project dependencies and add new components)

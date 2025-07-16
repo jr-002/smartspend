@@ -27,7 +27,7 @@ create table if not exists public.budgets (
     user_id uuid references public.profiles(id) on delete cascade,
     category text not null,
     amount decimal(12,2) not null,
-    period text not null check (period in ('monthly', 'yearly')),
+    period text not null check (period in ('weekly', 'monthly', 'yearly')),
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

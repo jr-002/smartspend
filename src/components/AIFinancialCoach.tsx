@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -194,10 +195,54 @@ What specific area would you like me to dive deeper into?`;
       }
     } else {
       setIsListening(false);
+=======
+import { useState } from 'react';
+import { Button } from './ui/button';
+import { Card } from './ui/card';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+
+export interface AIFinancialCoachProps {
+  userId: string;
+}
+
+export function AIFinancialCoach({ userId }: AIFinancialCoachProps) {
+  const [question, setQuestion] = useState('');
+  const [response, setResponse] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/ai-coach', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userContext: question,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to get AI response');
+      }
+
+      const data = await res.json();
+      setResponse(data.advice);
+    } catch (error) {
+      console.error('Error getting AI advice:', error);
+      setResponse('Sorry, I encountered an error while generating advice. Please try again.');
+    } finally {
+      setLoading(false);
+>>>>>>> c224187 (chore: update project dependencies and add new components)
     }
   };
 
   return (
+<<<<<<< HEAD
     <div className="space-y-6">
       <Card className="shadow-card bg-gradient-card border-0">
         <CardHeader>
@@ -321,3 +366,34 @@ What specific area would you like me to dive deeper into?`;
 };
 
 export default AIFinancialCoach;
+=======
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-4">AI Financial Coach</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="question" className="block text-sm font-medium mb-2">
+            Ask me anything about your finances
+          </label>
+          <Textarea
+            id="question"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="E.g., How can I improve my savings habits?"
+            className="w-full"
+            rows={4}
+          />
+        </div>
+        <Button type="submit" disabled={loading || !question}>
+          {loading ? 'Generating advice...' : 'Get Advice'}
+        </Button>
+      </form>
+      {response && (
+        <div className="mt-6">
+          <h3 className="font-semibold mb-2">Financial Advice:</h3>
+          <div className="bg-muted p-4 rounded-lg whitespace-pre-wrap">{response}</div>
+        </div>
+      )}
+    </Card>
+  );
+}
+>>>>>>> c224187 (chore: update project dependencies and add new components)

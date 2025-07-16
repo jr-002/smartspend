@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import Groq from 'groq-sdk';
 
 const groq = new Groq({
@@ -195,3 +196,55 @@ function getFallbackInsights(data: FinancialData): AIInsight[] {
   
   return insights.slice(0, 4); // Limit to 4 insights
 }
+=======
+import { Groq } from 'groq-sdk';
+
+// Initialize Groq client
+export const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY!,
+});
+
+// Helper function for financial advice generation
+export async function generateFinancialAdvice(userContext: string) {
+  const completion = await groq.chat.completions.create({
+    messages: [
+      {
+        role: 'system',
+        content: 'You are a knowledgeable financial advisor. Provide specific, actionable advice based on the user\'s financial situation.',
+      },
+      {
+        role: 'user',
+        content: userContext,
+      },
+    ],
+    model: 'mixtral-8x7b-32768',
+    temperature: 0.7,
+    max_tokens: 800,
+  });
+
+  return completion.choices[0]?.message?.content || 'Unable to generate advice at this time.';
+}
+
+// Helper function for risk analysis
+export async function analyzeFinancialRisk(financialData: any) {
+  const dataString = JSON.stringify(financialData);
+  
+  const completion = await groq.chat.completions.create({
+    messages: [
+      {
+        role: 'system',
+        content: 'You are a financial risk assessment expert. Analyze the provided financial data and provide risk predictions and a health score.',
+      },
+      {
+        role: 'user',
+        content: `Please analyze this financial data and provide risk predictions and a health score: ${dataString}`,
+      },
+    ],
+    model: 'mixtral-8x7b-32768',
+    temperature: 0.5,
+    max_tokens: 1000,
+  });
+
+  return completion.choices[0]?.message?.content || 'Unable to analyze risk at this time.';
+}
+>>>>>>> c224187 (chore: update project dependencies and add new components)

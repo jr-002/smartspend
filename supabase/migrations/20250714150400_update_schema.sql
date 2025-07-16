@@ -26,7 +26,7 @@ create table if not exists public.budgets (
     category text not null,
     amount decimal(12,2) not null,
     current_amount decimal(12,2) default 0,
-    period text not null check (period in ('monthly', 'yearly')),
+    period text not null check (period in ('weekly', 'monthly', 'yearly')),
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

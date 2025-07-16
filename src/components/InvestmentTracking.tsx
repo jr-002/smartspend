@@ -5,7 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+<<<<<<< HEAD
 import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Loader2, Trash2, Edit } from "lucide-react";
+=======
+import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3 } from "lucide-react";
+import { UpdateValueDialog } from "@/components/ui/update-value-dialog";
+>>>>>>> c224187 (chore: update project dependencies and add new components)
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, PieChart as RechartsPieChart, Cell } from "recharts";
 import EmptyState from "./EmptyState";
@@ -14,6 +19,7 @@ import { useInvestments, type NewInvestment } from "@/hooks/useInvestments";
 import { useAuth } from "@/contexts/AuthContext";
 
 const InvestmentTracking = () => {
+<<<<<<< HEAD
   const { investments, loading, addInvestment, updateInvestmentValue, deleteInvestment } = useInvestments();
   const { profile } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -30,6 +36,56 @@ const InvestmentTracking = () => {
   const handleAddInvestment = async () => {
     if (!newInvestment.name || !newInvestment.type || !newInvestment.current_value || !newInvestment.initial_investment) {
       return;
+=======
+  const [updateDialogState, setUpdateDialogState] = useState<{
+    isOpen: boolean;
+    investmentId: string | null;
+  }>({
+    isOpen: false,
+    investmentId: null
+  });
+
+  const [investments, setInvestments] = useState<Investment[]>([
+    {
+      id: "1",
+      name: "Nigerian Stock Exchange",
+      type: "Stocks",
+      currentValue: 450000,
+      initialInvestment: 400000,
+      change: 50000,
+      changePercent: 12.5,
+      lastUpdated: "2025-01-15"
+    },
+    {
+      id: "2",
+      name: "Treasury Bills",
+      type: "Government Bonds",
+      currentValue: 520000,
+      initialInvestment: 500000,
+      change: 20000,
+      changePercent: 4.0,
+      lastUpdated: "2025-01-15"
+    },
+    {
+      id: "3",
+      name: "Mutual Funds",
+      type: "Mutual Funds",
+      currentValue: 180000,
+      initialInvestment: 200000,
+      change: -20000,
+      changePercent: -10.0,
+      lastUpdated: "2025-01-15"
+    },
+    {
+      id: "4",
+      name: "Real Estate Investment",
+      type: "Real Estate",
+      currentValue: 2500000,
+      initialInvestment: 2200000,
+      change: 300000,
+      changePercent: 13.6,
+      lastUpdated: "2025-01-15"
+>>>>>>> c224187 (chore: update project dependencies and add new components)
     }
 
     setIsSubmitting(true);
@@ -202,6 +258,25 @@ const InvestmentTracking = () => {
     { month: 'Jan', value: totalValue },
   ];
 
+  const handleUpdateValue = (id: string, newValue: number) => {
+    setInvestments(prevInvestments => 
+      prevInvestments.map(inv => {
+        if (inv.id === id) {
+          const change = newValue - inv.initialInvestment;
+          const changePercent = (change / inv.initialInvestment) * 100;
+          return {
+            ...inv,
+            currentValue: newValue,
+            change,
+            changePercent,
+            lastUpdated: new Date().toISOString().split('T')[0]
+          };
+        }
+        return inv;
+      })
+    );
+  };
+
   const chartConfig = {
     value: {
       label: "Portfolio Value",
@@ -210,11 +285,12 @@ const InvestmentTracking = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Portfolio Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardContent className="p-6">
+    <>
+      <div className="space-y-6">
+        {/* Portfolio Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="shadow-card bg-gradient-card border-0">
+            <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Portfolio</p>
@@ -463,13 +539,39 @@ const InvestmentTracking = () => {
                       </Button>
                     </div>
                   </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-2"
+                    onClick={() => setUpdateDialogState({
+                      isOpen: true,
+                      investmentId: investment.id
+                    })}
+                  >
+                    Update Value
+                  </Button>
                 </div>
               );
             })}
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+
+      <UpdateValueDialog
+      open={updateDialogState.isOpen}
+      onOpenChange={(open) => setUpdateDialogState(prev => ({ ...prev, isOpen: open }))}
+      onSubmit={(value) => {
+        if (updateDialogState.investmentId) {
+          handleUpdateValue(updateDialogState.investmentId, value);
+        }
+      }}
+      title="Update Investment Value"
+      description="Enter the new current value of your investment"
+      label="Current Value"
+      defaultValue={investments.find(inv => inv.id === updateDialogState.investmentId)?.currentValue}
+    />
+    </>
   );
 };
 

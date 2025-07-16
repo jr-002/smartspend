@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { UpdateValueDialog } from "@/components/ui/update-value-dialog";
 import { Progress } from "@/components/ui/progress";
 import { Plus, Target, Trash2, Loader2 } from "lucide-react";
 import EmptyState from "./EmptyState";
@@ -16,6 +17,15 @@ const SavingsGoals = () => {
   const { profile } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [updateDialogState, setUpdateDialogState] = useState<{
+    isOpen: boolean;
+    goalId: string | null;
+    type: 'add' | 'withdraw';
+  }>({
+    isOpen: false,
+    goalId: null,
+    type: 'add'
+  });
   
   const [newGoal, setNewGoal] = useState<NewSavingsGoal>({
     name: "",
@@ -304,10 +314,11 @@ const SavingsGoals = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      const amount = parseFloat(prompt("Enter amount to add:") || "0");
-                      if (amount > 0) handleUpdateProgress(goal.id, amount);
-                    }}
+                    onClick={() => setUpdateDialogState({
+                      isOpen: true,
+                      goalId: goal.id,
+                      type: 'add'
+                    })}
                     className="flex-1"
                   >
                     Add Money
@@ -315,10 +326,11 @@ const SavingsGoals = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      const amount = parseFloat(prompt("Enter amount to withdraw:") || "0");
-                      if (amount > 0) handleUpdateProgress(goal.id, -amount);
-                    }}
+                    onClick={() => setUpdateDialogState({
+                      isOpen: true,
+                      goalId: goal.id,
+                      type: 'withdraw'
+                    })}
                     className="flex-1"
                   >
                     Withdraw
@@ -329,6 +341,22 @@ const SavingsGoals = () => {
           );
         })}
       </div>
+      
+      <UpdateValueDialog
+        open={updateDialogState.isOpen}
+        onOpenChange={(open) => setUpdateDialogState(prev => ({ ...prev, isOpen: open }))}
+        onSubmit={(amount) => {
+          if (updateDialogState.goalId) {
+            handleUpdateProgress(
+              updateDialogState.goalId,
+              updateDialogState.type === 'withdraw' ? -amount : amount
+            );
+          }
+        }}
+        title={`${updateDialogState.type === 'add' ? 'Add to' : 'Withdraw from'} Goal`}
+        description="Enter the amount you want to update"
+        label={`Amount to ${updateDialogState.type}`}
+      />
     </div>
   );
 };
