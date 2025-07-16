@@ -1,229 +1,148 @@
 import { useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from './useNotifications';
+import { useTransactions } from './useTransactions';
+import { useBills } from './useBills';
+import { useBudgets } from './useBudgets';
+import { useSavingsGoals } from './useSavingsGoals';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useNotificationTriggers = () => {
-  const { user } = useAuth();
-  const { createNotification } = useNotifications();
+  const { addNotification, settings } = useNotifications();
+  const { transactions } = useTransactions();
+  const { bills } = useBills();
+  const { budgets } = useBudgets();
+  const { goals: savingsGoals } = useSavingsGoals();
+  const { user, profile } = useAuth();
 
-  // Check for budget alerts
-  const checkBudgetAlerts = async () => {
-    if (!user) return;
-
-    try {
-      // Get current month transactions and budgets
-      const currentMonth = new Date().toISOString().slice(0, 7);
-      
-      const [transactionsResult, budgetsResult] = await Promise.all([
-        supabase
-          .from('transactions')
-          .select('category, amount')
-          .eq('user_id', user.id)
-          .eq('transaction_type', 'expense')
-          .gte('date', `${currentMonth}-01`)
-          .lt('date', `${currentMonth}-32`),
-        
-        supabase
-          .from('budgets')
-          .select('*')
-          .eq('user_id', user.id)
-      ]);
-
-      if (transactionsResult.error || budgetsResult.error) return;
-
-      const transactions = transactionsResult.data || [];
-      const budgets = budgetsResult.data || [];
-
-      // Calculate spending by category
-      const categorySpending = transactions.reduce((acc, transaction) => {
-        acc[transaction.category] = (acc[transaction.category] || 0) + transaction.amount;
-        return acc;
-      }, {} as Record<string, number>);
-
-      // Check each budget for alerts
-      for (const budget of budgets) {
-        const spent = categorySpending[budget.category] || 0;
-        const percentage = (spent / budget.amount) * 100;
-
-        // Create notification if spending exceeds 90% or 100% of budget
-        if (percentage >= 90) {
-          const existingNotifications = await supabase
-            .from('notifications')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('type', 'budget')
-            .gte('created_at', `${currentMonth}-01`)
-            .like('title', `%${budget.category}%`);
-
-          // Only create notification if one doesn't already exist for this month
-          if (!existingNotifications.data?.length) {
-            await createNotification(
-              `Budget Alert: ${budget.category}`,
-              `You've spent ${spent.toLocaleString()} out of ${budget.amount.toLocaleString()} (${percentage.toFixed(1)}%) in your ${budget.category} budget.`,
-              'budget',
-              percentage >= 100 ? 'high' : 'medium',
-              {
-                category: budget.category,
-                spent,
-                budget: budget.amount,
-                percentage
-              }
-            );
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error checking budget alerts:', error);
-    }
-  };
-
-  // Check for bill due alerts
-  const checkBillAlerts = async () => {
-    if (!user) return;
-
-    try {
-      const today = new Date();
-      const threeDaysFromNow = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000);
-
-      const { data: bills, error } = await supabase
-        .from('bills')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'pending')
-        .gte('due_date', today.toISOString().split('T')[0])
-        .lte('due_date', threeDaysFromNow.toISOString().split('T')[0]);
-
-      if (error || !bills) return;
-
-      for (const bill of bills) {
-        const dueDate = new Date(bill.due_date);
-        const daysUntilDue = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-        // Check if notification already exists for this bill
-        const existingNotifications = await supabase
-          .from('notifications')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('type', 'bill')
-          .gte('created_at', today.toISOString().split('T')[0])
-          .like('title', `%${bill.name}%`);
-
-        if (!existingNotifications.data?.length) {
-          await createNotification(
-            `Bill Due: ${bill.name}`,
-            `Your ${bill.name} bill of ${bill.amount.toLocaleString()} is due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}.`,
-            'bill',
-            daysUntilDue <= 1 ? 'high' : 'medium',
-            {
-              bill_name: bill.name,
-              amount: bill.amount,
-              due_date: bill.due_date,
-              days_until_due: daysUntilDue
-            }
-          );
-        }
-      }
-    } catch (error) {
-      console.error('Error checking bill alerts:', error);
-    }
-  };
-
-  // Check for goal achievements
-  const checkGoalAlerts = async () => {
-    if (!user) return;
-
-    try {
-      const { data: goals, error } = await supabase
-        .from('savings_goals')
-        .select('*')
-        .eq('user_id', user.id);
-
-      if (error || !goals) return;
-
-      for (const goal of goals) {
-        const percentage = (goal.current_amount / goal.target_amount) * 100;
-
-        // Check for goal completion or milestone achievements
-        if (percentage >= 100) {
-          // Check if completion notification already exists
-          const existingNotifications = await supabase
-            .from('notifications')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('type', 'goal')
-            .like('title', `Goal Achieved: ${goal.name}`);
-
-          if (!existingNotifications.data?.length) {
-            await createNotification(
-              `Goal Achieved: ${goal.name}`,
-              `Congratulations! You've reached your ${goal.name} goal of ${goal.target_amount.toLocaleString()}!`,
-              'goal',
-              'high',
-              {
-                goal_name: goal.name,
-                current_amount: goal.current_amount,
-                target_amount: goal.target_amount,
-                percentage,
-                achievement_type: 'completed'
-              }
-            );
-          }
-        } else if (percentage >= 75 && percentage < 100) {
-          // Check for milestone notification
-          const today = new Date().toISOString().split('T')[0];
-          const existingNotifications = await supabase
-            .from('notifications')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('type', 'goal')
-            .gte('created_at', today)
-            .like('title', `Goal Progress: ${goal.name}`);
-
-          if (!existingNotifications.data?.length) {
-            await createNotification(
-              `Goal Progress: ${goal.name}`,
-              `Great progress! You're ${percentage.toFixed(1)}% of the way to your ${goal.name} goal.`,
-              'goal',
-              'medium',
-              {
-                goal_name: goal.name,
-                current_amount: goal.current_amount,
-                target_amount: goal.target_amount,
-                percentage,
-                achievement_type: 'milestone'
-              }
-            );
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error checking goal alerts:', error);
-    }
-  };
-
-  // Run checks periodically
+  // Check for budget overruns
   useEffect(() => {
-    if (!user) return;
+    if (!user || !settings.budgetAlerts || !transactions.length || !budgets.length) return;
 
-    // Initial check
-    checkBudgetAlerts();
-    checkBillAlerts();
-    checkGoalAlerts();
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentMonthTransactions = transactions.filter(t => 
+      t.date.startsWith(currentMonth) && t.transaction_type === 'expense'
+    );
 
-    // Set up periodic checks (every 30 minutes)
-    const interval = setInterval(() => {
-      checkBudgetAlerts();
-      checkBillAlerts();
-      checkGoalAlerts();
-    }, 30 * 60 * 1000);
+    const categorySpending: Record<string, number> = {};
+    currentMonthTransactions.forEach(transaction => {
+      categorySpending[transaction.category] = (categorySpending[transaction.category] || 0) + transaction.amount;
+    });
 
-    return () => clearInterval(interval);
-  }, [user]);
+    budgets.forEach(budget => {
+      const spent = categorySpending[budget.category] || 0;
+      const percentage = (spent / budget.amount) * 100;
 
-  return {
-    checkBudgetAlerts,
-    checkBillAlerts,
-    checkGoalAlerts,
-  };
+      if (percentage >= 100) {
+        addNotification({
+          title: 'Budget Exceeded',
+          message: `You have exceeded your ${budget.category} budget by ${((spent - budget.amount) / budget.amount * 100).toFixed(1)}%`,
+          type: 'budget',
+          priority: 'high',
+          read: false,
+          data: { category: budget.category, spent, budgeted: budget.amount }
+        });
+      } else if (percentage >= 80) {
+        addNotification({
+          title: 'Budget Alert',
+          message: `You have used ${percentage.toFixed(1)}% of your ${budget.category} budget`,
+          type: 'budget',
+          priority: 'medium',
+          read: false,
+          data: { category: budget.category, spent, budgeted: budget.amount, percentage }
+        });
+      }
+    });
+  }, [transactions, budgets, user, settings.budgetAlerts, addNotification]);
+
+  // Check for upcoming bill due dates
+  useEffect(() => {
+    if (!user || !settings.billReminders || !bills.length) return;
+
+    const today = new Date();
+    const threeDaysFromNow = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    bills.forEach(bill => {
+      if (bill.status === 'pending') {
+        const dueDate = new Date(bill.due_date);
+        const daysUntilDue = Math.ceil((dueDate.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
+
+        if (daysUntilDue <= 3 && daysUntilDue >= 0) {
+          const priority = daysUntilDue === 0 ? 'high' : daysUntilDue === 1 ? 'high' : 'medium';
+          addNotification({
+            title: 'Bill Due Soon',
+            message: `${bill.name} is due ${daysUntilDue === 0 ? 'today' : `in ${daysUntilDue} day${daysUntilDue > 1 ? 's' : ''}`}`,
+            type: 'bill',
+            priority,
+            read: false,
+            data: { billId: bill.id, dueDate: bill.due_date, amount: bill.amount }
+          });
+        } else if (daysUntilDue < 0) {
+          addNotification({
+            title: 'Overdue Bill',
+            message: `${bill.name} was due ${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) > 1 ? 's' : ''} ago`,
+            type: 'bill',
+            priority: 'high',
+            read: false,
+            data: { billId: bill.id, dueDate: bill.due_date, amount: bill.amount, overdue: true }
+          });
+        }
+      }
+    });
+  }, [bills, user, settings.billReminders, addNotification]);
+
+  // Check for savings goal progress
+  useEffect(() => {
+    if (!user || !settings.goalUpdates || !savingsGoals.length) return;
+
+    savingsGoals.forEach(goal => {
+      const progress = (goal.current_amount / goal.target_amount) * 100;
+      
+      // Notify at 25%, 50%, 75%, and 100% milestones
+      const milestones = [25, 50, 75, 100];
+      milestones.forEach(milestone => {
+        if (progress >= milestone && progress < milestone + 5) { // Small range to avoid duplicate notifications
+          addNotification({
+            title: 'Savings Milestone',
+            message: `You've reached ${milestone}% of your ${goal.name} savings goal!`,
+            type: 'goal',
+            priority: milestone === 100 ? 'high' : 'low',
+            read: false,
+            data: { goalId: goal.id, progress, milestone, currentAmount: goal.current_amount }
+          });
+        }
+      });
+    });
+  }, [savingsGoals, user, settings.goalUpdates, addNotification]);
+
+  // Check for unusual spending patterns
+  useEffect(() => {
+    if (!user || !settings.spendingAlerts || !transactions.length) return;
+
+    const lastThirtyDays = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const recentTransactions = transactions.filter(t => 
+      new Date(t.date) >= lastThirtyDays && t.transaction_type === 'expense'
+    );
+
+    const dailySpending: Record<string, number> = {};
+    recentTransactions.forEach(transaction => {
+      const date = transaction.date;
+      dailySpending[date] = (dailySpending[date] || 0) + transaction.amount;
+    });
+
+    const averageDailySpending = Object.values(dailySpending).reduce((sum, amount) => sum + amount, 0) / Object.keys(dailySpending).length;
+    const today = new Date().toISOString().split('T')[0];
+    const todaySpending = dailySpending[today] || 0;
+
+    // Alert if today's spending is 200% above average
+    if (todaySpending > averageDailySpending * 2 && averageDailySpending > 0) {
+      addNotification({
+        title: 'High Spending Alert',
+        message: `Today's spending is significantly higher than your average daily spending`,
+        type: 'spending',
+        priority: 'medium',
+        read: false,
+        data: { todaySpending, averageDailySpending }
+      });
+    }
+  }, [transactions, user, settings.spendingAlerts, addNotification]);
 };

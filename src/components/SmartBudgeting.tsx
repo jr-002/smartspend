@@ -202,7 +202,7 @@ const SmartBudgeting = () => {
       spent: currentMonthSpending[budget.category] || 0,
       predicted: predictions[budget.category] || budget.amount,
       color: getColorForCategory(budget.category),
-      trend: 'stable'
+      trend: 'stable' as 'up' | 'down' | 'stable'
     }));
 
     // Add categories that have spending but no budget
@@ -215,7 +215,7 @@ const SmartBudgeting = () => {
           spent,
           predicted: predictions[category] || spent * 1.1,
           color: getColorForCategory(category),
-          trend: 'stable'
+          trend: 'stable' as 'up' | 'down' | 'stable'
         });
       }
     });
@@ -539,8 +539,8 @@ const SmartBudgeting = () => {
                         <div className="flex items-center gap-2 mt-1">
                           {getTrendIcon(category.trend)}
                           <span className="text-sm text-muted-foreground">
-                            {category.trend === 'up' || category.trend === 'increasing' ? 'Trending up' : 
-                             category.trend === 'down' || category.trend === 'decreasing' ? 'Trending down' : 'Stable'}
+                            {category.trend === 'up' ? 'Trending up' : 
+                             category.trend === 'down' ? 'Trending down' : 'Stable'}
                           </span>
                         </div>
                       </div>
