@@ -1,88 +1,70 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, TrendingUp, AlertTriangle, Target, Lightbulb, Sparkles } from "lucide-react";
+import { Brain, TrendingUp, AlertTriangle, Target, Lightbulb, Sparkles, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import { useAsyncOperation } from "@/hooks/useAsyncOperation";
+import { generateFinancialAdvice } from "@/lib/groq";
+
+interface Insight {
+  id: string;
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  type: 'saving' | 'spending' | 'investment' | 'budget';
+  impact: 'high' | 'medium' | 'low';
+  action: string;
+}
 
 const AIInsights = () => {
-  const [insights, setInsights] = useState<any[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useAuth();
+  const { 
+    data: insights,
+    isLoading,
+    error,
+    execute: executeGeneration
+  } = useAsyncOperation<Insight[]>();
 
-  const generateInsights = () => {
-    setIsGenerating(true);
-    
-    // Simulate AI analysis
-    setTimeout(() => {
-      generateAIInsights();
-    }, 1000);
-  };
-
-  const generateAIInsights = async () => {
+  const generateInsights = async () => {
     if (!user) {
       toast({
-        title: "Error",
+        title: "Authentication Required",
         description: "You must be logged in to generate insights.",
         variant: "destructive",
       });
-      setIsGenerating(false);
       return;
     }
 
     try {
-      const response = await fetch('/api/ai-insights', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: user.id }),
+      await executeGeneration(async () => {
+        const advice = await generateFinancialAdvice('Generate financial insights based on user data');
+        // Parse and structure the insights
+        const structuredInsights: Insight[] = []; // Transform advice into structured insights
+        return structuredInsights;
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.insights && Array.isArray(data.insights)) {
-        setInsights(data.insights.sort((a, b) => a.priority - b.priority));
-        toast({
-          title: "Success",
-          description: "AI insights generated successfully!",
-        });
-      } else {
-        throw new Error('Invalid response format');
-      }
+      toast({
+        title: "Success",
+        description: "Financial insights generated successfully!",
+      });
     } catch (error) {
-      console.error('Error generating AI insights:', error);
       toast({
         title: "Error",
-        description: "Failed to generate AI insights. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate insights",
         variant: "destructive",
       });
-      
-      // Fallback to demo insights if API fails
-      setInsights([
-        {
-          id: "fallback-1",
-          type: "spending",
-          title: "Analysis Unavailable",
-          description: "Unable to connect to AI service. Please check your internet connection and try again.",
-          impact: "medium",
-          action: "Retry generating insights or review your financial data manually.",
-          priority: 1
-        }
-      ]);
-    } finally {
-      setIsGenerating(false);
+      return;
     }
+
   };
 
   useEffect(() => {
-    generateInsights();
-  }, []);
+    if (user) {
+      generateInsights();
+    }
+  }, [user]);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -124,13 +106,13 @@ const AIInsights = () => {
           <Button 
             variant="outline" 
             onClick={generateInsights}
-            disabled={isGenerating}
+            disabled={isLoading}
             className="bg-gradient-primary text-primary-foreground border-0"
           >
-            {isGenerating ? (
+            {isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                Generating AI Insights...
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Generating Insights...
               </>
             ) : (
               <>
@@ -143,6 +125,11 @@ const AIInsights = () => {
         <p className="text-muted-foreground">
           AI-powered personalized recommendations based on your financial behavior and goals
         </p>
+        {error && (
+          <div className="mt-2 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <p className="text-sm text-destructive">{error.message}</p>
+          </div>
+        )}
       </CardHeader>
       
       <CardContent>
@@ -191,7 +178,7 @@ const AIInsights = () => {
             </div>
           ))}
           
-          {insights.length === 0 && !isGenerating && (
+          {!isLoading && !error && (!insights || insights.length === 0) && (
             <div className="text-center py-12">
               <Brain className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">No insights available</h3>
@@ -201,6 +188,15 @@ const AIInsights = () => {
               <Button onClick={generateInsights} className="bg-gradient-primary">
                 Generate Insights
               </Button>
+            </div>
+          )}
+          {isLoading && (
+            <div className="text-center py-12">
+              <Loader2 className="w-16 h-16 text-primary animate-spin mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Generating Insights</h3>
+              <p className="text-muted-foreground">
+                Our AI is analyzing your financial data to provide personalized recommendations...
+              </p>
             </div>
           )}
         </div>

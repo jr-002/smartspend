@@ -1,10 +1,20 @@
-<<<<<<< HEAD
 import Groq from 'groq-sdk';
 
+if (!process.env.GROQ_API_KEY) {
+  throw new Error('GROQ_API_KEY environment variable is not set');
+}
+
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY || '',
+  apiKey: process.env.GROQ_API_KEY,
   dangerouslyAllowBrowser: false // Only use on server-side
 });
+
+export class GroqError extends Error {
+  constructor(message: string, public statusCode?: number) {
+    super(message);
+    this.name = 'GroqError';
+  }
+}
 
 export interface FinancialData {
   transactions: Array<{
@@ -196,13 +206,6 @@ function getFallbackInsights(data: FinancialData): AIInsight[] {
   
   return insights.slice(0, 4); // Limit to 4 insights
 }
-=======
-import { Groq } from 'groq-sdk';
-
-// Initialize Groq client
-export const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY!,
-});
 
 // Helper function for financial advice generation
 export async function generateFinancialAdvice(userContext: string) {
@@ -247,4 +250,3 @@ export async function analyzeFinancialRisk(financialData: any) {
 
   return completion.choices[0]?.message?.content || 'Unable to analyze risk at this time.';
 }
->>>>>>> c224187 (chore: update project dependencies and add new components)
