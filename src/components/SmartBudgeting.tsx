@@ -136,7 +136,7 @@ const SmartBudgeting = () => {
         await addBudget({
           category: recommendation.category,
           amount: recommendation.suggestedAmount,
-          period: 'monthly' as 'weekly' | 'monthly' | 'yearly'
+          period: 'monthly'
         });
       }
 

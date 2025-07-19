@@ -55,6 +55,12 @@ const SavingsGoals = () => {
     await updateGoalProgress(id, amount);
   };
 
+  const handleDeleteGoal = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this savings goal?")) {
+      await deleteGoal(id);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">

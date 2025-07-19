@@ -13,8 +13,8 @@ interface Insight {
   id: string;
   title: string;
   description: string;
-  priority: 'high' | 'medium' | 'low';
-  type: 'saving' | 'spending' | 'investment' | 'budget';
+  priority: number;
+  type: 'saving' | 'spending' | 'investment' | 'budget' | 'goal';
   impact: 'high' | 'medium' | 'low';
   action: string;
 }

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { UpdateValueDialog } from "@/components/ui/update-value-dialog";
 import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Loader2, Trash2, Edit } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, PieChart as RechartsPieChart, Cell } from "recharts";
@@ -18,6 +19,15 @@ const InvestmentTracking = () => {
   const { profile } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [updateDialogState, setUpdateDialogState] = useState<{
+    isOpen: boolean;
+    investmentId: string | null;
+    currentValue: number;
+  }>({
+    isOpen: false,
+    investmentId: null,
+    currentValue: 0
+  });
   
   const [newInvestment, setNewInvestment] = useState<NewInvestment>({
     name: "",
@@ -46,6 +56,17 @@ const InvestmentTracking = () => {
   const handleDeleteInvestment = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this investment?")) {
       await deleteInvestment(id);
+    }
+  };
+
+  const handleUpdateValue = (investmentId: string) => {
+    const investment = investments.find(inv => inv.id === investmentId);
+    if (investment) {
+      setUpdateDialogState({
+        isOpen: true,
+        investmentId,
+        currentValue: investment.current_value
+      });
     }
   };
 
