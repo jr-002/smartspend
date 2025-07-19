@@ -57,9 +57,9 @@ async function generateBudgetPredictions(
           content: prompt
         }
       ],
-      model: "llama3-8b-8192",
+      model: "llama-3.3-70b-versatile",
       temperature: 0.2,
-      max_tokens: 3000,
+      max_tokens: 6000,
     });
 
     const response = completion.choices[0]?.message?.content;
@@ -300,7 +300,6 @@ function getFallbackBudgetRecommendation(
 }
 
 async function generateSpendingPredictions(transactions: any[], currency: string): Promise<Record<string, number>> {
-  // Get last 3 months of spending data
   const now = new Date();
   const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
   
@@ -309,7 +308,6 @@ async function generateSpendingPredictions(transactions: any[], currency: string
     new Date(t.date) >= threeMonthsAgo
   );
   
-  // Calculate average spending by category
   const categorySpending: Record<string, number[]> = {};
   
   recentTransactions.forEach(t => {
@@ -319,12 +317,10 @@ async function generateSpendingPredictions(transactions: any[], currency: string
     categorySpending[t.category].push(t.amount);
   });
   
-  // Calculate predictions based on averages with seasonal adjustment
   const predictions: Record<string, number> = {};
   
   Object.entries(categorySpending).forEach(([category, amounts]) => {
-    const average = amounts.reduce((sum, amount) => sum + amount, 0) / 3; // 3 months average
-    // Add 10% seasonal buffer for predictions
+    const average = amounts.reduce((sum, amount) => sum + amount, 0) / 3;
     predictions[category] = Math.round(average * 1.1);
   });
   
@@ -379,7 +375,6 @@ serve(async (req) => {
     }
     
     if (type === 'predictions') {
-      // Return spending predictions format
       const predictions = await generateSpendingPredictions(
         transactionsResult.data,
         profileResult.data?.currency || 'USD'
@@ -389,7 +384,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } else {
-      // Return budget recommendations format
       const recommendations = await generateBudgetPredictions(
         transactionsResult.data,
         profileResult.data?.monthly_income || 0,

@@ -32,9 +32,9 @@ Format your response as a structured analysis that includes the numerical health
           content: `Please analyze this financial data and provide a comprehensive risk assessment with a health score out of 100: ${dataString}`,
         },
       ],
-      model: 'mixtral-8x7b-32768',
+      model: 'llama-3.3-70b-versatile',
       temperature: 0.5,
-      max_tokens: 1000,
+      max_tokens: 2000,
     });
 
     return completion.choices[0]?.message?.content || 'Unable to analyze risk at this time. Please ensure you have sufficient financial data and try again.';
@@ -46,11 +46,9 @@ Format your response as a structured analysis that includes the numerical health
 
 function calculateHealthScore(analysis: string): number {
   try {
-    // Look for numerical scores in the AI response
     const scoreMatches = analysis.match(/(?:score|health|rating).*?(\d{1,3}(?:\.\d)?)/gi);
     
     if (scoreMatches && scoreMatches.length > 0) {
-      // Find the most likely health score (looking for numbers between 0-100)
       for (const match of scoreMatches) {
         const numberMatch = match.match(/(\d{1,3}(?:\.\d)?)/);
         if (numberMatch) {
@@ -62,31 +60,30 @@ function calculateHealthScore(analysis: string): number {
       }
     }
 
-    // Fallback scoring based on keywords in the analysis
     const lowRiskWords = ['excellent', 'strong', 'healthy', 'good', 'stable', 'low risk'];
     const mediumRiskWords = ['moderate', 'fair', 'average', 'caution', 'medium risk'];
     const highRiskWords = ['poor', 'high risk', 'concerning', 'dangerous', 'critical', 'urgent'];
 
     const lowerAnalysis = analysis.toLowerCase();
     
-    let score = 50; // Default middle score
+    let score = 50;
     
     const lowRiskCount = lowRiskWords.filter(word => lowerAnalysis.includes(word)).length;
     const mediumRiskCount = mediumRiskWords.filter(word => lowerAnalysis.includes(word)).length;
     const highRiskCount = highRiskWords.filter(word => lowerAnalysis.includes(word)).length;
 
     if (lowRiskCount > highRiskCount && lowRiskCount > mediumRiskCount) {
-      score = 75 + (lowRiskCount * 5); // Higher score for positive indicators
+      score = 75 + (lowRiskCount * 5);
     } else if (highRiskCount > lowRiskCount && highRiskCount > mediumRiskCount) {
-      score = 35 - (highRiskCount * 5); // Lower score for negative indicators
+      score = 35 - (highRiskCount * 5);
     } else if (mediumRiskCount > 0) {
-      score = 55; // Medium score for moderate risk
+      score = 55;
     }
 
-    return Math.min(Math.max(score, 0), 100); // Ensure score is between 0-100
+    return Math.min(Math.max(score, 0), 100);
   } catch (error) {
     console.error('Error calculating health score:', error);
-    return 50; // Default score on error
+    return 50;
   }
 }
 
@@ -98,7 +95,6 @@ serve(async (req) => {
   try {
     const { financialData, userId } = await req.json();
 
-    // If userId is provided but no financialData, fetch from database
     if (userId && !financialData) {
       const supabase = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
@@ -118,7 +114,6 @@ serve(async (req) => {
         });
       }
 
-      // Fetch comprehensive financial data
       const [transactionsResult, budgetsResult, savingsGoalsResult, billsResult, debtsResult, profileResult] = await Promise.all([
         supabase.from('transactions').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(100),
         supabase.from('budgets').select('*').eq('user_id', userId),
@@ -136,7 +131,6 @@ serve(async (req) => {
         });
       }
 
-      // Calculate current month spending by category for budget analysis
       const currentMonth = new Date().toISOString().slice(0, 7);
       const currentMonthTransactions = transactionsResult.data.filter(t => t.date.startsWith(currentMonth) && t.transaction_type === 'expense');
       
@@ -151,7 +145,6 @@ serve(async (req) => {
         utilization: budget.amount > 0 ? (budgetSpending[budget.category] || 0) / budget.amount : 0
       }));
 
-      // Compile comprehensive financial data
       const comprehensiveFinancialData = {
         profile: profileResult.data,
         transactions: transactionsResult.data,
@@ -161,7 +154,6 @@ serve(async (req) => {
         debts: debtsResult.data || [],
         monthlyIncome: profileResult.data?.monthly_income || 0,
         currency: profileResult.data?.currency || 'USD',
-        // Calculate key financial ratios
         totalDebt: (debtsResult.data || []).reduce((sum, debt) => sum + debt.balance, 0),
         totalSavings: (savingsGoalsResult.data || []).reduce((sum, goal) => sum + goal.current_amount, 0),
         monthlyExpenses: currentMonthTransactions.reduce((sum, t) => sum + t.amount, 0),
@@ -189,7 +181,6 @@ serve(async (req) => {
       });
     }
 
-    // If financialData is provided directly, use it
     if (!financialData) {
       return new Response(JSON.stringify({ error: 'Financial data or user ID is required' }), {
         status: 400,

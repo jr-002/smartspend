@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Groq from 'https://esm.sh/groq-sdk@0.7.0';
 
@@ -23,7 +24,7 @@ async function generateFinancialAdvice(userContext: string): Promise<string> {
           content: userContext,
         },
       ],
-      model: 'mixtral-8x7b-32768',
+      model: 'llama-3.3-70b-versatile',
       temperature: 0.7,
       max_tokens: 800,
     });
@@ -50,7 +51,6 @@ serve(async (req) => {
       });
     }
 
-    // Validate input length to prevent abuse
     if (userContext.length > 2000) {
       return new Response(JSON.stringify({ error: 'User context is too long. Please keep it under 2000 characters.' }), {
         status: 400,

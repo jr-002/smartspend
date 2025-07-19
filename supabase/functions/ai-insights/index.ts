@@ -65,9 +65,9 @@ async function generateFinancialInsights(data: FinancialData): Promise<AIInsight
           content: prompt
         }
       ],
-      model: "llama3-8b-8192",
+      model: "llama-3.3-70b-versatile",
       temperature: 0.3,
-      max_tokens: 2048,
+      max_tokens: 4000,
     });
 
     const response = completion.choices[0]?.message?.content;
@@ -212,7 +212,6 @@ serve(async (req) => {
       });
     }
 
-    // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -223,7 +222,6 @@ serve(async (req) => {
       }
     );
 
-    // Get JWT from Authorization header
     const authHeader = req.headers.get('Authorization');
     if (authHeader) {
       supabase.auth.setSession({
@@ -232,7 +230,6 @@ serve(async (req) => {
       });
     }
 
-    // Fetch user's financial data
     const [transactionsResult, budgetsResult, savingsGoalsResult, billsResult, profileResult] = await Promise.all([
       supabase.from('transactions').select('*').eq('user_id', userId).order('date', { ascending: false }),
       supabase.from('budgets').select('*').eq('user_id', userId),
@@ -249,7 +246,6 @@ serve(async (req) => {
       });
     }
 
-    // Calculate spent amounts for budgets (sum current month transactions)
     const currentMonth = new Date().toISOString().slice(0, 7);
     const currentMonthTransactions = transactionsResult.data.filter(t => t.date.startsWith(currentMonth) && t.transaction_type === 'expense');
     
