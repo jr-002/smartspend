@@ -198,14 +198,8 @@ serve(async (req) => {
     }
 
     const analysis = await analyzeFinancialRisk(financialData);
-    const healthScore = calculateHealthScore(analysis);
 
-    const analysisData = {
-      riskPredictions: analysis,
-      healthScore: healthScore,
-    };
-
-    return new Response(JSON.stringify(analysisData), {
+    return new Response(JSON.stringify({ analysis }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
@@ -213,8 +207,7 @@ serve(async (req) => {
     console.error('Error in risk-prediction function:', error);
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
-      riskPredictions: 'Risk analysis is temporarily unavailable due to technical difficulties.',
-      healthScore: 50
+      analysis: 'Risk analysis is temporarily unavailable due to technical difficulties.'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

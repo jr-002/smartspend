@@ -299,13 +299,46 @@ function getFallbackBudgetRecommendation(
   };
 }
 
+async function generateSpendingPredictions(transactions: any[], currency: string): Promise<Record<string, number>> {
+  // Get last 3 months of spending data
+  const now = new Date();
+  const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+  
+  const recentTransactions = transactions.filter(t => 
+    t.transaction_type === 'expense' && 
+    new Date(t.date) >= threeMonthsAgo
+  );
+  
+  // Calculate average spending by category
+  const categorySpending: Record<string, number[]> = {};
+  
+  recentTransactions.forEach(t => {
+    if (!categorySpending[t.category]) {
+      categorySpending[t.category] = [];
+    }
+    categorySpending[t.category].push(t.amount);
+  });
+  
+  // Calculate predictions based on averages with seasonal adjustment
+  const predictions: Record<string, number> = {};
+  
+  Object.entries(categorySpending).forEach(([category, amounts]) => {
+    const average = amounts.reduce((sum, amount) => sum + amount, 0) / 3; // 3 months average
+    // Add 10% seasonal buffer for predictions
+    predictions[category] = Math.round(average * 1.1);
+  });
+  
+  return predictions;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { userId } = await req.json();
+    const requestBody = await req.json();
+    const { userId, type } = requestBody;
 
     if (!userId) {
       return new Response(JSON.stringify({ error: 'User ID is required' }), {
@@ -344,16 +377,29 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    
+    if (type === 'predictions') {
+      // Return spending predictions format
+      const predictions = await generateSpendingPredictions(
+        transactionsResult.data,
+        profileResult.data?.currency || 'USD'
+      );
+      
+      return new Response(JSON.stringify({ predictions }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } else {
+      // Return budget recommendations format
+      const recommendations = await generateBudgetPredictions(
+        transactionsResult.data,
+        profileResult.data?.monthly_income || 0,
+        profileResult.data?.currency || 'USD'
+      );
 
-    const recommendations = await generateBudgetPredictions(
-      transactionsResult.data,
-      profileResult.data?.monthly_income || 0,
-      profileResult.data?.currency || 'USD'
-    );
-
-    return new Response(JSON.stringify(recommendations), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+      return new Response(JSON.stringify({ recommendations }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
   } catch (error) {
     console.error('Error in budget-ai function:', error);

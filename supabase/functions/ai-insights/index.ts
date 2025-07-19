@@ -280,7 +280,7 @@ serve(async (req) => {
 
     const insights = await generateFinancialInsights(financialData);
 
-    return new Response(JSON.stringify(insights), {
+    return new Response(JSON.stringify({ insights }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
