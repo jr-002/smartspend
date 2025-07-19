@@ -6,7 +6,7 @@ import { Brain, TrendingUp, AlertTriangle, Target, Lightbulb, Sparkles, Loader2 
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { useAsyncOperation } from "@/hooks/useAsyncOperation";
-import { generateFinancialAdvice } from "@/lib/groq";
+import { useCallback } from "react";
 
 interface Insight {
   id: string;
@@ -27,7 +27,7 @@ const AIInsights = () => {
     execute: executeGeneration
   } = useAsyncOperation<Insight[]>();
 
-  const generateInsights = async () => {
+  const generateInsights = useCallback(async () => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -39,10 +39,22 @@ const AIInsights = () => {
 
     try {
       await executeGeneration(async () => {
-        const advice = await generateFinancialAdvice('Generate financial insights based on user data');
-        // Parse and structure the insights
-        const structuredInsights: Insight[] = []; // Transform advice into structured insights
-        return structuredInsights;
+        const response = await fetch('/api/ai-insights', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: 'Generate financial insights based on user data'
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to generate insights');
+        }
+
+        const data = await response.json();
+        return data.insights || [];
       });
 
       toast({
@@ -57,14 +69,13 @@ const AIInsights = () => {
       });
       return;
     }
-
-  };
+  }, [user, executeGeneration]);
 
   useEffect(() => {
     if (user) {
       generateInsights();
     }
-  }, [user]);
+  }, [user, generateInsights]);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
