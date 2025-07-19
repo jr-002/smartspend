@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, Send, Bot, User, Sparkles, Mic, MicOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/utils/currencies";
+import { generateFinancialAdvice } from "@/lib/api";
 
 interface ChatMessage {
   id: string;
@@ -52,9 +53,8 @@ const AIFinancialCoach = () => {
     setInputMessage("");
     setIsLoading(true);
 
-    // Simulate AI response (in production, this would call your AI service)
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(inputMessage);
+    try {
+      const aiResponse = await generateFinancialAdvice(inputMessage);
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
@@ -64,7 +64,19 @@ const AIFinancialCoach = () => {
       
       setMessages(prev => [...prev, assistantMessage]);
       setIsLoading(false);
-    }, 1500);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      setIsLoading(false);
+      // Fallback to local response
+      const fallbackResponse = generateAIResponse(inputMessage);
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: fallbackResponse,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+    }
   };
 
   const generateAIResponse = (question: string): string => {

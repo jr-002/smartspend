@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useBudgets } from "@/hooks/useBudgets";
 import { formatCurrency } from "@/utils/currencies";
+import { analyzeFinancialRisk } from "@/lib/api";
 
 interface RiskPrediction {
   type: 'balance' | 'overspend' | 'goal' | 'emergency';
@@ -56,10 +57,22 @@ const FinancialRiskPredictor = () => {
   const analyzeFinancialRisks = () => {
     setIsAnalyzing(true);
     
-    // Simulate analysis delay
-    setTimeout(() => {
+    // Use mock analysis for now
+    setTimeout(async () => {
       const newPredictions = generateRiskPredictions();
       const newHealthScore = calculateHealthScore();
+      
+      // Optional: Get AI analysis
+      try {
+        const aiAnalysis = await analyzeFinancialRisk({
+          transactions,
+          budgets,
+          monthlyIncome: profile?.monthly_income || 0
+        });
+        console.log('AI Risk Analysis:', aiAnalysis);
+      } catch (error) {
+        console.error('AI analysis failed:', error);
+      }
       
       setPredictions(newPredictions);
       setHealthScore(newHealthScore);

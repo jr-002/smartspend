@@ -6,6 +6,7 @@ import { Brain, TrendingUp, AlertTriangle, Target, Lightbulb, Sparkles, Loader2 
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { useAsyncOperation } from "@/hooks/useAsyncOperation";
+import { generateAIInsights } from "@/lib/api";
 import { useCallback } from "react";
 
 interface Insight {
@@ -39,22 +40,7 @@ const AIInsights = () => {
 
     try {
       await executeGeneration(async () => {
-        const response = await fetch('/api/ai-insights', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            prompt: 'Generate financial insights based on user data'
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to generate insights');
-        }
-
-        const data = await response.json();
-        return data.insights || [];
+        return await generateAIInsights(user.id);
       });
 
       toast({

@@ -84,6 +84,11 @@ export const getCurrencyByCode = (code: string): Currency | undefined => {
 };
 
 export const formatCurrency = (amount: number, currencyCode: string): string => {
+  // Handle null/undefined amounts
+  if (amount === null || amount === undefined || isNaN(amount)) {
+    amount = 0;
+  }
+  
   const currency = getCurrencyByCode(currencyCode);
   if (!currency) return `${amount.toLocaleString()}`;
   

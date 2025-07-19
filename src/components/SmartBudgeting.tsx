@@ -12,6 +12,7 @@ import { useBudgets } from "@/hooks/useBudgets";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/utils/currencies";
+import { generateBudgetRecommendations, generateSpendingPredictions } from "@/lib/api";
 
 interface BudgetCategory {
   id: string;
@@ -70,46 +71,27 @@ const SmartBudgeting = () => {
 
     setIsGeneratingBudget(true);
     try {
-      const response = await fetch('/api/budget-ai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          userId: user.id, 
-          action: 'generate-budget' 
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const recommendations = await generateBudgetRecommendations(user.id);
       
-      if (data.success && data.recommendations) {
-        setAiRecommendations(data.recommendations);
+      setAiRecommendations(recommendations);
         
-        // Apply recommendations to create budget categories
-        const newCategories: BudgetCategory[] = data.recommendations.categories.map((rec: any, index: number) => ({
-          id: `ai-${index}`,
-          name: rec.category,
-          budgeted: rec.suggestedAmount,
-          spent: getCurrentMonthSpending()[rec.category] || 0,
-          predicted: predictions[rec.category] || rec.suggestedAmount,
-          color: getColorForCategory(rec.category),
-          trend: rec.trend === 'increasing' ? 'up' : rec.trend === 'decreasing' ? 'down' : 'stable'
-        }));
+      // Apply recommendations to create budget categories
+      const newCategories: BudgetCategory[] = recommendations.categories.map((rec: any, index: number) => ({
+        id: `ai-${index}`,
+        name: rec.category,
+        budgeted: rec.suggestedAmount,
+        spent: getCurrentMonthSpending()[rec.category] || 0,
+        predicted: predictions[rec.category] || rec.suggestedAmount,
+        color: getColorForCategory(rec.category),
+        trend: rec.trend === 'increasing' ? 'up' : rec.trend === 'decreasing' ? 'down' : 'stable'
+      }));
 
-        setBudgetCategories(newCategories);
+      setBudgetCategories(newCategories);
         
-        toast({
-          title: "AI Budget Generated!",
-          description: `Generated budget recommendations based on your spending patterns with ${data.dataQuality.transactionCount} transactions analyzed.`,
-        });
-      } else {
-        throw new Error('Invalid response format');
-      }
+      toast({
+        title: "AI Budget Generated!",
+        description: `Generated budget recommendations based on your spending patterns.`,
+      });
     } catch (error) {
       console.error('Error generating AI budget:', error);
       toast({
@@ -129,32 +111,15 @@ const SmartBudgeting = () => {
     setIsGeneratingPredictions(true);
 
     try {
-      const response = await fetch('/api/budget-ai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          userId: user.id, 
-          action: 'predict-spending' 
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const predictions = await generateSpendingPredictions(user.id);
       
-      if (data.success && data.predictions) {
-        setPredictions(data.predictions);
+      setPredictions(predictions);
         
-        // Update budget categories with new predictions
-        setBudgetCategories(prev => prev.map(category => ({
-          ...category,
-          predicted: data.predictions[category.name] || category.predicted
-        })));
-      }
+      // Update budget categories with new predictions
+      setBudgetCategories(prev => prev.map(category => ({
+        ...category,
+        predicted: predictions[category.name] || category.predicted
+      })));
     } catch (error) {
       console.error('Error generating predictions:', error);
     } finally {
