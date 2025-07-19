@@ -1,1 +1,13 @@
 project_id = "gxvsmnmgrxovbsmdkdqf"
+
+[functions.ai-insights]
+verify_jwt = true
+
+[functions.budget-ai]
+verify_jwt = true
+
+[functions.ai-coach]
+verify_jwt = false
+
+[functions.risk-prediction]
+verify_jwt = true
