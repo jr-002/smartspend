@@ -49,13 +49,6 @@ const InvestmentTracking = () => {
     }
   };
 
-  const handleUpdateValue = async (id: string) => {
-    const newValue = parseFloat(prompt("Enter new current value:") || "0");
-    if (newValue > 0) {
-      await updateInvestmentValue(id, newValue);
-    }
-  };
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -468,6 +461,22 @@ const InvestmentTracking = () => {
           </div>
         </CardContent>
       </Card>
+      
+      <UpdateValueDialog
+        open={updateDialogState.isOpen}
+        onOpenChange={(open) => setUpdateDialogState(prev => ({ ...prev, isOpen: open }))}
+        onSubmit={(newValue) => {
+          if (updateDialogState.investmentId) {
+            updateInvestmentValue(updateDialogState.investmentId, newValue);
+          }
+        }}
+        title="Update Investment Value"
+        description="Enter the new current value for this investment"
+        label="Current Value"
+        defaultValue={updateDialogState.currentValue}
+        placeholder="Enter new value"
+        min={0}
+      />
     </div>
   );
 };

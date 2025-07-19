@@ -8,7 +8,7 @@ export interface Budget {
   id: string;
   category: string;
   amount: number;
-  period: 'weekly' | 'monthly' | 'yearly';
+  period: 'monthly' | 'yearly';
   created_at?: string;
   updated_at?: string;
 }
@@ -16,7 +16,7 @@ export interface Budget {
 export interface NewBudget {
   category: string;
   amount: number;
-  period: 'weekly' | 'monthly' | 'yearly';
+  period: 'monthly' | 'yearly';
 }
 
 export const useBudgets = () => {

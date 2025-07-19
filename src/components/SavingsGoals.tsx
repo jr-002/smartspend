@@ -51,12 +51,6 @@ const SavingsGoals = () => {
     setIsSubmitting(false);
   };
 
-  const handleDeleteGoal = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this savings goal?")) {
-      await deleteGoal(id);
-    }
-  };
-
   const handleUpdateProgress = async (id: string, amount: number) => {
     await updateGoalProgress(id, amount);
   };

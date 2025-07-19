@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -18,6 +19,9 @@ interface UpdateValueDialogProps {
   description?: string
   label?: string
   defaultValue?: number
+  placeholder?: string
+  min?: number
+  max?: number
 }
 
 export function UpdateValueDialog({
@@ -28,25 +32,53 @@ export function UpdateValueDialog({
   description,
   label = "Amount",
   defaultValue = 0,
+  placeholder = "Enter amount",
+  min,
+  max,
 }: UpdateValueDialogProps) {
   const [value, setValue] = useState<string>(defaultValue.toString())
+  const [error, setError] = useState<string>("")
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setError("")
+    
     const numValue = parseFloat(value)
-    if (!isNaN(numValue)) {
-      onSubmit(numValue)
-      onOpenChange(false)
-      setValue(defaultValue.toString()) // Reset for next time
+    
+    if (isNaN(numValue)) {
+      setError("Please enter a valid number")
+      return
     }
+    
+    if (min !== undefined && numValue < min) {
+      setError(`Amount must be at least ${min}`)
+      return
+    }
+    
+    if (max !== undefined && numValue > max) {
+      setError(`Amount must not exceed ${max}`)
+      return
+    }
+    
+    onSubmit(numValue)
+    onOpenChange(false)
+    setValue(defaultValue.toString()) // Reset for next time
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setError("")
+      setValue(defaultValue.toString())
+    }
+    onOpenChange(open)
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -60,14 +92,22 @@ export function UpdateValueDialog({
                 className="col-span-3"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
+                placeholder={placeholder}
                 step="0.01"
+                min={min}
+                max={max}
                 required
                 autoFocus
               />
             </div>
+            {error && (
+              <div className="col-span-4 text-sm text-destructive">
+                {error}
+              </div>
+            )}
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit">Update</Button>
