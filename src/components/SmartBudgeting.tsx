@@ -205,16 +205,29 @@ const SmartBudgeting = () => {
                     placeholder="e.g., Food, Transportation"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="amount">Monthly Amount</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    value={newBudget.amount || ""}
-                    onChange={(e) => setNewBudget({...newBudget, amount: parseFloat(e.target.value) || 0})}
-                    placeholder="0.00"
-                  />
-                </div>
+                  <div>
+                    <Label htmlFor="period">Period</Label>
+                    <select 
+                      id="period"
+                      value={newBudget.period}
+                      onChange={(e) => setNewBudget({...newBudget, period: e.target.value as 'weekly' | 'monthly' | 'yearly'})}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="amount">Amount ({newBudget.period === 'weekly' ? 'Weekly' : newBudget.period === 'monthly' ? 'Monthly' : 'Yearly'})</Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      value={newBudget.amount || ""}
+                      onChange={(e) => setNewBudget({...newBudget, amount: parseFloat(e.target.value) || 0})}
+                      placeholder="0.00"
+                    />
+                  </div>
                 <Button 
                   onClick={handleAddBudget} 
                   className="w-full"
@@ -360,7 +373,20 @@ const SmartBudgeting = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="amount">Monthly Amount</Label>
+                    <Label htmlFor="period">Period</Label>
+                    <select 
+                      id="period"
+                      value={newBudget.period}
+                      onChange={(e) => setNewBudget({...newBudget, period: e.target.value as 'weekly' | 'monthly' | 'yearly'})}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="amount">Amount ({newBudget.period === 'weekly' ? 'Weekly' : newBudget.period === 'monthly' ? 'Monthly' : 'Yearly'})</Label>
                     <Input
                       id="amount"
                       type="number"
