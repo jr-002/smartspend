@@ -69,7 +69,7 @@ const FinancialRiskPredictor = () => {
           budgets,
           monthlyIncome: profile?.monthly_income || 0
         });
-        console.log('AI Risk Analysis:', aiAnalysis);
+        // AI analysis received successfully
       } catch (error) {
         console.error('AI analysis failed:', error);
       }
