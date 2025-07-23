@@ -1,18 +1,21 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
-import { Calculator, AlertTriangle, TrendingUp, TrendingDown, Target, Brain, Loader2, Sparkles, Zap } from "lucide-react";
+import { Calculator, AlertTriangle, TrendingUp, TrendingDown, Target, Brain, Loader2, Sparkles, Zap, Plus, Trash2 } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
-import { useBudgets } from "@/hooks/useBudgets";
+import { useBudgets, type NewBudget } from "@/hooks/useBudgets";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/utils/currencies";
-import { generateBudgetRecommendations, generateSpendingPredictions } from "@/lib/api";
+import EmptyState from "./EmptyState";
 
 interface BudgetCategory {
   id: string;
@@ -25,22 +28,17 @@ interface BudgetCategory {
 }
 
 const SmartBudgeting = () => {
-  const { transactions, loading: transactionsLoading } = useTransactions();
-  const { budgets, loading: budgetsLoading, addBudget } = useBudgets();
+  const { transactions = [], loading: transactionsLoading } = useTransactions();
+  const { budgets = [], loading: budgetsLoading, addBudget, deleteBudget } = useBudgets();
   const { user, profile } = useAuth();
   
   const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([]);
-  const [predictions, setPredictions] = useState<Record<string, number>>({});
-  const [aiRecommendations, setAiRecommendations] = useState<any>(null);
-  const [isGeneratingBudget, setIsGeneratingBudget] = useState(false);
-  const [isGeneratingPredictions, setIsGeneratingPredictions] = useState(false);
-  const [predictiveAnalysis, setPredictiveAnalysis] = useState({
-    monthlyIncome: 0,
-    projectedExpenses: 0,
-    projectedSavings: 0,
-    savingsRate: 0,
-    budgetVariance: 0,
-    riskLevel: "low" as "low" | "medium" | "high"
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newBudget, setNewBudget] = useState<NewBudget>({
+    category: "",
+    amount: 0,
+    period: "monthly"
   });
 
   // Calculate current month spending by category
@@ -59,99 +57,30 @@ const SmartBudgeting = () => {
     return categorySpending;
   };
 
-  // Generate AI-powered budget recommendations
-  const generateAIBudget = async () => {
-    if (!user) {
+  const handleAddBudget = async () => {
+    if (!newBudget.category || !newBudget.amount) {
       toast({
         title: "Error",
-        description: "You must be logged in to generate AI budget recommendations.",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsGeneratingBudget(true);
-    try {
-      const recommendations = await generateBudgetRecommendations(user.id);
-      
-      setAiRecommendations(recommendations);
-        
-      // Apply recommendations to create budget categories
-      const newCategories: BudgetCategory[] = recommendations.categories.map((rec: any, index: number) => ({
-        id: `ai-${index}`,
-        name: rec.category,
-        budgeted: rec.suggestedAmount,
-        spent: getCurrentMonthSpending()[rec.category] || 0,
-        predicted: predictions[rec.category] || rec.suggestedAmount,
-        color: getColorForCategory(rec.category),
-        trend: rec.trend === 'increasing' ? 'up' : rec.trend === 'decreasing' ? 'down' : 'stable'
-      }));
-
-      setBudgetCategories(newCategories);
-        
-      toast({
-        title: "AI Budget Generated!",
-        description: `Generated budget recommendations based on your spending patterns.`,
-      });
-    } catch (error) {
-      console.error('Error generating AI budget:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate AI budget recommendations. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGeneratingBudget(false);
+    setIsSubmitting(true);
+    const success = await addBudget(newBudget);
+    
+    if (success) {
+      setNewBudget({ category: "", amount: 0, period: "monthly" });
+      setIsAddDialogOpen(false);
     }
+    
+    setIsSubmitting(false);
   };
 
-  // Generate spending predictions
-  const generatePredictions = async () => {
-    if (!user) return;
-
-    setIsGeneratingPredictions(true);
-
-    try {
-      const predictions = await generateSpendingPredictions(user.id);
-      
-      setPredictions(predictions);
-        
-      // Update budget categories with new predictions
-      setBudgetCategories(prev => prev.map(category => ({
-        ...category,
-        predicted: predictions[category.name] || category.predicted
-      })));
-    } catch (error) {
-      console.error('Error generating predictions:', error);
-    } finally {
-      setIsGeneratingPredictions(false);
-    }
-  };
-
-  // Apply AI recommendations to actual budgets
-  const applyAIRecommendations = async () => {
-    if (!aiRecommendations || !user) return;
-
-    try {
-      for (const recommendation of aiRecommendations.categories) {
-        await addBudget({
-          category: recommendation.category,
-          amount: recommendation.suggestedAmount,
-          period: 'monthly'
-        });
-      }
-
-      toast({
-        title: "Budgets Applied!",
-        description: "AI recommendations have been applied to your budget categories.",
-      });
-    } catch (error) {
-      console.error('Error applying AI recommendations:', error);
-      toast({
-        title: "Error",
-        description: "Failed to apply AI recommendations. Please try again.",
-        variant: "destructive",
-      });
+  const handleDeleteBudget = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this budget?")) {
+      await deleteBudget(id);
     }
   };
 
@@ -163,11 +92,6 @@ const SmartBudgeting = () => {
     const safeTransactions = Array.isArray(transactions) ? transactions : [];
     const safeBudgets = Array.isArray(budgets) ? budgets : [];
     
-    if (safeTransactions.length === 0) {
-      setBudgetCategories([]);
-      return;
-    }
-
     const currentMonthSpending = getCurrentMonthSpending();
     
     const categories = safeBudgets.map(budget => ({
@@ -175,46 +99,13 @@ const SmartBudgeting = () => {
       name: budget.category,
       budgeted: budget.amount,
       spent: currentMonthSpending[budget.category] || 0,
-      predicted: predictions[budget.category] || budget.amount,
+      predicted: currentMonthSpending[budget.category] || 0,
       color: getColorForCategory(budget.category),
       trend: 'stable' as 'up' | 'down' | 'stable'
     }));
 
-    // Add categories that have spending but no budget
-    Object.entries(currentMonthSpending).forEach(([category, spent]) => {
-      if (!categories.find(c => c.name === category)) {
-        categories.push({
-          id: `spending-${category}`,
-          name: category,
-          budgeted: 0,
-          spent,
-          predicted: predictions[category] || spent * 1.1,
-          color: getColorForCategory(category),
-          trend: 'stable' as 'up' | 'down' | 'stable'
-        });
-      }
-    });
-
     setBudgetCategories(categories);
-
-    // Calculate predictive analysis
-    const totalBudgeted = categories.reduce((sum, cat) => sum + cat.budgeted, 0);
-    const totalSpent = categories.reduce((sum, cat) => sum + cat.spent, 0);
-    const totalPredicted = categories.reduce((sum, cat) => sum + cat.predicted, 0);
-    const monthlyIncome = profile?.monthly_income || 0;
-
-    setPredictiveAnalysis({
-      monthlyIncome,
-      projectedExpenses: totalPredicted,
-      projectedSavings: Math.max(0, monthlyIncome - totalPredicted),
-      savingsRate: monthlyIncome > 0 ? ((monthlyIncome - totalPredicted) / monthlyIncome) * 100 : 0,
-      budgetVariance: totalPredicted - totalBudgeted,
-      riskLevel: totalPredicted > monthlyIncome * 0.9 ? "high" : totalPredicted > monthlyIncome * 0.7 ? "medium" : "low"
-    });
-
-    // Auto-generate predictions on load
-    generatePredictions();
-  }, [safeTransactions, safeBudgets, transactionsLoading, budgetsLoading, profile]);
+  }, [transactions, budgets, transactionsLoading, budgetsLoading]);
 
   const getColorForCategory = (category: string): string => {
     const colors = [
@@ -227,20 +118,17 @@ const SmartBudgeting = () => {
 
   const totalBudgeted = budgetCategories.reduce((sum, cat) => sum + cat.budgeted, 0);
   const totalSpent = budgetCategories.reduce((sum, cat) => sum + cat.spent, 0);
-  const totalPredicted = budgetCategories.reduce((sum, cat) => sum + cat.predicted, 0);
-
-  // Ensure arrays are never null/undefined
-  const safeBudgetCategories = budgetCategories || [];
-  const safeComparisonData = comparisonData || [];
-  const safePieChartData = pieChartData || [];
 
   const getProgressPercentage = (spent: number, budgeted: number) => {
+    if (budgeted === 0) return 0;
     return Math.min((spent / budgeted) * 100, 100);
   };
 
-  const getStatusColor = (spent: number, budgeted: number, predicted: number) => {
-    if (predicted > budgeted) return "text-destructive";
-    if (spent > budgeted * 0.8) return "text-warning";
+  const getStatusColor = (spent: number, budgeted: number) => {
+    if (budgeted === 0) return "text-muted-foreground";
+    const percentage = (spent / budgeted) * 100;
+    if (percentage > 100) return "text-destructive";
+    if (percentage > 80) return "text-warning";
     return "text-success";
   };
 
@@ -248,49 +136,113 @@ const SmartBudgeting = () => {
     switch (trend) {
       case 'up': 
       case 'increasing': return <TrendingUp className="w-4 h-4 text-destructive" />;
-      return [...(debts || [])].sort((a, b) => a.balance - b.balance);
+      case 'down':
       case 'decreasing': return <TrendingDown className="w-4 h-4 text-success" />;
-      return [...(debts || [])].sort((a, b) => b.interest_rate - a.interest_rate);
+      default: return <Target className="w-4 h-4 text-muted-foreground" />;
     }
   };
 
-  const pieChartData = safeBudgetCategories.map(cat => ({
+  const pieChartData = budgetCategories.map(cat => ({
     name: cat.name,
     value: cat.spent,
     color: cat.color
   }));
 
-  const comparisonData = safeBudgetCategories.map(cat => ({
+  const comparisonData = budgetCategories.map(cat => ({
     name: cat.name.split(' ')[0],
     budgeted: cat.budgeted,
-    spent: cat.spent,
-    predicted: cat.predicted
+    spent: cat.spent
   }));
+
+  if (transactionsLoading || budgetsLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Smart Budgeting</h2>
+            <p className="text-muted-foreground">AI-powered budget management</p>
+          </div>
+        </div>
+        
+        <Card className="shadow-card bg-gradient-card border-0">
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span className="text-muted-foreground">Loading budget data...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (budgetCategories.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Smart Budgeting</h2>
+            <p className="text-muted-foreground">AI-powered budget management</p>
+          </div>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create Budget
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Budget</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="category">Category</Label>
+                  <Input
+                    id="category"
+                    value={newBudget.category}
+                    onChange={(e) => setNewBudget({...newBudget, category: e.target.value})}
+                    placeholder="e.g., Food, Transportation"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="amount">Monthly Amount</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    value={newBudget.amount || ""}
+                    onChange={(e) => setNewBudget({...newBudget, amount: parseFloat(e.target.value) || 0})}
+                    placeholder="0.00"
+                  />
+                </div>
+                <Button 
+                  onClick={handleAddBudget} 
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Budget"
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+        
+        <EmptyState type="budgets" onAdd={() => setIsAddDialogOpen(true)} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Predictive Analysis Alert */}
-      <Alert className={`${
-        predictiveAnalysis.riskLevel === 'high' 
-          ? 'border-destructive bg-destructive/10' 
-          : predictiveAnalysis.riskLevel === 'medium'
-          ? 'border-warning bg-warning/10'
-          : 'border-success bg-success/10'
-      }`}>
-        <Brain className="h-4 w-4" />
-        <AlertDescription>
-          <strong>AI Prediction:</strong> {
-            predictiveAnalysis.riskLevel === 'high'
-              ? `You're projected to spend ${formatCurrency(predictiveAnalysis.projectedExpenses, profile?.currency || "USD")} this month, which exceeds your income. Consider reducing discretionary spending.`
-              : predictiveAnalysis.riskLevel === 'medium'
-              ? `Your projected spending of ${formatCurrency(predictiveAnalysis.projectedExpenses, profile?.currency || "USD")} is within budget but leaves little room for savings.`
-              : `Great job! Your spending is on track with a projected savings rate of ${predictiveAnalysis.savingsRate.toFixed(1)}%.`
-          }
-        </AlertDescription>
-      </Alert>
-
       {/* Budget Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="shadow-card bg-gradient-card border-0">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -307,7 +259,7 @@ const SmartBudgeting = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Current Spent</p>
+                <p className="text-sm text-muted-foreground">Total Spent</p>
                 <p className="text-2xl font-bold text-foreground">{formatCurrency(totalSpent, profile?.currency || "USD")}</p>
               </div>
               <Target className="w-8 h-8 text-warning" />
@@ -319,195 +271,128 @@ const SmartBudgeting = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Predicted Total</p>
-                <p className={`text-2xl font-bold ${
-                  predictiveAnalysis.riskLevel === 'high' ? 'text-destructive' : 
-                  predictiveAnalysis.riskLevel === 'medium' ? 'text-warning' : 'text-success'
-                }`}>{formatCurrency(totalPredicted, profile?.currency || "USD")}</p>
-              </div>
-              <Brain className={`w-8 h-8 ${
-                predictiveAnalysis.riskLevel === 'high' ? 'text-destructive' : 
-                predictiveAnalysis.riskLevel === 'medium' ? 'text-warning' : 'text-success'
-              }`} />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Projected Savings</p>
-                <p className={`text-2xl font-bold ${predictiveAnalysis.projectedSavings > 0 ? 'text-success' : 'text-destructive'}`}>
-                  {formatCurrency(predictiveAnalysis.projectedSavings, profile?.currency || "USD")}
+                <p className="text-sm text-muted-foreground">Remaining</p>
+                <p className={`text-2xl font-bold ${totalBudgeted - totalSpent >= 0 ? 'text-success' : 'text-destructive'}`}>
+                  {formatCurrency(totalBudgeted - totalSpent, profile?.currency || "USD")}
                 </p>
               </div>
-              <TrendingUp className={`w-8 h-8 ${predictiveAnalysis.projectedSavings > 0 ? 'text-success' : 'text-destructive'}`} />
+              <TrendingUp className={`w-8 h-8 ${totalBudgeted - totalSpent >= 0 ? 'text-success' : 'text-destructive'}`} />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardHeader>
-            <CardTitle>Spending Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={safePieChartData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {safePieChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `₦${Number(value).toLocaleString()}`} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardHeader>
-            <CardTitle>Budget vs Actual vs Predicted</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={safeComparisonData}>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `₦${Number(value).toLocaleString()}`} />
-                  <Bar dataKey="budgeted" fill="#94A3B8" name="Budgeted" />
-                  <Bar dataKey="spent" fill="#3B82F6" name="Spent" />
-                  <Bar dataKey="predicted" fill="#EF4444" name="Predicted" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* AI Recommendations Panel */}
-      {aiRecommendations && (
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold text-foreground flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              AI Budget Recommendations
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="text-center p-4 bg-primary/5 rounded-lg">
-                <p className="text-sm text-muted-foreground">Recommended Budget</p>
-                <p className="text-xl font-bold text-primary">{formatCurrency(aiRecommendations.totalBudget, profile?.currency || "USD")}</p>
+      {pieChartData.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="shadow-card bg-gradient-card border-0">
+            <CardHeader>
+              <CardTitle>Spending Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieChartData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {pieChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => formatCurrency(Number(value), profile?.currency || "USD")} />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-              <div className="text-center p-4 bg-success/5 rounded-lg">
-                <p className="text-sm text-muted-foreground">Savings Rate</p>
-                <p className="text-xl font-bold text-success">{aiRecommendations.savingsRate}%</p>
-              </div>
-              <div className="text-center p-4 bg-warning/5 rounded-lg">
-                <p className="text-sm text-muted-foreground">Emergency Fund</p>
-                <p className="text-xl font-bold text-warning">{formatCurrency(aiRecommendations.emergencyFund, profile?.currency || "USD")}</p>
-              </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="space-y-3">
-              <h4 className="font-semibold text-foreground">AI Insights:</h4>
-              {aiRecommendations.insights.map((insight, index) => (
-                <div key={index} className="flex items-start gap-2 p-3 bg-muted/30 rounded-lg">
-                  <Zap className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-foreground">{insight}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-2 pt-4">
-              <Button onClick={applyAIRecommendations} className="bg-gradient-primary">
-                Apply Recommendations
-              </Button>
-              <Button variant="outline" onClick={() => setAiRecommendations(null)}>
-                Dismiss
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          <Card className="shadow-card bg-gradient-card border-0">
+            <CardHeader>
+              <CardTitle>Budget vs Actual</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={comparisonData}>
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => formatCurrency(Number(value), profile?.currency || "USD")} />
+                    <Bar dataKey="budgeted" fill="#94A3B8" name="Budgeted" />
+                    <Bar dataKey="spent" fill="#3B82F6" name="Spent" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Budget Categories */}
       <Card className="shadow-card bg-gradient-card border-0">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold text-foreground">Smart Budget Tracking</CardTitle>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={generatePredictions}
-                disabled={isGeneratingPredictions}
-                className="gap-2"
-              >
-                {isGeneratingPredictions ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="w-4 h-4" />
-                    Update Predictions
-                  </>
-                )}
-              </Button>
-              <Button 
-                className="bg-gradient-primary gap-2"
-                onClick={generateAIBudget}
-                disabled={isGeneratingBudget}
-              >
-                {isGeneratingBudget ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    Auto-Generate Budget
-                  </>
-                )}
-              </Button>
-            </div>
+            <CardTitle className="text-2xl font-bold text-foreground">Budget Categories</CardTitle>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Add Budget
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New Budget</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Input
+                      id="category"
+                      value={newBudget.category}
+                      onChange={(e) => setNewBudget({...newBudget, category: e.target.value})}
+                      placeholder="e.g., Food, Transportation"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="amount">Monthly Amount</Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      value={newBudget.amount || ""}
+                      onChange={(e) => setNewBudget({...newBudget, amount: parseFloat(e.target.value) || 0})}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleAddBudget} 
+                    className="w-full"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      "Create Budget"
+                    )}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
         
         <CardContent>
-          {budgetCategories.length === 0 && !transactionsLoading && !budgetsLoading ? (
-            <div className="text-center py-12">
-              <Brain className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No budget data available</h3>
-              <p className="text-muted-foreground mb-6">
-                Start by adding some transactions or let AI generate a budget based on your spending patterns
-              </p>
-              <Button onClick={generateAIBudget} className="bg-gradient-primary gap-2">
-                <Sparkles className="w-4 h-4" />
-                Generate AI Budget
-              </Button>
-            </div>
-          ) : (
           <div className="space-y-6">
-            {safeBudgetCategories.map((category) => {
+            {budgetCategories.map((category) => {
               const progressPercentage = getProgressPercentage(category.spent, category.budgeted);
-              const predictedPercentage = getProgressPercentage(category.predicted, category.budgeted);
               
               return (
                 <div key={category.id} className="p-6 border rounded-lg bg-card/50 hover:bg-card transition-colors">
@@ -525,35 +410,37 @@ const SmartBudgeting = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-foreground">{formatCurrency(category.spent, profile?.currency || "USD")}</p>
-                      <p className="text-sm text-muted-foreground">
-                        of {formatCurrency(category.budgeted, profile?.currency || "USD")}
-                      </p>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-foreground">{formatCurrency(category.spent, profile?.currency || "USD")}</p>
+                        <p className="text-sm text-muted-foreground">
+                          of {formatCurrency(category.budgeted, profile?.currency || "USD")}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteBudget(category.id)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                   
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Current Progress</span>
-                      <span className={`font-semibold ${getStatusColor(category.spent, category.budgeted, category.predicted)}`}>
+                      <span className="text-muted-foreground">Progress</span>
+                      <span className={`font-semibold ${getStatusColor(category.spent, category.budgeted)}`}>
                         {progressPercentage.toFixed(1)}%
                       </span>
                     </div>
                     <Progress value={progressPercentage} className="h-2" />
                     
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">AI Prediction</span>
-                      <span className={`font-semibold ${getStatusColor(category.spent, category.budgeted, category.predicted)}`}>
-                        {formatCurrency(category.predicted, profile?.currency || "USD")} ({predictedPercentage.toFixed(1)}%)
-                      </span>
-                    </div>
-                    <Progress value={predictedPercentage} className="h-1 opacity-60" />
-                    
-                    {category.predicted > category.budgeted && (
+                    {category.spent > category.budgeted && (
                       <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
                         <p className="text-sm text-destructive font-medium">
-                          ⚠️ Likely to exceed budget by {formatCurrency(category.predicted - category.budgeted, profile?.currency || "USD")}
+                          ⚠️ Over budget by {formatCurrency(category.spent - category.budgeted, profile?.currency || "USD")}
                         </p>
                       </div>
                     )}
@@ -562,7 +449,6 @@ const SmartBudgeting = () => {
               );
             })}
           </div>
-          )}
         </CardContent>
       </Card>
     </div>

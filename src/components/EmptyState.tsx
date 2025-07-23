@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, TrendingUp, Target, PieChart } from "lucide-react";
 
 interface EmptyStateProps {
-  type: "transactions" | "goals" | "bills" | "investments" | "debts";
+  type: "transactions" | "goals" | "bills" | "investments" | "debts" | "budgets";
   onAdd?: () => void;
 }
 
@@ -39,6 +39,12 @@ const EmptyState = ({ type, onAdd }: EmptyStateProps) => {
       title: "No debts to manage",
       description: "Add any debts you have to create a payoff strategy",
       buttonText: "Add Debt"
+    },
+    budgets: {
+      icon: PieChart,
+      title: "No budgets created",
+      description: "Create your first budget to track and control your spending",
+      buttonText: "Create Budget"
     }
   };
 

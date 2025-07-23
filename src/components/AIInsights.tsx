@@ -48,12 +48,12 @@ const AIInsights = () => {
         description: "Financial insights generated successfully!",
       });
     } catch (error) {
+      console.error('Error generating insights:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to generate insights",
+        description: "Failed to generate insights. Using fallback recommendations.",
         variant: "destructive",
       });
-      return;
     }
   }, [user, executeGeneration]);
 

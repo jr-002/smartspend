@@ -20,9 +20,12 @@ export function useAsyncOperation<T>() {
       setState({ data: result, isLoading: false, error: null });
       return result;
     } catch (error) {
+      console.error('Async operation failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-      setState({ data: null, isLoading: false, error: new Error(errorMessage) });
-      throw error;
+      const errorObj = new Error(errorMessage);
+      setState({ data: null, isLoading: false, error: errorObj });
+      // Don't re-throw the error, let the component handle it gracefully
+      return null;
     }
   }, []);
 
