@@ -89,7 +89,7 @@ const AIFinancialCoach = () => {
 2. Your current available balance
 3. Your upcoming expenses this month
 
-Based on your profile, you have a monthly income of ${formatCurrency(profile?.monthly_income || 0, profile?.currency || 'NGN')}. 
+Based on your profile, you have a monthly income of ${formatCurrency(profile?.monthly_income || 0, profile?.currency || 'USD')}. 
 
 💡 **Smart Tip**: Follow the 50/30/20 rule - only spend from your 30% "wants" budget for non-essential purchases.`;
     }
@@ -153,8 +153,8 @@ Would you like me to help set up your personalized budget categories?`;
     return `That's a great question! Here are some personalized insights:
 
 💡 **Based on your profile:**
-- Monthly income: ${formatCurrency(profile?.monthly_income || 0, profile?.currency || 'NGN')}
-- Currency: ${profile?.currency || 'NGN'}
+- Monthly income: ${formatCurrency(profile?.monthly_income || 0, profile?.currency || 'USD')}
+- Currency: ${profile?.currency || 'USD'}
 
 🎯 **My recommendations:**
 1. **Emergency fund**: Aim for 3-6 months of expenses

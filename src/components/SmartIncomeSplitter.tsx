@@ -251,7 +251,7 @@ const SmartIncomeSplitter = () => {
                       className="w-full"
                     />
                     <p className="text-sm text-muted-foreground">
-                      {formatCurrency(allocations[0]?.amount || 0, profile?.currency || 'NGN')}
+                      {formatCurrency(allocations[0]?.amount || 0, profile?.currency || 'USD')}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {allocations[0]?.description}
@@ -276,7 +276,7 @@ const SmartIncomeSplitter = () => {
                       className="w-full"
                     />
                     <p className="text-sm text-muted-foreground">
-                      {formatCurrency(allocations[1]?.amount || 0, profile?.currency || 'NGN')}
+                      {formatCurrency(allocations[1]?.amount || 0, profile?.currency || 'USD')}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {allocations[1]?.description}
@@ -301,7 +301,7 @@ const SmartIncomeSplitter = () => {
                       className="w-full"
                     />
                     <p className="text-sm text-muted-foreground">
-                      {formatCurrency(allocations[2]?.amount || 0, profile?.currency || 'NGN')}
+                      {formatCurrency(allocations[2]?.amount || 0, profile?.currency || 'USD')}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {allocations[2]?.description}
@@ -328,7 +328,7 @@ const SmartIncomeSplitter = () => {
                           ))}
                         </Pie>
                         <Tooltip 
-                          formatter={(value) => formatCurrency(Number(value), profile?.currency || 'NGN')}
+                          formatter={(value) => formatCurrency(Number(value), profile?.currency || 'USD')}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -344,7 +344,7 @@ const SmartIncomeSplitter = () => {
                         ></div>
                         <p className="text-xs font-medium">{allocation.category}</p>
                         <p className="text-sm font-bold">
-                          {formatCurrency(allocation.amount, profile?.currency || 'NGN')}
+                          {formatCurrency(allocation.amount, profile?.currency || 'USD')}
                         </p>
                       </div>
                     ))}

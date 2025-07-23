@@ -301,8 +301,8 @@ const SavingsGoals = () => {
                 
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-2xl font-bold">{formatCurrency(goal.current_amount, profile?.currency || "NGN")}</p>
-                    <p className="text-sm text-muted-foreground">of {formatCurrency(goal.target_amount, profile?.currency || "NGN")}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(goal.current_amount, profile?.currency || "USD")}</p>
+                    <p className="text-sm text-muted-foreground">of {formatCurrency(goal.target_amount, profile?.currency || "USD")}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">{daysLeft > 0 ? `${daysLeft} days left` : 'Overdue'}</p>

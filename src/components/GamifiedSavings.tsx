@@ -356,11 +356,11 @@ const GamifiedSavings = () => {
                         <span className="text-muted-foreground">Progress</span>
                         <span className="font-semibold text-foreground">
                           {challenge.type === 'weekly' && challenge.id === '2' 
-                            ? formatCurrency(challenge.progress, profile?.currency || 'NGN')
+                            ? formatCurrency(challenge.progress, profile?.currency || 'USD')
                             : challenge.progress
                           } / {
                             challenge.type === 'weekly' && challenge.id === '2'
-                              ? formatCurrency(challenge.target, profile?.currency || 'NGN')
+                              ? formatCurrency(challenge.target, profile?.currency || 'USD')
                               : challenge.target
                           }
                         </span>

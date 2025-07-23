@@ -7,6 +7,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown, CreditCard, PiggyBank, FileText, Coins
 import { useTransactions } from "@/hooks/useTransactions";
 import { useBills } from "@/hooks/useBills";
 import { useBudgets } from "@/hooks/useBudgets";
+import { useSavingsGoals } from "@/hooks/useSavingsGoals";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/utils/currencies";
 
@@ -14,9 +15,10 @@ const EnhancedDashboard = () => {
   const { transactions, loading: transactionsLoading } = useTransactions();
   const { bills, loading: billsLoading } = useBills();
   const { budgets, loading: budgetsLoading } = useBudgets();
+  const { goals: savingsGoals, loading: savingsLoading } = useSavingsGoals();
   const { profile } = useAuth();
 
-  if (transactionsLoading || billsLoading || budgetsLoading) {
+  if (transactionsLoading || billsLoading || budgetsLoading || savingsLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
@@ -43,6 +45,10 @@ const EnhancedDashboard = () => {
   const billsOverdue = bills.filter((bill) => bill.status === 'overdue').length;
 
   const totalBudgets = budgets.length;
+
+  // Calculate savings goals metrics
+  const totalSavingsGoalAmount = savingsGoals.reduce((sum, goal) => sum + goal.target_amount, 0);
+  const totalCurrentSavings = savingsGoals.reduce((sum, goal) => sum + goal.current_amount, 0);
 
   return (
     <div className="space-y-8">
@@ -120,13 +126,21 @@ const EnhancedDashboard = () => {
           <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">Savings Goal</p>
+                <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">Savings Goals</p>
                 <p className="text-3xl font-bold text-warning tracking-tight">
-                  {formatCurrency(12345, profile?.currency || "USD")}
+                  {savingsGoals.length > 0 
+                    ? formatCurrency(totalCurrentSavings, profile?.currency || "USD")
+                    : formatCurrency(0, profile?.currency || "USD")
+                  }
                 </p>
                 <div className="flex items-center gap-1 text-xs">
                   <div className="w-2 h-2 rounded-full bg-warning animate-pulse" />
-                  <span className="text-muted-foreground">Target progress</span>
+                  <span className="text-muted-foreground">
+                    {savingsGoals.length > 0 
+                      ? `${savingsGoals.length} active goals`
+                      : 'No goals set'
+                    }
+                  </span>
                 </div>
               </div>
               <div className="p-3 bg-warning/10 rounded-2xl">

@@ -342,7 +342,7 @@ const BillPayments = () => {
                   
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="font-semibold text-foreground">{formatCurrency(bill.amount, profile?.currency || "NGN")}</p>
+                      <p className="font-semibold text-foreground">{formatCurrency(bill.amount, profile?.currency || "USD")}</p>
                       <Badge className={getStatusColor(bill.status)}>
                         {bill.status.charAt(0).toUpperCase() + bill.status.slice(1)}
                       </Badge>

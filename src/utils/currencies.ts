@@ -103,5 +103,5 @@ export const formatCurrency = (amount: number, currencyCode: string): string => 
 };
 
 export const getDefaultCurrency = (): Currency => {
-  return CURRENCIES.find(c => c.code === 'NGN') || CURRENCIES[0];
+  return CURRENCIES.find(c => c.code === 'USD') || CURRENCIES[0];
 };
