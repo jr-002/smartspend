@@ -46,7 +46,8 @@ const SmartBudgeting = () => {
   // Calculate current month spending by category
   const getCurrentMonthSpending = () => {
     const currentMonth = new Date().toISOString().slice(0, 7);
-    const currentMonthTransactions = transactions.filter(t => 
+    const safeTransactions = Array.isArray(transactions) ? transactions : [];
+    const currentMonthTransactions = safeTransactions.filter(t => 
       t.date.startsWith(currentMonth) && t.transaction_type === 'expense'
     );
 
@@ -156,11 +157,20 @@ const SmartBudgeting = () => {
 
   // Initialize budget categories from existing budgets and transactions
   useEffect(() => {
-    if (transactionsLoading || budgetsLoading || !transactions.length) return;
+    if (transactionsLoading || budgetsLoading) return;
+    
+    // Ensure we have arrays to work with
+    const safeTransactions = Array.isArray(transactions) ? transactions : [];
+    const safeBudgets = Array.isArray(budgets) ? budgets : [];
+    
+    if (safeTransactions.length === 0) {
+      setBudgetCategories([]);
+      return;
+    }
 
     const currentMonthSpending = getCurrentMonthSpending();
     
-    const categories = budgets.map(budget => ({
+    const categories = safeBudgets.map(budget => ({
       id: budget.id,
       name: budget.category,
       budgeted: budget.amount,
@@ -204,7 +214,7 @@ const SmartBudgeting = () => {
 
     // Auto-generate predictions on load
     generatePredictions();
-  }, [transactions, budgets, transactionsLoading, budgetsLoading, profile]);
+  }, [safeTransactions, safeBudgets, transactionsLoading, budgetsLoading, profile]);
 
   const getColorForCategory = (category: string): string => {
     const colors = [
@@ -218,6 +228,11 @@ const SmartBudgeting = () => {
   const totalBudgeted = budgetCategories.reduce((sum, cat) => sum + cat.budgeted, 0);
   const totalSpent = budgetCategories.reduce((sum, cat) => sum + cat.spent, 0);
   const totalPredicted = budgetCategories.reduce((sum, cat) => sum + cat.predicted, 0);
+
+  // Ensure arrays are never null/undefined
+  const safeBudgetCategories = budgetCategories || [];
+  const safeComparisonData = comparisonData || [];
+  const safePieChartData = pieChartData || [];
 
   const getProgressPercentage = (spent: number, budgeted: number) => {
     return Math.min((spent / budgeted) * 100, 100);
@@ -233,19 +248,19 @@ const SmartBudgeting = () => {
     switch (trend) {
       case 'up': 
       case 'increasing': return <TrendingUp className="w-4 h-4 text-destructive" />;
-      case 'down': 
+      return [...(debts || [])].sort((a, b) => a.balance - b.balance);
       case 'decreasing': return <TrendingDown className="w-4 h-4 text-success" />;
-      default: return <Target className="w-4 h-4 text-muted-foreground" />;
+      return [...(debts || [])].sort((a, b) => b.interest_rate - a.interest_rate);
     }
   };
 
-  const pieChartData = budgetCategories.map(cat => ({
+  const pieChartData = safeBudgetCategories.map(cat => ({
     name: cat.name,
     value: cat.spent,
     color: cat.color
   }));
 
-  const comparisonData = budgetCategories.map(cat => ({
+  const comparisonData = safeBudgetCategories.map(cat => ({
     name: cat.name.split(' ')[0],
     budgeted: cat.budgeted,
     spent: cat.spent,
@@ -344,14 +359,14 @@ const SmartBudgeting = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={pieChartData}
+                    data={safePieChartData}
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
                     dataKey="value"
                     label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                   >
-                    {pieChartData.map((entry, index) => (
+                    {safePieChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -369,7 +384,7 @@ const SmartBudgeting = () => {
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={comparisonData}>
+                <BarChart data={safeComparisonData}>
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip formatter={(value) => `₦${Number(value).toLocaleString()}`} />
@@ -490,7 +505,7 @@ const SmartBudgeting = () => {
             </div>
           ) : (
           <div className="space-y-6">
-            {budgetCategories.map((category) => {
+            {safeBudgetCategories.map((category) => {
               const progressPercentage = getProgressPercentage(category.spent, category.budgeted);
               const predictedPercentage = getProgressPercentage(category.predicted, category.budgeted);
               

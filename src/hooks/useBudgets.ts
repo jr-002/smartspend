@@ -46,10 +46,12 @@ export const useBudgets = () => {
         throw fetchError;
       }
 
-      setBudgets((data || []) as Budget[]);
+      // Ensure we always set an array, never null
+      setBudgets(Array.isArray(data) ? data as Budget[] : []);
     } catch (err) {
       console.error('Error fetching budgets:', err);
       setError('Failed to load budgets');
+      setBudgets([]); // Set empty array on error
       toast({
         title: "Error",
         description: "Failed to load budgets. Please try again.",

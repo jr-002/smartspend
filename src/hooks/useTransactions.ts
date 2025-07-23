@@ -50,7 +50,7 @@ export const useTransactions = () => {
       }
 
       // Transform the data to ensure proper typing
-      const transformedData: Transaction[] = (data || []).map(item => ({
+      const transformedData: Transaction[] = Array.isArray(data) ? data.map(item => ({
         id: item.id,
         description: item.description,
         amount: item.amount,
@@ -58,12 +58,13 @@ export const useTransactions = () => {
         date: item.date,
         transaction_type: item.transaction_type as "income" | "expense",
         created_at: item.created_at,
-      }));
+      })) : [];
 
       setTransactions(transformedData);
     } catch (err) {
       console.error('Error fetching transactions:', err);
       setError('Failed to load transactions');
+      setTransactions([]); // Set empty array on error
       toast({
         title: "Error",
         description: "Failed to load transactions. Please try again.",
