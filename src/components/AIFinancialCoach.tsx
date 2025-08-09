@@ -30,10 +30,11 @@ const AIFinancialCoach = () => {
   const [isListening, setIsListening] = useState(false);
   const { profile } = useAuth();
 
+  const currency = profile?.currency || 'USD';
   const quickQuestions = [
     "Can I afford this purchase?",
     "Why am I overspending this month?",
-    "How can I save ₦50,000 in 3 months?",
+    `How can I save ${formatCurrency(50000, currency)} in 3 months?`,
     "What's my spending pattern?",
     "Should I invest or save more?",
     "How to reduce my expenses?"
@@ -112,11 +113,15 @@ Would you like me to help you create a personalized spending plan?`;
     }
     
     if (lowerQuestion.includes('save') && (lowerQuestion.includes('50000') || lowerQuestion.includes('50,000'))) {
-      return `Great goal! Here's your ₦50,000 savings plan for 3 months:
+      const target = 50000;
+      const monthly = Math.ceil(target / 3);
+      const weekly = Math.ceil(target / 13);
+      const daily = Math.ceil(target / 90);
+      return `Great goal! Here's your ${formatCurrency(target, currency)} savings plan for 3 months:
 
-💰 **Monthly target**: ₦16,667
-📅 **Weekly target**: ₦4,167
-🎯 **Daily target**: ₦556
+💰 **Monthly target**: ${formatCurrency(monthly, currency)}
+📅 **Weekly target**: ${formatCurrency(weekly, currency)}
+🎯 **Daily target**: ${formatCurrency(daily, currency)}
 
 **Smart Savings Strategy:**
 1. **Automate**: Set up automatic transfers on payday
@@ -124,7 +129,7 @@ Would you like me to help you create a personalized spending plan?`;
 3. **Cut expenses**: Reduce dining out by 50%
 4. **Challenge yourself**: Try a "no-spend weekend" monthly
 
-🏆 **Pro tip**: Start with ₦500/day and increase gradually. Small consistent amounts beat large irregular ones!
+🏆 **Pro tip**: Start with ${formatCurrency(500, currency)}/day and increase gradually. Small consistent amounts beat large irregular ones!
 
 Want me to create a detailed weekly action plan?`;
     }

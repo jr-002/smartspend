@@ -42,110 +42,14 @@ interface Reward {
 
 const GamifiedSavings = () => {
   const { profile } = useAuth();
-  const [userPoints, setUserPoints] = useState(1250);
-  const [currentStreak, setCurrentStreak] = useState(7);
-  const [level, setLevel] = useState(3);
-  const [levelProgress, setLevelProgress] = useState(65);
+  const [userPoints, setUserPoints] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [level, setLevel] = useState(1);
+  const [levelProgress, setLevelProgress] = useState(0);
 
-  const [achievements, setAchievements] = useState<Achievement[]>([
-    {
-      id: '1',
-      title: 'First Steps',
-      description: 'Complete your first savings goal',
-      icon: '🎯',
-      points: 100,
-      unlocked: true,
-      progress: 1,
-      maxProgress: 1
-    },
-    {
-      id: '2',
-      title: 'Budget Master',
-      description: 'Stay within budget for 7 consecutive days',
-      icon: '💰',
-      points: 200,
-      unlocked: true,
-      progress: 7,
-      maxProgress: 7
-    },
-    {
-      id: '3',
-      title: 'Savings Streak',
-      description: 'Save money for 30 consecutive days',
-      icon: '🔥',
-      points: 500,
-      unlocked: false,
-      progress: 7,
-      maxProgress: 30
-    },
-    {
-      id: '4',
-      title: 'Investment Pioneer',
-      description: 'Make your first investment',
-      icon: '📈',
-      points: 300,
-      unlocked: false,
-      progress: 0,
-      maxProgress: 1
-    },
-    {
-      id: '5',
-      title: 'Debt Destroyer',
-      description: 'Pay off a debt completely',
-      icon: '⚡',
-      points: 400,
-      unlocked: false,
-      progress: 0,
-      maxProgress: 1
-    }
-  ]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
 
-  const [challenges, setChallenges] = useState<Challenge[]>([
-    {
-      id: '1',
-      title: 'No Spend Day',
-      description: 'Go a full day without any non-essential spending',
-      type: 'daily',
-      points: 50,
-      progress: 0,
-      target: 1,
-      deadline: 'Today',
-      completed: false
-    },
-    {
-      id: '2',
-      title: '₦1,000 Challenge',
-      description: 'Save ₦1,000 this week through small cuts',
-      type: 'weekly',
-      points: 150,
-      progress: 650,
-      target: 1000,
-      deadline: '3 days left',
-      completed: false
-    },
-    {
-      id: '3',
-      title: 'Cook at Home',
-      description: 'Prepare meals at home for 5 days this week',
-      type: 'weekly',
-      points: 100,
-      progress: 3,
-      target: 5,
-      deadline: '4 days left',
-      completed: false
-    },
-    {
-      id: '4',
-      title: 'Emergency Fund Builder',
-      description: 'Add ₦5,000 to your emergency fund this month',
-      type: 'monthly',
-      points: 300,
-      progress: 2000,
-      target: 5000,
-      deadline: '12 days left',
-      completed: false
-    }
-  ]);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
 
   const [rewards, setRewards] = useState<Reward[]>([
     {

@@ -54,30 +54,25 @@ const FinancialRiskPredictor = () => {
     }
   }, [transactions, budgets, profile]);
 
-  const analyzeFinancialRisks = () => {
+  const analyzeFinancialRisks = async () => {
     setIsAnalyzing(true);
-    
-    // Use mock analysis for now
-    setTimeout(async () => {
-      const newPredictions = generateRiskPredictions();
-      const newHealthScore = calculateHealthScore();
-      
-      // Optional: Get AI analysis
-      try {
-        const aiAnalysis = await analyzeFinancialRisk({
-          transactions,
-          budgets,
-          monthlyIncome: profile?.monthly_income || 0
-        });
-        // AI analysis received successfully
-      } catch (error) {
-        console.error('AI analysis failed:', error);
-      }
-      
-      setPredictions(newPredictions);
-      setHealthScore(newHealthScore);
-      setIsAnalyzing(false);
-    }, 2000);
+
+    const newPredictions = generateRiskPredictions();
+    const newHealthScore = calculateHealthScore();
+
+    try {
+      await analyzeFinancialRisk({
+        transactions,
+        budgets,
+        monthlyIncome: profile?.monthly_income || 0
+      });
+    } catch (error) {
+      console.error('AI analysis failed:', error);
+    }
+
+    setPredictions(newPredictions);
+    setHealthScore(newHealthScore);
+    setIsAnalyzing(false);
   };
 
   const generateRiskPredictions = (): RiskPrediction[] => {
@@ -157,7 +152,7 @@ const FinancialRiskPredictor = () => {
         impact: 'High financial stress during unexpected events',
         recommendations: [
           'Automate emergency fund contributions',
-          'Start with a goal of ₦50,000 emergency fund',
+          `Start with a goal of ${formatCurrency(50000, profile?.currency || 'USD')} emergency fund`,
           'Reduce non-essential spending temporarily',
           'Consider a high-yield savings account'
         ],
@@ -431,7 +426,7 @@ const FinancialRiskPredictor = () => {
                     Medium-term Goals (This Month)
                   </h4>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• Build emergency fund to ₦50,000</li>
+                    <li>• Build emergency fund to {formatCurrency(50000, profile?.currency || 'USD')}</li>
                     <li>• Implement envelope budgeting system</li>
                     <li>• Negotiate better rates for utilities/services</li>
                     <li>• Start meal planning to reduce food costs</li>
