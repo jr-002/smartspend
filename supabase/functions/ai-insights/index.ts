@@ -7,6 +7,40 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Simple in-memory rate limiter per identifier (user or IP)
+type RateEntry = { count: number; reset: number };
+const rateStore = new Map<string, RateEntry>();
+
+function getClientIdentifier(req: Request): string {
+  const auth = req.headers.get('authorization') || '';
+  const ip = (req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || '').split(',')[0].trim();
+  if (auth.startsWith('Bearer ')) {
+    const token = auth.replace('Bearer ', '');
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1] || ''));
+      return payload.sub || ip || 'anonymous';
+    } catch {
+      return ip || 'anonymous';
+    }
+  }
+  return ip || 'anonymous';
+}
+
+function rateLimit(key: string, limit: number, windowMs: number) {
+  const now = Date.now();
+  const entry = rateStore.get(key);
+  if (!entry || now > entry.reset) {
+    const reset = now + windowMs;
+    rateStore.set(key, { count: 1, reset });
+    return { allowed: true, remaining: limit - 1, reset, limit };
+  }
+  if (entry.count >= limit) {
+    return { allowed: false, remaining: 0, reset: entry.reset, limit };
+  }
+  entry.count += 1;
+  return { allowed: true, remaining: Math.max(0, limit - entry.count), reset: entry.reset, limit };
+}
+
 const groq = new Groq({
   apiKey: Deno.env.get('GROQ_API_KEY'),
 });
@@ -202,6 +236,24 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Apply rate limiting: 3 requests per 5 minutes per identifier
+  const identifier = getClientIdentifier(req);
+  const rl = rateLimit(`ai-insights:${identifier}`, 3, 5 * 60_000);
+  if (!rl.allowed) {
+    const retryAfter = Math.ceil((rl.reset - Date.now()) / 1000);
+    return new Response(JSON.stringify({ error: 'Too Many Requests. Please try again later.' }), {
+      status: 429,
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'application/json',
+        'Retry-After': String(retryAfter),
+        'X-RateLimit-Limit': String(rl.limit),
+        'X-RateLimit-Remaining': '0',
+        'X-RateLimit-Reset': String(rl.reset)
+      },
+    });
+  }
+
   try {
     const { userId } = await req.json();
 
@@ -277,7 +329,13 @@ serve(async (req) => {
     const insights = await generateFinancialInsights(financialData);
 
     return new Response(JSON.stringify({ insights }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'application/json',
+        'X-RateLimit-Limit': String(rl.limit),
+        'X-RateLimit-Remaining': String(rl.remaining),
+        'X-RateLimit-Reset': String(rl.reset)
+      },
     });
 
   } catch (error) {
