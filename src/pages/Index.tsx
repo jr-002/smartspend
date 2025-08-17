@@ -50,20 +50,12 @@ const Index = () => {
   const menuItems = useMemo(
     () => [
       { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, component: EnhancedDashboard },
+      { id: "budgeting", label: "Budgeting", icon: Calculator, component: SmartBudgeting },
       { id: "transactions", label: "Transactions", icon: CreditCard, component: TransactionHistory },
-      { id: "budgeting", label: "Smart Budgeting", icon: Calculator, component: SmartBudgeting },
       { id: "goals", label: "Savings Goals", icon: Target, component: SavingsGoals },
-      { id: "bills", label: "Bill Payments", icon: CreditCard, component: BillPayments },
-      { id: "investments", label: "Investments", icon: TrendingUp, component: InvestmentTracking },
-      { id: "debts", label: "Debt Management", icon: CreditCard, component: DebtManagement },
-      { id: "analytics", label: "Analytics", icon: PieChart, component: AnalyticsReports },
-      { id: "ai-insights", label: "AI Insights", icon: Brain, component: AIInsights },
-      { id: "education", label: "Education", icon: BookOpen, component: FinancialEducation },
+      { id: "bills", label: "Bills & Payments", icon: CreditCard, component: BillPayments },
       { id: "ai-coach", label: "AI Coach", icon: MessageCircle, component: AIFinancialCoach },
-      { id: "gamified", label: "Rewards", icon: Trophy, component: GamifiedSavings },
-      { id: "income-splitter", label: "Income Splitter", icon: Calculator, component: SmartIncomeSplitter },
-      { id: "community", label: "Community", icon: Users, component: CommunityBudgetTemplates },
-      { id: "risk-predictor", label: "Risk Predictor", icon: AlertTriangle, component: FinancialRiskPredictor },
+      { id: "analytics", label: "Reports", icon: PieChart, component: AnalyticsReports },
       { id: "notifications", label: "Notifications", icon: Bell, component: NotificationCenter },
     ],
     []
