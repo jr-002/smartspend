@@ -19,7 +19,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import AppSidebar from "@/components/AppSidebar";
+import AppSidebar, { SidebarCategory } from "@/components/AppSidebar";
 
 // Lazy-load all heavy feature components
 const EnhancedDashboard = lazy(() => import("@/components/EnhancedDashboard"));
@@ -47,35 +47,61 @@ const Index = () => {
     await signOut();
   };
 
-  const coreItems = useMemo(
-    () => [
-      { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, component: EnhancedDashboard },
-      { id: "budgeting", label: "Budgeting", icon: Calculator, component: SmartBudgeting },
-      { id: "transactions", label: "Transactions", icon: CreditCard, component: TransactionHistory },
-      { id: "goals", label: "Savings Goals", icon: Target, component: SavingsGoals },
-      { id: "bills", label: "Bills & Payments", icon: CreditCard, component: BillPayments },
-      { id: "ai-coach", label: "AI Coach", icon: MessageCircle, component: AIFinancialCoach },
-      { id: "analytics", label: "Reports", icon: PieChart, component: AnalyticsReports },
-      { id: "notifications", label: "Notifications", icon: Bell, component: NotificationCenter },
-    ],
-    []
-  );
+  const sidebarCategories = useMemo((): SidebarCategory[] => [
+    {
+      id: "essentials",
+      label: "Essentials",
+      defaultOpen: true,
+      items: [
+        { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, component: EnhancedDashboard },
+        { id: "budgeting", label: "Budgeting", icon: Calculator, component: SmartBudgeting },
+        { id: "transactions", label: "Transactions", icon: CreditCard, component: TransactionHistory },
+      ]
+    },
+    {
+      id: "financial-goals",
+      label: "Financial Goals",
+      defaultOpen: true,
+      items: [
+        { id: "goals", label: "Savings Goals", icon: Target, component: SavingsGoals },
+        { id: "bills", label: "Bills & Payments", icon: CreditCard, component: BillPayments },
+        { id: "debts", label: "Debt Management", icon: CreditCard, component: DebtManagement },
+      ]
+    },
+    {
+      id: "ai-tools",
+      label: "AI & Insights",
+      defaultOpen: false,
+      items: [
+        { id: "ai-coach", label: "AI Coach", icon: MessageCircle, component: AIFinancialCoach },
+        { id: "ai-insights", label: "AI Insights", icon: Brain, component: AIInsights },
+        { id: "risk-predictor", label: "Risk Predictor", icon: AlertTriangle, component: FinancialRiskPredictor },
+      ]
+    },
+    {
+      id: "advanced",
+      label: "Advanced Tools",
+      defaultOpen: false,
+      items: [
+        { id: "investments", label: "Investments", icon: TrendingUp, component: InvestmentTracking },
+        { id: "income-splitter", label: "Income Splitter", icon: Calculator, component: SmartIncomeSplitter },
+        { id: "analytics", label: "Reports", icon: PieChart, component: AnalyticsReports },
+      ]
+    },
+    {
+      id: "community",
+      label: "Learn & Connect",
+      defaultOpen: false,
+      items: [
+        { id: "education", label: "Education", icon: BookOpen, component: FinancialEducation },
+        { id: "community", label: "Community", icon: Users, component: CommunityBudgetTemplates },
+        { id: "gamified", label: "Rewards", icon: Trophy, component: GamifiedSavings },
+        { id: "notifications", label: "Notifications", icon: Bell, component: NotificationCenter },
+      ]
+    }
+  ], []);
 
-  const moreItems = useMemo(
-    () => [
-      { id: "investments", label: "Investments", icon: TrendingUp, component: InvestmentTracking },
-      { id: "debts", label: "Debt Management", icon: CreditCard, component: DebtManagement },
-      { id: "ai-insights", label: "AI Insights", icon: Brain, component: AIInsights },
-      { id: "education", label: "Education", icon: BookOpen, component: FinancialEducation },
-      { id: "gamified", label: "Rewards", icon: Trophy, component: GamifiedSavings },
-      { id: "income-splitter", label: "Income Splitter", icon: Calculator, component: SmartIncomeSplitter },
-      { id: "community", label: "Community", icon: Users, component: CommunityBudgetTemplates },
-      { id: "risk-predictor", label: "Risk Predictor", icon: AlertTriangle, component: FinancialRiskPredictor },
-    ],
-    []
-  );
-
-  const allItems = [...coreItems, ...moreItems];
+  const allItems = sidebarCategories.flatMap(category => category.items);
   const activeItem = allItems.find((item) => item.id === activeTab) || allItems[0];
   const ActiveComponent = activeItem.component;
 
@@ -92,7 +118,7 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-background">
-        <AppSidebar coreItems={coreItems} moreItems={moreItems} activeId={activeTab} onSelect={setActiveTab} />
+        <AppSidebar categories={sidebarCategories} activeId={activeTab} onSelect={setActiveTab} />
 
         <div className="flex-1 flex flex-col">
           {/* App Header */}
