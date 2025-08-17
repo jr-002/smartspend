@@ -47,7 +47,7 @@ const Index = () => {
     await signOut();
   };
 
-  const menuItems = useMemo(
+  const coreItems = useMemo(
     () => [
       { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, component: EnhancedDashboard },
       { id: "budgeting", label: "Budgeting", icon: Calculator, component: SmartBudgeting },
@@ -61,7 +61,22 @@ const Index = () => {
     []
   );
 
-  const activeItem = menuItems.find((item) => item.id === activeTab) || menuItems[0];
+  const moreItems = useMemo(
+    () => [
+      { id: "investments", label: "Investments", icon: TrendingUp, component: InvestmentTracking },
+      { id: "debts", label: "Debt Management", icon: CreditCard, component: DebtManagement },
+      { id: "ai-insights", label: "AI Insights", icon: Brain, component: AIInsights },
+      { id: "education", label: "Education", icon: BookOpen, component: FinancialEducation },
+      { id: "gamified", label: "Rewards", icon: Trophy, component: GamifiedSavings },
+      { id: "income-splitter", label: "Income Splitter", icon: Calculator, component: SmartIncomeSplitter },
+      { id: "community", label: "Community", icon: Users, component: CommunityBudgetTemplates },
+      { id: "risk-predictor", label: "Risk Predictor", icon: AlertTriangle, component: FinancialRiskPredictor },
+    ],
+    []
+  );
+
+  const allItems = [...coreItems, ...moreItems];
+  const activeItem = allItems.find((item) => item.id === activeTab) || allItems[0];
   const ActiveComponent = activeItem.component;
 
   // Lightweight SEO updates per section
@@ -77,7 +92,7 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-background">
-        <AppSidebar items={menuItems} activeId={activeTab} onSelect={setActiveTab} />
+        <AppSidebar coreItems={coreItems} moreItems={moreItems} activeId={activeTab} onSelect={setActiveTab} />
 
         <div className="flex-1 flex flex-col">
           {/* App Header */}
