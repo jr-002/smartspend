@@ -66,6 +66,7 @@ export function createLazyComponent<T extends React.ComponentType<any>>(
   return React.forwardRef<any, React.ComponentProps<T>>((props, ref) => (
     <React.Suspense fallback={fallback ? <fallback /> : <div>Loading...</div>}>
       <LazyComponent {...props} ref={ref} />
+    }
     </React.Suspense>
   ));
 }
