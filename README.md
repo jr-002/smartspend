@@ -16,6 +16,71 @@ FinAssist SmartSpend is a comprehensive personal finance management application 
 - **Transaction History**: Monitor all your financial transactions
 - **Multi-currency Support**: Handle transactions in different currencies
 
+## Production Configuration
+
+### Environment Variables Setup
+
+#### Vercel Dashboard Configuration
+Set the following environment variables in your Vercel dashboard:
+
+```
+VITE_SENTRY_DSN=your_sentry_dsn_here
+```
+
+#### Supabase Secrets Configuration
+The following secrets are already configured in Supabase:
+- `GROQ_API_KEY` - For AI functionality
+- `SUPABASE_URL` - Database URL
+- `SUPABASE_ANON_KEY` - Public API key
+- `SUPABASE_SERVICE_ROLE_KEY` - Admin API key
+
+### Monitoring & Error Tracking
+
+#### Sentry Setup
+1. Create a Sentry account at https://sentry.io
+2. Create a new project for React
+3. Copy the DSN from your project settings
+4. Add the DSN to Vercel environment variables as `VITE_SENTRY_DSN`
+
+### Server-Side AI Routes
+
+All AI functionality has been moved to server-side Edge Functions:
+
+#### Available AI Endpoints
+- **AI Coach** (`/ai-coach`) - Financial advice and coaching
+- **AI Insights** (`/ai-insights`) - Personalized financial insights
+- **Risk Prediction** (`/risk-prediction`) - Financial risk analysis
+
+#### Rate Limiting
+- AI Coach: 5 requests per minute per user
+- AI Insights: 3 requests per 5 minutes per user  
+- Risk Prediction: 2 requests per 5 minutes per user
+
+### Security Features
+- Row Level Security (RLS) enabled on all tables
+- User authentication required for all operations
+- Rate limiting on AI endpoints
+- Input validation and sanitization
+- Error monitoring and alerting
+
+### Performance Monitoring
+- Automatic performance tracking for API calls
+- Slow operation detection (>5s operations logged)
+- User action tracking for critical features
+- Real-time error reporting to Sentry
+
+### Production Checklist
+- [x] Environment variables configured
+- [x] Server-side AI routes implemented
+- [x] Rate limiting enabled
+- [x] Error monitoring with Sentry
+- [x] Performance monitoring
+- [x] Security audits passed
+- [x] RLS policies implemented
+- [ ] SSL certificate configured
+- [ ] CDN setup for assets
+- [ ] Database backups scheduled
+
 ## Getting Started
 
 To run this project locally, follow these steps:
@@ -65,15 +130,20 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (Backend)
+- Sentry (Monitoring)
 
 ## Deployment
 
 The application can be deployed to any hosting platform that supports Node.js applications. Some recommended platforms include:
 
-- Vercel
+- Vercel (Recommended)
 - Netlify
 - AWS Amplify
 - Heroku
+
+### Support
+For issues or questions, please check the documentation or create an issue in the repository.
 
 ## Contributing
 

@@ -1,5 +1,7 @@
 // API client for handling all API requests
-import { supabase } from '@/integrations/supabase/client'
+import { supabase } from '@/integrations/supabase/client';
+import { captureException } from './sentry';
+import { monitoredAPICall } from './monitoring';
 
 export interface FinancialData {
   transactions: Array<{
@@ -62,12 +64,13 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
     return getFallbackInsights();
   }
 
-  try {
+  return monitoredAPICall('ai-insights', async () => {
     const { data, error } = await supabase.functions.invoke('ai-insights', {
       body: { userId }
     });
 
     if (error) {
+      captureException(error);
       console.error('Error calling ai-insights function:', error);
       return getFallbackInsights();
     }
@@ -87,10 +90,7 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
       action: insight.action || 'Review your financial data',
       priority: insight.priority || index + 1
     }));
-  } catch (error) {
-    console.error('Error in generateAIInsights:', error);
-    return getFallbackInsights();
-  }
+  });
 }
 
 export async function generateBudgetRecommendations(userId: string): Promise<BudgetRecommendation> {
@@ -155,21 +155,19 @@ export async function generateFinancialAdvice(userContext: string): Promise<stri
   }
   localStorage.setItem('lastAIRequest', now.toString());
 
-  try {
+  return monitoredAPICall('ai-coach', async () => {
     const { data, error } = await supabase.functions.invoke('ai-coach', {
       body: { userContext }
     });
 
     if (error) {
+      captureException(error);
       console.error('Error calling ai-coach function:', error);
       return getFallbackFinancialAdvice(userContext);
     }
 
     return data.advice || getFallbackFinancialAdvice(userContext);
-  } catch (error) {
-    console.error('Error in generateFinancialAdvice:', error);
-    return getFallbackFinancialAdvice(userContext);
-  }
+  });
 }
 
 export async function analyzeFinancialRisk(financialData: any): Promise<string> {

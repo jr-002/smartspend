@@ -2,6 +2,10 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { setupGlobalErrorHandlers } from './lib/error-handler'
+import { initSentry } from './lib/sentry'
+
+// Initialize Sentry for error monitoring
+initSentry()
 
 // Set up global error handlers
 setupGlobalErrorHandlers()
