@@ -43,7 +43,7 @@ const Dashboard = () => {
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-md">
                   Track, predict, and optimize your spending habits with AI-powered insights. 
-                  Make every naira count with SmartSpend.
+                  Make every dollar count with SmartSpend.
                 </p>
               </div>
               
@@ -62,7 +62,7 @@ const Dashboard = () => {
                   <div className="text-sm text-muted-foreground">Active Users</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">₦2.5B+</div>
+                  <div className="text-2xl font-bold text-foreground">$2.5B+</div>
                   <div className="text-sm text-muted-foreground">Money Tracked</div>
                 </div>
                 <div className="text-center">
@@ -77,6 +77,10 @@ const Dashboard = () => {
                 src={heroImage} 
                 alt="SmartSpend Dashboard Preview" 
                 className="rounded-2xl shadow-floating w-full"
+                onError={(e) => {
+                  // Hide image if it fails to load
+                  e.currentTarget.style.display = 'none';
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent rounded-2xl"></div>
             </div>

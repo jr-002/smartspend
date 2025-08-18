@@ -58,10 +58,24 @@ const SmartBudgeting = () => {
   };
 
   const handleAddBudget = async () => {
-    if (!newBudget.category || !newBudget.amount) {
+    if (!newBudget.category?.trim() || !newBudget.amount || newBudget.amount <= 0) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields.",
+        description: "Please provide a valid category name and amount greater than zero.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check for duplicate category
+    const existingBudget = budgetCategories.find(cat => 
+      cat.name.toLowerCase() === newBudget.category.toLowerCase()
+    );
+    
+    if (existingBudget) {
+      toast({
+        title: "Error",
+        description: "A budget for this category already exists.",
         variant: "destructive",
       });
       return;

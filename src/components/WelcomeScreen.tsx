@@ -47,14 +47,29 @@ const WelcomeScreen = () => {
 
     try {
       if (isLogin) {
+        // Validate login form
+        if (!formData.email?.trim() || !formData.password) {
+          setError("Please enter both email and password");
+          setLoading(false);
+          return;
+        }
+
         const { error } = await signIn(formData.email, formData.password);
         if (error) {
           setError(error.message);
         }
       } else {
         // Validate form data before signup
-        if (!formData.email || !formData.password || !formData.name) {
+        if (!formData.email?.trim() || !formData.password || !formData.name?.trim()) {
           setError("Please fill in all required fields");
+          setLoading(false);
+          return;
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          setError("Please enter a valid email address");
           setLoading(false);
           return;
         }
@@ -71,8 +86,15 @@ const WelcomeScreen = () => {
           return;
         }
 
+        // Validate currency
+        if (!formData.currency || formData.currency.length !== 3) {
+          setError("Please select a valid currency");
+          setLoading(false);
+          return;
+        }
+
         const { error } = await signUp(formData.email, formData.password, {
-          name: formData.name,
+          name: formData.name.trim(),
           monthlyIncome: formData.monthlyIncome,
           currency: formData.currency
         });

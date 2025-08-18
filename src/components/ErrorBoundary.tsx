@@ -29,16 +29,31 @@ class ErrorBoundary extends Component<Props, State> {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     
     // Log error details for debugging
-    console.error('Error details:', {
+    const errorDetails = {
       message: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       url: window.location.href
-    });
+    };
     
-    // In production, you would send this to a monitoring service like Sentry
+    console.error('Error details:', errorDetails);
+    
+    // In production, send to monitoring service
+    if (import.meta.env.PROD) {
+      // Example: Send to monitoring service
+      try {
+        fetch('/api/errors', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(errorDetails)
+        }).catch(console.error);
+      } catch (e) {
+        console.error('Failed to log error to monitoring service:', e);
+      }
+    }
+    
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }

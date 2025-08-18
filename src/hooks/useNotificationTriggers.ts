@@ -14,26 +14,37 @@ export const useNotificationTriggers = () => {
   const { goals: savingsGoals } = useSavingsGoals();
   const { user, profile } = useAuth();
 
+  // Debounce notification creation to prevent spam
+  const debouncedAddNotification = useMemo(
+    () => debounce(addNotification, 1000),
+    [addNotification]
+  );
+
   // Check for budget overruns
   useEffect(() => {
-    if (!user || !settings.budgetAlerts || !transactions.length || !budgets.length) return;
+    if (!user || !settings?.budgetAlerts || !Array.isArray(transactions) || !Array.isArray(budgets)) return;
+    if (transactions.length === 0 || budgets.length === 0) return;
 
     const currentMonth = new Date().toISOString().slice(0, 7);
     const currentMonthTransactions = transactions.filter(t => 
-      t.date.startsWith(currentMonth) && t.transaction_type === 'expense'
+      t?.date?.startsWith(currentMonth) && t.transaction_type === 'expense'
     );
 
     const categorySpending: Record<string, number> = {};
     currentMonthTransactions.forEach(transaction => {
-      categorySpending[transaction.category] = (categorySpending[transaction.category] || 0) + transaction.amount;
+      if (transaction?.category && typeof transaction.amount === 'number') {
+        categorySpending[transaction.category] = (categorySpending[transaction.category] || 0) + transaction.amount;
+      }
     });
 
     budgets.forEach(budget => {
+      if (!budget?.category || typeof budget.amount !== 'number') return;
+      
       const spent = categorySpending[budget.category] || 0;
       const percentage = (spent / budget.amount) * 100;
 
       if (percentage >= 100) {
-        addNotification({
+        debouncedAddNotification({
           title: 'Budget Exceeded',
           message: `You have exceeded your ${budget.category} budget by ${((spent - budget.amount) / budget.amount * 100).toFixed(1)}%`,
           type: 'budget',
@@ -42,7 +53,7 @@ export const useNotificationTriggers = () => {
           data: { category: budget.category, spent, budgeted: budget.amount }
         });
       } else if (percentage >= 80) {
-        addNotification({
+        debouncedAddNotification({
           title: 'Budget Alert',
           message: `You have used ${percentage.toFixed(1)}% of your ${budget.category} budget`,
           type: 'budget',
@@ -52,7 +63,7 @@ export const useNotificationTriggers = () => {
         });
       }
     });
-  }, [transactions, budgets, user, settings.budgetAlerts, addNotification]);
+  }, [transactions, budgets, user, settings?.budgetAlerts, debouncedAddNotification]);
 
   // Check for upcoming bill due dates
   useEffect(() => {

@@ -41,7 +41,20 @@ const AIFinancialCoach = () => {
   ];
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || isLoading) return;
+
+    // Rate limiting check
+    const lastMessage = localStorage.getItem('lastCoachMessage');
+    const now = Date.now();
+    if (lastMessage && now - parseInt(lastMessage) < 3000) {
+      toast({
+        title: "Please wait",
+        description: "Please wait a moment before sending another message.",
+        variant: "destructive",
+      });
+      return;
+    }
+    localStorage.setItem('lastCoachMessage', now.toString());
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -64,10 +77,8 @@ const AIFinancialCoach = () => {
       };
       
       setMessages(prev => [...prev, assistantMessage]);
-      setIsLoading(false);
     } catch (error) {
       console.error('Error getting AI response:', error);
-      setIsLoading(false);
       // Fallback to local response
       const fallbackResponse = generateAIResponse(inputMessage);
       const assistantMessage: ChatMessage = {
@@ -77,6 +88,8 @@ const AIFinancialCoach = () => {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, assistantMessage]);
+    } finally {
+      setIsLoading(false);
     }
   };
 

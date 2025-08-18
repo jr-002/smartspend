@@ -18,9 +18,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
               src="/Picture1.png" 
               alt="SmartSpend Logo" 
               className="w-12 h-12 object-contain"
+              onError={(e) => {
+                // Fallback if logo fails to load
+                e.currentTarget.style.display = 'none';
+              }}
             />
           </div>
-          <p className="text-muted-foreground">Loading...</p>
+          <div className="space-y-2">
+            <div className="h-4 w-24 bg-muted rounded mx-auto animate-pulse"></div>
+            <p className="text-muted-foreground text-sm">Loading your financial data...</p>
+          </div>
         </div>
       </div>
     );

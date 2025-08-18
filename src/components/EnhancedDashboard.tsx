@@ -29,26 +29,35 @@ const EnhancedDashboard = () => {
     );
   }
 
-  // Calculate financial metrics
-  const totalIncome = transactions
-    .filter((t) => t.transaction_type === 'income')
+  // Calculate financial metrics with safety checks
+  const safeTransactions = Array.isArray(transactions) ? transactions : [];
+  const safeBills = Array.isArray(bills) ? bills : [];
+  const safeBudgets = Array.isArray(budgets) ? budgets : [];
+  const safeSavingsGoals = Array.isArray(savingsGoals) ? savingsGoals : [];
+
+  const totalIncome = safeTransactions
+    .filter((t) => t?.transaction_type === 'income' && typeof t.amount === 'number')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const totalExpenses = transactions
-    .filter((t) => t.transaction_type === 'expense')
+  const totalExpenses = safeTransactions
+    .filter((t) => t?.transaction_type === 'expense' && typeof t.amount === 'number')
     .reduce((sum, t) => sum + t.amount, 0);
 
   const balance = totalIncome - totalExpenses;
 
-  const billsPaid = bills.filter((bill) => bill.status === 'paid').length;
-  const billsPending = bills.filter((bill) => bill.status === 'pending').length;
-  const billsOverdue = bills.filter((bill) => bill.status === 'overdue').length;
+  const billsPaid = safeBills.filter((bill) => bill?.status === 'paid').length;
+  const billsPending = safeBills.filter((bill) => bill?.status === 'pending').length;
+  const billsOverdue = safeBills.filter((bill) => bill?.status === 'overdue').length;
 
-  const totalBudgets = budgets.length;
+  const totalBudgets = safeBudgets.length;
 
   // Calculate savings goals metrics
-  const totalSavingsGoalAmount = savingsGoals.reduce((sum, goal) => sum + goal.target_amount, 0);
-  const totalCurrentSavings = savingsGoals.reduce((sum, goal) => sum + goal.current_amount, 0);
+  const totalSavingsGoalAmount = safeSavingsGoals
+    .filter(goal => typeof goal?.target_amount === 'number')
+    .reduce((sum, goal) => sum + goal.target_amount, 0);
+  const totalCurrentSavings = safeSavingsGoals
+    .filter(goal => typeof goal?.current_amount === 'number')
+    .reduce((sum, goal) => sum + goal.current_amount, 0);
 
   return (
     <div className="space-y-8">

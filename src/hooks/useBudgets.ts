@@ -72,12 +72,45 @@ export const useBudgets = () => {
       return false;
     }
 
+    // Validate input data
+    if (!newBudget.category?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Budget category is required.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (newBudget.amount <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Budget amount must be greater than zero.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Check for duplicate category
+    const existingBudget = budgets.find(b => 
+      b.category.toLowerCase() === newBudget.category.toLowerCase()
+    );
+    
+    if (existingBudget) {
+      toast({
+        title: "Validation Error",
+        description: "A budget for this category already exists.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     try {
       const { data, error: insertError } = await supabase
         .from('budgets')
         .insert({
           user_id: user.id,
-          category: newBudget.category,
+          category: newBudget.category.trim(),
           amount: newBudget.amount,
           period: newBudget.period,
         })

@@ -57,6 +57,11 @@ export interface BudgetRecommendation {
 
 // Real AI API functions using Supabase Edge Functions
 export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
+  if (!userId) {
+    console.error('generateAIInsights: userId is required');
+    return getFallbackInsights();
+  }
+
   try {
     const { data, error } = await supabase.functions.invoke('ai-insights', {
       body: { userId }
@@ -64,19 +69,36 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
 
     if (error) {
       console.error('Error calling ai-insights function:', error);
-      // Return fallback insights instead of throwing
       return getFallbackInsights();
     }
 
-    return data.insights || [];
+    // Validate response structure
+    if (!data || !Array.isArray(data.insights)) {
+      console.warn('Invalid response structure from ai-insights function');
+      return getFallbackInsights();
+    }
+
+    return data.insights.map((insight: any, index: number) => ({
+      id: insight.id || `fallback-${Date.now()}-${index}`,
+      type: insight.type || 'spending',
+      title: insight.title || 'Financial Insight',
+      description: insight.description || 'No description available',
+      impact: insight.impact || 'medium',
+      action: insight.action || 'Review your financial data',
+      priority: insight.priority || index + 1
+    }));
   } catch (error) {
     console.error('Error in generateAIInsights:', error);
-    // Return fallback insights instead of throwing
     return getFallbackInsights();
   }
 }
 
 export async function generateBudgetRecommendations(userId: string): Promise<BudgetRecommendation> {
+  if (!userId) {
+    console.error('generateBudgetRecommendations: userId is required');
+    return getFallbackBudgetRecommendations();
+  }
+
   try {
     const { data, error } = await supabase.functions.invoke('budget-ai', {
       body: { userId }
@@ -84,7 +106,12 @@ export async function generateBudgetRecommendations(userId: string): Promise<Bud
 
     if (error) {
       console.error('Error calling budget-ai function:', error);
-      // Return fallback recommendations instead of throwing
+      return getFallbackBudgetRecommendations();
+    }
+
+    // Validate response structure
+    if (!data || !data.recommendations) {
+      console.warn('Invalid response structure from budget-ai function');
       return getFallbackBudgetRecommendations();
     }
 
@@ -111,12 +138,23 @@ export async function generateSpendingPredictions(userId: string): Promise<Recor
     return data.predictions || {};
   } catch (error) {
     console.error('Error in generateSpendingPredictions:', error);
-    // Return empty object as fallback
     return {};
   }
 }
 
 export async function generateFinancialAdvice(userContext: string): Promise<string> {
+  if (!userContext?.trim()) {
+    return "Please provide more details about your financial question so I can give you better advice.";
+  }
+
+  // Rate limiting check
+  const lastRequest = localStorage.getItem('lastAIRequest');
+  const now = Date.now();
+  if (lastRequest && now - parseInt(lastRequest) < 5000) { // 5 second cooldown
+    return "Please wait a moment before asking another question.";
+  }
+  localStorage.setItem('lastAIRequest', now.toString());
+
   try {
     const { data, error } = await supabase.functions.invoke('ai-coach', {
       body: { userContext }
@@ -124,14 +162,12 @@ export async function generateFinancialAdvice(userContext: string): Promise<stri
 
     if (error) {
       console.error('Error calling ai-coach function:', error);
-      // Return fallback advice instead of throwing
       return getFallbackFinancialAdvice(userContext);
     }
 
-    return data.advice || '';
+    return data.advice || getFallbackFinancialAdvice(userContext);
   } catch (error) {
     console.error('Error in generateFinancialAdvice:', error);
-    // Return fallback advice instead of throwing
     return getFallbackFinancialAdvice(userContext);
   }
 }
@@ -162,20 +198,38 @@ function getFallbackInsights(): AIInsight[] {
     {
       id: 'fallback-1',
       type: 'spending',
-      title: 'Track Your Expenses',
-      description: 'Start by adding your daily transactions to get personalized insights.',
+      title: 'Start Tracking Your Expenses',
+      description: 'Begin by recording your daily transactions to unlock personalized financial insights and recommendations.',
       impact: 'medium',
-      action: 'Add at least 10 transactions to see spending patterns.',
+      action: 'Add at least 10 transactions over the next week to see meaningful spending patterns and trends.',
       priority: 1
     },
     {
       id: 'fallback-2',
       type: 'budget',
       title: 'Create Your First Budget',
-      description: 'Set up budget categories to control your spending.',
+      description: 'Establish budget categories for your main expenses to gain better control over your spending habits.',
       impact: 'high',
-      action: 'Create budgets for your main expense categories.',
+      action: 'Start with budgets for Food, Transportation, and Entertainment - your likely biggest expense categories.',
       priority: 2
+    },
+    {
+      id: 'fallback-3',
+      type: 'saving',
+      title: 'Build an Emergency Fund',
+      description: 'Having an emergency fund is crucial for financial security and peace of mind.',
+      impact: 'high',
+      action: 'Start by saving $1,000 as a starter emergency fund, then work towards 3-6 months of expenses.',
+      priority: 3
+    },
+    {
+      id: 'fallback-4',
+      type: 'goal',
+      title: 'Set Financial Goals',
+      description: 'Clear financial goals help you stay motivated and track your progress effectively.',
+      impact: 'medium',
+      action: 'Create specific, measurable goals like "Save $5,000 for vacation by December 2025".',
+      priority: 4
     }
   ];
 }

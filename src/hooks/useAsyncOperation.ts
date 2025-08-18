@@ -14,6 +14,12 @@ export function useAsyncOperation<T>() {
   });
 
   const execute = useCallback(async (asyncFn: () => Promise<T>) => {
+    // Prevent concurrent executions
+    if (state.isLoading) {
+      console.warn('Async operation already in progress, skipping');
+      return null;
+    }
+
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     try {
       const result = await asyncFn();
@@ -21,16 +27,20 @@ export function useAsyncOperation<T>() {
       return result;
     } catch (error) {
       console.error('Async operation failed:', error);
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'An unexpected error occurred';
       const errorObj = new Error(errorMessage);
       setState({ data: null, isLoading: false, error: errorObj });
-      // Don't re-throw the error, let the component handle it gracefully
       return null;
     }
-  }, []);
+  }, [state.isLoading]);
 
   return {
     ...state,
     execute,
+    reset: useCallback(() => {
+      setState({ data: null, isLoading: false, error: null });
+    }, []),
   };
 }

@@ -43,15 +43,18 @@ const AIInsights = () => {
         return await generateAIInsights(user.id);
       });
 
-      toast({
-        title: "Success",
-        description: "Financial insights generated successfully!",
-      });
+      // Only show success toast if we actually got insights
+      if (insights && insights.length > 0) {
+        toast({
+          title: "Success",
+          description: "Financial insights generated successfully!",
+        });
+      }
     } catch (error) {
       console.error('Error generating insights:', error);
       toast({
         title: "Error",
-        description: "Failed to generate insights. Using fallback recommendations.",
+        description: "Failed to generate insights. Please try again later.",
         variant: "destructive",
       });
     }

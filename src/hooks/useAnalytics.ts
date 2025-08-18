@@ -135,14 +135,24 @@ export const useAnalytics = (period: string = '3months') => {
       if (savingsGoalsResult.error) throw savingsGoalsResult.error;
       if (billsResult.error) throw billsResult.error;
 
-      const transactions = transactionsResult.data || [];
-      const budgets = budgetsResult.data || [];
-      const savingsGoals = savingsGoalsResult.data || [];
-      const bills = billsResult.data || [];
+      // Ensure we have valid arrays and validate data
+      const transactions = Array.isArray(transactionsResult.data) ? transactionsResult.data : [];
+      const budgets = Array.isArray(budgetsResult.data) ? budgetsResult.data : [];
+      const savingsGoals = Array.isArray(savingsGoalsResult.data) ? savingsGoalsResult.data : [];
+      const bills = Array.isArray(billsResult.data) ? billsResult.data : [];
+
+      // Validate transaction data
+      const validTransactions = transactions.filter(t => 
+        t && typeof t.amount === 'number' && t.transaction_type && t.date
+      );
+
+      if (validTransactions.length !== transactions.length) {
+        console.warn(`Filtered out ${transactions.length - validTransactions.length} invalid transactions`);
+      }
 
       // Process transactions data
-      const incomeTransactions = transactions.filter(t => t.transaction_type === 'income');
-      const expenseTransactions = transactions.filter(t => t.transaction_type === 'expense');
+      const incomeTransactions = validTransactions.filter(t => t.transaction_type === 'income');
+      const expenseTransactions = validTransactions.filter(t => t.transaction_type === 'expense');
       
       const totalIncome = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
       const totalExpenses = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
@@ -150,16 +160,16 @@ export const useAnalytics = (period: string = '3months') => {
       const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
 
       // Generate monthly spending data
-      const monthlyData = generateMonthlyData(transactions, budgets, startDate, endDate);
+      const monthlyData = generateMonthlyData(validTransactions, budgets, startDate, endDate);
       
       // Generate category breakdown
       const categoryData = generateCategoryBreakdown(expenseTransactions);
       
       // Generate income vs expenses data
-      const incomeVsExpensesData = generateIncomeVsExpensesData(transactions, startDate, endDate);
+      const incomeVsExpensesData = generateIncomeVsExpensesData(validTransactions, startDate, endDate);
       
       // Calculate key metrics
-      const keyMetrics = calculateKeyMetrics(transactions, budgets);
+      const keyMetrics = calculateKeyMetrics(validTransactions, budgets);
       
       // Process goals data
       const goalsProgress = {

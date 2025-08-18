@@ -49,18 +49,22 @@ export const useTransactions = () => {
         throw fetchError;
       }
 
-      // Transform the data to ensure proper typing
-      const transformedData: Transaction[] = Array.isArray(data) ? data.map(item => ({
-        id: item.id,
-        description: item.description,
-        amount: item.amount,
-        category: item.category,
-        date: item.date,
-        transaction_type: item.transaction_type as "income" | "expense",
-        created_at: item.created_at,
-      })) : [];
+      // Ensure we always have an array and validate data structure
+      const validatedData: Transaction[] = Array.isArray(data) ? data
+        .filter(item => item && typeof item === 'object')
+        .map(item => ({
+          id: item.id || '',
+          description: item.description || '',
+          amount: Number(item.amount) || 0,
+          category: item.category || 'Other',
+          date: item.date || new Date().toISOString().split('T')[0],
+          transaction_type: (item.transaction_type === 'income' || item.transaction_type === 'expense') 
+            ? item.transaction_type 
+            : 'expense',
+          created_at: item.created_at,
+        })) : [];
 
-      setTransactions(transformedData);
+      setTransactions(validatedData);
     } catch (err) {
       console.error('Error fetching transactions:', err);
       setError('Failed to load transactions');

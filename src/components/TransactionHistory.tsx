@@ -91,6 +91,8 @@ const TransactionHistory = () => {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (loading) return; // Prevent double submission
+    
     const transactionData = {
       description: values.description,
       amount: values.amount,
@@ -99,6 +101,8 @@ const TransactionHistory = () => {
       date: values.date.toISOString().split('T')[0]
     };
 
+    setLoading(true);
+    
     if (editingTransaction) {
       const success = await updateTransaction(editingTransaction.id, transactionData);
       if (success) {
@@ -117,6 +121,7 @@ const TransactionHistory = () => {
       }
     }
 
+    setLoading(false);
     resetForm();
   }
 
