@@ -170,7 +170,7 @@ export const sanitizeNumber = (input: number): number => {
 
 // Validation error formatter
 export const formatValidationErrors = (error: z.ZodError): string[] => {
-  return error.errors.map((err) => {
+  return error.issues.map((err) => {
     const path = err.path.join('.');
     return `${path}: ${err.message}`;
   });

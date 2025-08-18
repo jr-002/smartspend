@@ -1,4 +1,5 @@
 // Performance optimization utilities
+import React from 'react';
 
 // Debounce function for search inputs and API calls
 export function debounce<T extends (...args: any[]) => any>(
@@ -63,12 +64,18 @@ export function createLazyComponent<T extends React.ComponentType<any>>(
 ) {
   const LazyComponent = React.lazy(importFunc);
   
-  return React.forwardRef<any, React.ComponentProps<T>>((props, ref) => (
-    <React.Suspense fallback={fallback ? <fallback /> : <div>Loading...</div>}>
-      <LazyComponent {...props} ref={ref} />
-    }
-    </React.Suspense>
-  ));
+  return React.forwardRef<any, React.ComponentProps<T>>((props, ref) => {
+    const FallbackComponent = fallback;
+    return React.createElement(
+      React.Suspense,
+      { 
+        fallback: FallbackComponent 
+          ? React.createElement(FallbackComponent)
+          : React.createElement('div', {}, 'Loading...')
+      },
+      React.createElement(LazyComponent, { ...props } as any)
+    );
+  });
 }
 
 // Performance monitoring utilities

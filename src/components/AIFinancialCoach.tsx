@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +48,7 @@ const AIFinancialCoach = () => {
     const lastMessage = localStorage.getItem('lastCoachMessage');
     const now = Date.now();
     if (lastMessage && now - parseInt(lastMessage) < 3000) {
+      const { toast } = useToast();
       toast({
         title: "Please wait",
         description: "Please wait a moment before sending another message.",

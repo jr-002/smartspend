@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import {
   Card,
   CardContent,
@@ -44,7 +45,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 const TransactionHistory = () => {
-  const { transactions, loading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
+  const { transactions, loading: transactionsLoading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const { profile } = useAuth();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -52,6 +53,8 @@ const TransactionHistory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const formSchema = z.object({
     description: z.string().min(2, {
@@ -317,7 +320,7 @@ const TransactionHistory = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading && (
+              {transactionsLoading && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center">
                     <div className="flex items-center justify-center">
@@ -327,14 +330,14 @@ const TransactionHistory = () => {
                   </TableCell>
                 </TableRow>
               )}
-              {!loading && filteredTransactions.length === 0 && (
+              {!transactionsLoading && filteredTransactions.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center">
                     No transactions found.
                   </TableCell>
                 </TableRow>
               )}
-              {!loading && filteredTransactions.map((transaction) => (
+              {!transactionsLoading && filteredTransactions.map((transaction) => (
                 <TableRow key={transaction.id}>
                   <TableCell>{transaction.date}</TableCell>
                   <TableCell>{transaction.description}</TableCell>

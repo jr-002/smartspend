@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { debounce } from '@/lib/performance';
 import { useNotifications } from './useNotifications';
 import { useTransactions } from './useTransactions';
 import { useBills } from './useBills';
