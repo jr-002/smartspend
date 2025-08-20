@@ -134,7 +134,7 @@ const AIInsights = () => {
       
       <CardContent>
         <div className="space-y-4">
-          {insights.map((insight) => (
+          {insights?.map((insight) => (
             <div key={insight.id} className="p-6 border rounded-lg bg-card/50 hover:bg-card transition-colors">
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-primary/10 rounded-lg text-primary">
