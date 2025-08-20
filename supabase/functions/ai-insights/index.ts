@@ -287,16 +287,19 @@ serve(async (req) => {
       supabase.from('budgets').select('*').eq('user_id', userId),
       supabase.from('savings_goals').select('*').eq('user_id', userId),
       supabase.from('bills').select('*').eq('user_id', userId),
-      supabase.from('profiles').select('*').eq('id', userId).single()
+      supabase.from('profiles').select('*').eq('id', userId).limit(1)
     ]);
 
-    if (transactionsResult.error || budgetsResult.error || savingsGoalsResult.error || billsResult.error || profileResult.error) {
+    if (transactionsResult.error || budgetsResult.error || savingsGoalsResult.error || billsResult.error) {
       console.error('Database error:', { transactionsResult, budgetsResult, savingsGoalsResult, billsResult, profileResult });
       return new Response(JSON.stringify({ error: 'Failed to fetch financial data' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // Handle missing profile gracefully
+    const profile = profileResult.data?.[0] || null;
 
     const currentMonth = new Date().toISOString().slice(0, 7);
     const currentMonthTransactions = transactionsResult.data.filter(t => t.date.startsWith(currentMonth) && t.transaction_type === 'expense');
@@ -322,8 +325,8 @@ serve(async (req) => {
       budgets: budgetsWithSpent,
       savingsGoals: savingsGoalsResult.data,
       bills: billsResult.data,
-      monthlyIncome: profileResult.data?.monthly_income || 0,
-      currency: profileResult.data?.currency || 'USD'
+      monthlyIncome: profile?.monthly_income || 0,
+      currency: profile?.currency || 'USD'
     };
 
     const insights = await generateFinancialInsights(financialData);
