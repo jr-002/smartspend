@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
-import { env } from '../lib/environment';
+import { env } from '../../lib/environment';
 
 
 export const supabase = createClient<Database>(env.supabase.url, env.supabase.anonKey, {
