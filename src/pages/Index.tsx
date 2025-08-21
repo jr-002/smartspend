@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState, Suspense, lazy } from "react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
+import ProfileSettings from "@/components/ProfileSettings";
 import {
   LayoutDashboard,
   Calculator,
@@ -141,14 +142,16 @@ const Index = () => {
               </div>
 
               <div className="flex items-center gap-3 lg:gap-4">
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-card/50 rounded-full border border-border/50">
-                  <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center">
-                    <User className="w-3.5 h-3.5 text-primary-foreground" />
+                <ProfileSettings>
+                  <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-card/50 rounded-full border border-border/50 hover:bg-card/80 transition-colors cursor-pointer">
+                    <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center">
+                      <User className="w-3.5 h-3.5 text-primary-foreground" />
+                    </div>
+                    <span className="text-sm font-medium text-foreground max-w-32 truncate">
+                      {profile?.name || user?.email}
+                    </span>
                   </div>
-                  <span className="text-sm font-medium text-foreground max-w-32 truncate">
-                    {profile?.name || user?.email}
-                  </span>
-                </div>
+                </ProfileSettings>
                 <ThemeToggle />
                 <Button variant="outline" size="sm" onClick={handleSignOut} className="border-border/50">
                   Sign Out
