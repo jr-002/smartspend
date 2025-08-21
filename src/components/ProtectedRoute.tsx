@@ -33,7 +33,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  if (!user || !profile) {
+  if (!user) {
     return <WelcomeScreen />;
   }
 
