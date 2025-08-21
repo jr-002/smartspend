@@ -22,6 +22,8 @@ import { User, Settings, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CURRENCIES } from '@/utils/currencies';
 
+// Profile settings component for user data management
+
 interface ProfileSettingsProps {
   children: React.ReactNode;
 }
