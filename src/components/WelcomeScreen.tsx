@@ -9,6 +9,7 @@ import { Wallet, Target, TrendingUp, Brain, Sparkles, Mail, Lock, User, DollarSi
 import CurrencySelector from "./CurrencySelector";
 import { getDefaultCurrency } from "@/utils/currencies";
 import { useAuth } from "@/contexts/AuthContext";
+import { passwordSchema, emailSchema, nameSchema, currencyCodeSchema } from "@/utils/validation";
 
 const WelcomeScreen = () => {
   const [step, setStep] = useState(1);
@@ -67,9 +68,10 @@ const WelcomeScreen = () => {
         }
 
         // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
-          setError("Please enter a valid email address");
+        try {
+          emailSchema.parse(formData.email);
+        } catch (err: any) {
+          setError(err.issues?.[0]?.message || "Please enter a valid email address");
           setLoading(false);
           return;
         }
@@ -80,15 +82,27 @@ const WelcomeScreen = () => {
           return;
         }
 
-        if (formData.password.length < 6) {
-          setError("Password must be at least 6 characters long");
+        try {
+          passwordSchema.parse(formData.password);
+        } catch (err: any) {
+          setError(err.issues?.[0]?.message || "Password does not meet requirements");
+          setLoading(false);
+          return;
+        }
+
+        try {
+          nameSchema.parse(formData.name.trim());
+        } catch (err: any) {
+          setError(err.issues?.[0]?.message || "Please enter a valid name");
           setLoading(false);
           return;
         }
 
         // Validate currency
-        if (!formData.currency || formData.currency.length !== 3) {
-          setError("Please select a valid currency");
+        try {
+          currencyCodeSchema.parse(formData.currency);
+        } catch (err: any) {
+          setError(err.issues?.[0]?.message || "Please select a valid currency");
           setLoading(false);
           return;
         }

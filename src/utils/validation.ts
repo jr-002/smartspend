@@ -36,7 +36,7 @@ export const passwordSchema = z
   .string()
   .min(6, "Password must be at least 6 characters")
   .max(128, "Password must be less than 128 characters")
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number");
+  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};\\':"\\|<>?,.\/`~])/, "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character");
 
 export const nameSchema = z
   .string()
