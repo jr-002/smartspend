@@ -1,11 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
+import { env } from '@/lib/environment';
 
-// Use project configuration directly as provided by Lovable
-const SUPABASE_URL = 'https://gxvsmnmgrxovbsmdkdqf.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4dnNtbm1ncnhvdmJzbWRrZHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1MTkyNTcsImV4cCI6MjA2ODA5NTI1N30.F2EPZdwx8Y7XTV1hqb4sas3kiUK77GzHuuqbh-Ah1ik';
-
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(env.supabase.url, env.supabase.anonKey, {
   auth: {
     storage: localStorage,
     persistSession: true,

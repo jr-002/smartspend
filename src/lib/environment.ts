@@ -11,6 +11,9 @@ interface EnvironmentConfig {
     environment: 'development' | 'production' | 'test';
     version: string;
   };
+  sentry: {
+    dsn?: string;
+  };
 }
 
 // Validate required environment variables
@@ -45,6 +48,9 @@ function validateEnvironment(): EnvironmentConfig {
     app: {
       environment: nodeEnv as 'development' | 'production' | 'test',
       version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+    },
+    sentry: {
+      dsn: import.meta.env.VITE_SENTRY_DSN,
     },
   };
 }
