@@ -22,19 +22,29 @@ function validateEnvironment(): EnvironmentConfig {
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
   const nodeEnv = import.meta.env.NODE_ENV || 'development';
 
+  // Enhanced debugging for environment variables
+  console.log('Environment validation:', {
+    supabaseUrl: supabaseUrl ? 'Set' : 'Missing',
+    supabaseAnonKey: supabaseAnonKey ? 'Set' : 'Missing',
+    nodeEnv,
+    allEnvVars: Object.keys(import.meta.env)
+  });
+
   if (!supabaseUrl) {
-    throw new Error('VITE_SUPABASE_URL is required');
+    console.error('Missing VITE_SUPABASE_URL. Available env vars:', Object.keys(import.meta.env));
+    throw new Error('VITE_SUPABASE_URL is required. Please check your environment variables.');
   }
 
   if (!supabaseAnonKey) {
-    throw new Error('VITE_SUPABASE_ANON_KEY is required');
+    console.error('Missing VITE_SUPABASE_ANON_KEY. Available env vars:', Object.keys(import.meta.env));
+    throw new Error('VITE_SUPABASE_ANON_KEY is required. Please check your environment variables.');
   }
 
   // Validate URL format
   try {
     new URL(supabaseUrl);
   } catch {
-    throw new Error('VITE_SUPABASE_URL must be a valid URL');
+    throw new Error('VITE_SUPABASE_URL must be a valid URL. Current value format is invalid.');
   }
 
   return {
