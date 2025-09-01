@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Wallet, Target, TrendingUp, Brain, Sparkles, Mail, Lock, User, DollarSign, CheckCircle, Eye, EyeOff, Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Wallet, Target, TrendingUp, Brain, Sparkles, Mail, Lock, User, DollarSign, CheckCircle, Eye, EyeOff, Info, Shield, Zap, Globe, Star } from "lucide-react";
 import CurrencySelector from "./CurrencySelector";
 import { getDefaultCurrency } from "@/utils/currencies";
 import { useAuth } from "@/contexts/AuthContext";
@@ -231,7 +232,7 @@ const WelcomeScreen = () => {
             Welcome to SmartSpend
           </CardTitle>
           <p className="text-muted-foreground">
-            Your Global Financial Wellness Assistant
+            Your AI-Powered Global Financial Assistant
           </p>
         </CardHeader>
 
@@ -245,34 +246,75 @@ const WelcomeScreen = () => {
           )}
 
           {step === 1 && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-2">Let's get started!</h3>
-                <p className="text-sm text-muted-foreground">
-                  SmartSpend helps you track expenses, manage budgets, and achieve your financial goals globally.
+            <div className="space-y-6">
+              <div className="text-center space-y-3">
+                <Badge variant="secondary" className="px-3 py-1 text-xs font-medium bg-primary/10 text-primary border-primary/20">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Smart Financial Management
+                </Badge>
+                <h3 className="text-xl font-bold">Take Control of Your Financial Future</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  Join thousands of users who've transformed their financial health with AI-powered insights and smart budgeting tools.
                 </p>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <Wallet className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <p className="text-sm font-medium">Track Expenses</p>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Wallet className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium">Smart Expense Tracking</p>
+                    <p className="text-xs text-muted-foreground">Automatically categorize and analyze your spending</p>
+                  </div>
                 </div>
-                <div className="text-center p-4 bg-success/5 rounded-lg border border-success/20">
-                  <Target className="w-8 h-8 text-success mx-auto mb-2" />
-                  <p className="text-sm font-medium">Set Goals</p>
+                <div className="flex items-center gap-3 p-3 bg-success/5 rounded-lg border border-success/20">
+                  <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
+                    <Target className="w-5 h-5 text-success" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium">Goal Achievement</p>
+                    <p className="text-xs text-muted-foreground">Set and reach your financial milestones faster</p>
+                  </div>
                 </div>
-                <div className="text-center p-4 bg-warning/5 rounded-lg border border-warning/20">
-                  <TrendingUp className="w-8 h-8 text-warning mx-auto mb-2" />
-                  <p className="text-sm font-medium">Invest Wisely</p>
+                <div className="flex items-center gap-3 p-3 bg-warning/5 rounded-lg border border-warning/20">
+                  <div className="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center">
+                    <Brain className="w-5 h-5 text-warning" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium">AI Financial Coach</p>
+                    <p className="text-xs text-muted-foreground">Get personalized advice and insights</p>
+                  </div>
                 </div>
-                <div className="text-center p-4 bg-purple-500/5 rounded-lg border border-purple-500/20">
-                  <Brain className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-                  <p className="text-sm font-medium">AI Insights</p>
+                <div className="flex items-center gap-3 p-3 bg-purple-500/5 rounded-lg border border-purple-500/20">
+                  <div className="w-10 h-10 bg-purple-500/10 rounded-full flex items-center justify-center">
+                    <Globe className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium">Global Currency Support</p>
+                    <p className="text-xs text-muted-foreground">Manage finances in any currency worldwide</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="text-center space-y-2">
+                <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Shield className="w-3 h-3" />
+                    <span>Bank-level security</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Zap className="w-3 h-3" />
+                    <span>Real-time insights</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-3 h-3" />
+                    <span>10k+ happy users</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
                 <Button
                   variant="outline"
                   className="flex-1"
@@ -284,13 +326,13 @@ const WelcomeScreen = () => {
                   Sign In
                 </Button>
                 <Button
-                  className="flex-1"
+                  className="flex-1 bg-gradient-primary hover:opacity-90 transition-opacity"
                   onClick={() => {
                     setIsLogin(false);
                     setStep(2);
                   }}
                 >
-                  Sign Up
+                  Get Started Free
                 </Button>
               </div>
             </div>
