@@ -2,9 +2,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Groq from 'https://esm.sh/groq-sdk@0.7.0';
 
+// Enhanced security headers with comprehensive protection
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, DELETE',
+  'Access-Control-Max-Age': '86400',
+  'Content-Type': 'application/json',
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'",
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  'X-Permitted-Cross-Domain-Policies': 'none',
+  'Cross-Origin-Embedder-Policy': 'require-corp',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Resource-Policy': 'cross-origin',
 };
 
 // Simple in-memory rate limiter per identifier (user or IP)
@@ -71,6 +85,15 @@ async function generateFinancialAdvice(userContext: string): Promise<string> {
 }
 
 serve(async (req) => {
+  const startTime = Date.now();
+  
+  // Enhanced security logging
+  console.log(`AI Coach Request: ${req.method} ${req.url}`, {
+    timestamp: new Date().toISOString(),
+    userAgent: req.headers.get('user-agent'),
+    ip: req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown'
+  });
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -80,11 +103,19 @@ serve(async (req) => {
   const rl = rateLimit(`ai-coach:${identifier}`, 5, 60_000);
   if (!rl.allowed) {
     const retryAfter = Math.ceil((rl.reset - Date.now()) / 1000);
+    
+    // Log rate limit exceeded
+    console.warn('Rate limit exceeded', {
+      identifier,
+      endpoint: 'ai-coach',
+      timestamp: new Date().toISOString(),
+      retryAfter
+    });
+    
     return new Response(JSON.stringify({ error: 'Too Many Requests. Please try again later.' }), {
       status: 429,
       headers: { 
         ...corsHeaders, 
-        'Content-Type': 'application/json',
         'Retry-After': String(retryAfter),
         'X-RateLimit-Limit': String(rl.limit),
         'X-RateLimit-Remaining': '0',
