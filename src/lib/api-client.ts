@@ -156,32 +156,103 @@ export const withRetry = async <T>(
   };
 };
 
+// Enhanced caching with Supabase optimizations
 export const withCache = <T>(
   cacheKey: string,
   apiCall: () => Promise<ApiResponse<T>>,
   ttl: number = 5 * 60 * 1000 // 5 minutes default
 ): Promise<ApiResponse<T>> => {
-  const cached = localStorage.getItem(cacheKey);
+  // Check memory cache first (faster)
+  const memoryCache = (window as any).__smartspend_cache || new Map();
+  (window as any).__smartspend_cache = memoryCache;
   
+  const memoryCached = memoryCache.get(cacheKey);
+  if (memoryCached && Date.now() - memoryCached.timestamp < ttl) {
+    return Promise.resolve({ success: true, data: memoryCached.data });
+  }
+
+  // Check localStorage cache
+  const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try {
       const { data, timestamp } = JSON.parse(cached);
       if (Date.now() - timestamp < ttl) {
+        // Update memory cache
+        memoryCache.set(cacheKey, { data, timestamp });
         return Promise.resolve({ success: true, data });
       }
     } catch (error) {
-      // Invalid cache, continue with API call
       localStorage.removeItem(cacheKey);
     }
   }
 
   return apiCall().then(result => {
     if (result.success && result.data) {
-      localStorage.setItem(cacheKey, JSON.stringify({
+      const cacheData = {
         data: result.data,
         timestamp: Date.now(),
-      }));
+      };
+      
+      // Store in both memory and localStorage
+      memoryCache.set(cacheKey, cacheData);
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      } catch (error) {
+        // localStorage might be full, clean up old entries
+        console.warn('Cache storage full, clearing old entries');
+        const keys = Object.keys(localStorage);
+        keys.filter(key => key.startsWith('smartspend_cache_'))
+             .slice(0, Math.floor(keys.length / 2))
+             .forEach(key => localStorage.removeItem(key));
+        
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+        } catch (e) {
+          console.warn('Unable to cache data in localStorage');
+        }
+      }
     }
     return result;
+  });
+};
+
+// Supabase-specific caching utilities
+export const clearApiCache = (pattern?: string): void => {
+  const memoryCache = (window as any).__smartspend_cache;
+  if (memoryCache) {
+    if (pattern) {
+      for (const key of memoryCache.keys()) {
+        if (key.includes(pattern)) {
+          memoryCache.delete(key);
+        }
+      }
+    } else {
+      memoryCache.clear();
+    }
+  }
+  
+  const keys = Object.keys(localStorage);
+  keys.forEach(key => {
+    if (key.startsWith('smartspend_cache_')) {
+      if (!pattern || key.includes(pattern)) {
+        localStorage.removeItem(key);
+      }
+    }
+  });
+};
+
+// Preload critical data
+export const preloadCriticalData = async (userId: string): Promise<void> => {
+  if (!userId) return;
+  
+  const criticalApis = [
+    () => apiClient.generateFinancialInsights(userId),
+    () => apiClient.generateBudgetRecommendations(userId),
+  ];
+  
+  // Preload in background without blocking UI
+  criticalApis.forEach(apiCall => {
+    withCache(`preload_${userId}_${apiCall.name}`, apiCall, 10 * 60 * 1000)
+      .catch(error => console.warn('Preload failed:', error));
   });
 };
