@@ -85,11 +85,11 @@ const SavingsGoals = () => {
 
   if (goals.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="section-spacing">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Savings Goals</h2>
-            <p className="text-muted-foreground">Set and track your financial goals</p>
+            <h2 className="heading-primary">Savings Goals</h2>
+            <p className="text-subtle mt-1">Set and track your financial goals</p>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
@@ -102,7 +102,7 @@ const SavingsGoals = () => {
               <DialogHeader>
                 <DialogTitle>Create New Savings Goal</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="card-spacing">
                 <div>
                   <Label htmlFor="name">Goal Name</Label>
                   <Input
@@ -175,11 +175,11 @@ const SavingsGoals = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="section-spacing">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Savings Goals</h2>
-          <p className="text-muted-foreground">Set and track your financial goals</p>
+          <h2 className="heading-primary">Savings Goals</h2>
+          <p className="text-subtle mt-1">Set and track your financial goals</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -192,7 +192,7 @@ const SavingsGoals = () => {
             <DialogHeader>
               <DialogTitle>Create New Savings Goal</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="card-spacing">
               <div>
                 <Label htmlFor="name">Goal Name</Label>
                 <Input
@@ -266,17 +266,17 @@ const SavingsGoals = () => {
           const daysLeft = Math.ceil((new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
           
           return (
-            <Card key={goal.id} className="shadow-card bg-gradient-card border-0">
+            <Card key={goal.id} className="card-clean">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-success/10 rounded-lg flex items-center justify-center">
                       <Target className="w-5 h-5 text-success" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{goal.name}</CardTitle>
+                      <CardTitle className="heading-secondary">{goal.name}</CardTitle>
                       {goal.description && (
-                        <p className="text-sm text-muted-foreground">{goal.description}</p>
+                        <p className="text-subtle">{goal.description}</p>
                       )}
                     </div>
                   </div>
@@ -290,7 +290,7 @@ const SavingsGoals = () => {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="card-spacing">
                 <div>
                   <div className="flex justify-between text-sm mb-2">
                     <span>Progress</span>
@@ -301,12 +301,12 @@ const SavingsGoals = () => {
                 
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-2xl font-bold">{formatCurrency(goal.current_amount, profile?.currency || "USD")}</p>
-                    <p className="text-sm text-muted-foreground">of {formatCurrency(goal.target_amount, profile?.currency || "USD")}</p>
+                    <p className="text-xl font-bold">{formatCurrency(goal.current_amount, profile?.currency || "USD")}</p>
+                    <p className="text-subtle">of {formatCurrency(goal.target_amount, profile?.currency || "USD")}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium">{daysLeft > 0 ? `${daysLeft} days left` : 'Overdue'}</p>
-                    <p className="text-xs text-muted-foreground">{goal.deadline}</p>
+                    <p className="text-sm font-medium text-foreground">{daysLeft > 0 ? `${daysLeft} days left` : 'Overdue'}</p>
+                    <p className="text-subtle">{goal.deadline}</p>
                   </div>
                 </div>
 

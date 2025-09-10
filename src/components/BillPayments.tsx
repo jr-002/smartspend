@@ -111,11 +111,11 @@ const BillPayments = () => {
 
   if (bills.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="section-spacing">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Bill Payments & Reminders</h2>
-            <p className="text-muted-foreground">Manage your recurring bills and payments</p>
+            <h2 className="heading-primary">Bill Payments & Reminders</h2>
+            <p className="text-subtle mt-1">Manage your recurring bills and payments</p>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
@@ -128,7 +128,7 @@ const BillPayments = () => {
               <DialogHeader>
                 <DialogTitle>Add New Bill</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="card-spacing">
                 <div>
                   <Label htmlFor="name">Bill Name</Label>
                   <Input
@@ -209,7 +209,7 @@ const BillPayments = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="section-spacing">
       {/* Upcoming Bills Alert */}
       {upcomingBills.length > 0 && (
         <Alert className="border-warning bg-warning/10">
@@ -220,13 +220,18 @@ const BillPayments = () => {
         </Alert>
       )}
 
-      <Card className="shadow-card bg-gradient-card border-0">
+      <Card className="card-clean">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <CreditCard className="w-6 h-6" />
-              Bill Payments & Reminders
-            </CardTitle>
+            <div>
+              <CardTitle className="heading-primary flex items-center gap-3">
+                <CreditCard className="w-6 h-6 text-primary" />
+                Bill Payments & Reminders
+              </CardTitle>
+              <CardDescription className="mt-2">
+                Manage your recurring bills and payments
+              </CardDescription>
+            </div>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
@@ -238,7 +243,7 @@ const BillPayments = () => {
                 <DialogHeader>
                   <DialogTitle>Add New Bill</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
+                <div className="card-spacing">
                   <div>
                     <Label htmlFor="name">Bill Name</Label>
                     <Input
@@ -315,22 +320,22 @@ const BillPayments = () => {
         </CardHeader>
         
         <CardContent>
-          <div className="grid gap-4">
+          <div className="space-y-3">
             {bills.map((bill) => {
               const daysUntilDue = getDaysUntilDue(bill.due_date);
               
               return (
-                <div key={bill.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                <div key={bill.id} className="flex items-center justify-between p-4 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                    <div className="p-2 bg-muted rounded-lg">
                       {getIconForCategory(bill.category)}
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">{bill.name}</h3>
-                      <p className="text-sm text-muted-foreground">{bill.provider}</p>
+                      <p className="text-subtle">{bill.provider}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
+                        <Calendar className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">
                           Due: {new Date(bill.due_date).toLocaleDateString()}
                           {bill.status === 'pending' && (
                             <span> ({daysUntilDue > 0 ? `${daysUntilDue} days left` : 'Overdue'})</span>
@@ -352,7 +357,7 @@ const BillPayments = () => {
                       {bill.status === 'pending' && (
                         <Button 
                           size="sm" 
-                          className="bg-gradient-primary"
+                          className="bg-primary"
                           onClick={() => handlePayBill(bill.id)}
                         >
                           Pay Now

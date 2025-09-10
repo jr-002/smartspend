@@ -52,19 +52,19 @@ const EmptyState = ({ type, onAdd }: EmptyStateProps) => {
   const Icon = config.icon;
 
   return (
-    <Card className="shadow-card bg-gradient-card border-0">
-      <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mb-4">
-          <Icon className="w-8 h-8 text-muted-foreground" />
+    <Card className="card-clean">
+      <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center mb-6">
+          <Icon className="w-8 h-8 text-muted-foreground/70" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">
+        <h3 className="text-lg font-semibold text-foreground mb-3">
           {config.title}
         </h3>
-        <p className="text-muted-foreground mb-6 max-w-sm">
+        <p className="text-muted-foreground mb-8 max-w-sm leading-relaxed">
           {config.description}
         </p>
         {onAdd && (
-          <Button onClick={onAdd} className="gap-2">
+          <Button onClick={onAdd} className="gap-2" size="lg">
             <Plus className="w-4 h-4" />
             {config.buttonText}
           </Button>

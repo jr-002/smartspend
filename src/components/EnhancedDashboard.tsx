@@ -60,100 +60,73 @@ const EnhancedDashboard = () => {
     .reduce((sum, goal) => sum + goal.current_amount, 0);
 
   return (
-    <div className="space-y-8">
+    <div className="section-spacing">
       {/* Enhanced Overview Section with animations */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="glass-card hover-lift border-0 group relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <CardContent className="p-6 relative">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="card-clean hover-lift group relative overflow-hidden">
+          <CardContent className="content-spacing relative">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">Current Balance</p>
+                <p className="text-sm font-medium text-muted-foreground">Current Balance</p>
                 <p className={`text-3xl font-bold tracking-tight ${
                   balance >= 0 ? 'text-success' : 'text-destructive'
                 }`}>
                   {formatCurrency(balance, profile?.currency || "USD")}
                 </p>
-                <div className="flex items-center gap-1 text-xs">
-                  <div className={`w-2 h-2 rounded-full ${balance >= 0 ? 'bg-success' : 'bg-destructive'}`} />
-                  <span className="text-muted-foreground">
-                    {balance >= 0 ? 'Positive' : 'Negative'} balance
-                  </span>
-                </div>
               </div>
-              <div className="p-3 bg-primary/10 rounded-2xl">
-                <CreditCard className="w-8 h-8 text-primary" />
+              <div className="p-3 bg-muted rounded-lg">
+                <CreditCard className="w-6 h-6 text-muted-foreground" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="glass-card hover-lift border-0 group relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <CardContent className="p-6 relative">
+        <Card className="card-clean hover-lift group relative overflow-hidden">
+          <CardContent className="content-spacing relative">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">Total Income</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Income</p>
                 <p className="text-3xl font-bold text-success tracking-tight">
                   {formatCurrency(totalIncome, profile?.currency || "USD")}
                 </p>
-                <div className="flex items-center gap-1 text-xs">
-                  <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                  <span className="text-muted-foreground">This month</span>
-                </div>
               </div>
-              <div className="p-3 bg-success/10 rounded-2xl">
-                <ArrowUp className="w-8 h-8 text-success" />
+              <div className="p-3 bg-muted rounded-lg">
+                <ArrowUp className="w-6 h-6 text-success" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="glass-card hover-lift border-0 group relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <CardContent className="p-6 relative">
+        <Card className="card-clean hover-lift group relative overflow-hidden">
+          <CardContent className="content-spacing relative">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">Total Expenses</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Expenses</p>
                 <p className="text-3xl font-bold text-destructive tracking-tight">
                   {formatCurrency(totalExpenses, profile?.currency || "USD")}
                 </p>
-                <div className="flex items-center gap-1 text-xs">
-                  <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-                  <span className="text-muted-foreground">This month</span>
-                </div>
               </div>
-              <div className="p-3 bg-destructive/10 rounded-2xl">
-                <ArrowDown className="w-8 h-8 text-destructive" />
+              <div className="p-3 bg-muted rounded-lg">
+                <ArrowDown className="w-6 h-6 text-destructive" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="glass-card hover-lift border-0 group relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <CardContent className="p-6 relative">
+        <Card className="card-clean hover-lift group relative overflow-hidden">
+          <CardContent className="content-spacing relative">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">Savings Goals</p>
+                <p className="text-sm font-medium text-muted-foreground">Savings Goals</p>
                 <p className="text-3xl font-bold text-warning tracking-tight">
                   {savingsGoals.length > 0 
                     ? formatCurrency(totalCurrentSavings, profile?.currency || "USD")
                     : formatCurrency(0, profile?.currency || "USD")
                   }
                 </p>
-                <div className="flex items-center gap-1 text-xs">
-                  <div className="w-2 h-2 rounded-full bg-warning animate-pulse" />
-                  <span className="text-muted-foreground">
-                    {savingsGoals.length > 0 
-                      ? `${savingsGoals.length} active goals`
-                      : 'No goals set'
-                    }
-                  </span>
-                </div>
               </div>
-              <div className="p-3 bg-warning/10 rounded-2xl">
-                <PiggyBank className="w-8 h-8 text-warning" />
+              <div className="p-3 bg-muted rounded-lg">
+                <PiggyBank className="w-6 h-6 text-muted-foreground" />
               </div>
             </div>
           </CardContent>
@@ -163,94 +136,85 @@ const EnhancedDashboard = () => {
       {/* Enhanced Financial Snapshot */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Recent Transactions */}
-        <Card className="glass-card hover-lift border-0 group">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl font-bold text-foreground flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <ArrowUpDown className="w-5 h-5 text-primary" />
-              </div>
+        <Card className="card-clean">
+          <CardHeader>
+            <CardTitle className="heading-secondary flex items-center gap-3">
+              <ArrowUpDown className="w-5 h-5 text-primary" />
               Recent Transactions
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="card-spacing">
             {transactions.length > 0 ? (
               <>
                 <div className="space-y-3">
                   {transactions.slice(0, 5).map((transaction) => (
-                    <div key={transaction.id} className="glass-card p-4 hover:shadow-glow transition-all duration-200 group/item">
-                      <div className="flex items-center justify-between">
+                    <div key={transaction.id} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold ${
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold ${
                             transaction.transaction_type === 'income' 
-                              ? 'bg-success/20 text-success' 
-                              : 'bg-destructive/20 text-destructive'
+                              ? 'bg-success/10 text-success' 
+                              : 'bg-destructive/10 text-destructive'
                           }`}>
                             {transaction.transaction_type === 'income' ? '+' : '-'}
                           </div>
                           <div className="space-y-1">
-                            <p className="font-semibold text-foreground group-hover/item:text-primary transition-colors">
+                            <p className="font-medium text-foreground">
                               {transaction.description}
                             </p>
-                            <p className="text-sm text-muted-foreground capitalize">
+                            <p className="text-xs text-muted-foreground">
                               {transaction.category}
                             </p>
                           </div>
                         </div>
                         <div className="text-right space-y-1">
-                          <p className={`font-bold text-lg ${
+                          <p className={`font-semibold ${
                             transaction.transaction_type === 'income' ? 'text-success' : 'text-destructive'
                           }`}>
                             {transaction.transaction_type === 'income' ? '+' : '-'}
                             {formatCurrency(transaction.amount, profile?.currency || "USD")}
                           </p>
-                          <p className="text-sm text-muted-foreground">{transaction.date}</p>
+                          <p className="text-xs text-muted-foreground">{transaction.date}</p>
                         </div>
-                      </div>
                     </div>
                   ))}
                 </div>
-                <Button variant="outline" className="w-full hover-lift">
+                <Button variant="outline" className="w-full">
                   View All Transactions
                 </Button>
               </>
             ) : (
-              <div className="text-center py-8">
-                <ArrowUpDown className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <div className="text-center py-12">
+                <ArrowUpDown className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
                 <p className="text-muted-foreground">No transactions yet</p>
-                <p className="text-sm text-muted-foreground">Start by adding your first transaction</p>
+                <p className="text-subtle">Start by adding your first transaction</p>
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Bills Overview */}
-        <Card className="glass-card hover-lift border-0 group">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl font-bold text-foreground flex items-center gap-3">
-              <div className="p-2 bg-warning/10 rounded-xl">
-                <FileText className="w-5 h-5 text-warning" />
-              </div>
+        <Card className="card-clean">
+          <CardHeader>
+            <CardTitle className="heading-secondary flex items-center gap-3">
+              <FileText className="w-5 h-5 text-primary" />
               Bills Overview
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="card-spacing">
             {bills.length > 0 ? (
               <>
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="glass-card p-4 text-center hover-lift">
+                  <div className="p-4 text-center rounded-lg border border-border/50">
                     <p className="text-sm font-medium text-muted-foreground mb-2">Paid</p>
                     <p className="text-3xl font-bold text-success">{billsPaid}</p>
-                    <div className="w-8 h-1 bg-success rounded-full mx-auto mt-2" />
                   </div>
-                  <div className="glass-card p-4 text-center hover-lift">
+                  <div className="p-4 text-center rounded-lg border border-border/50">
                     <p className="text-sm font-medium text-muted-foreground mb-2">Pending</p>
                     <p className="text-3xl font-bold text-warning">{billsPending}</p>
-                    <div className="w-8 h-1 bg-warning rounded-full mx-auto mt-2" />
                   </div>
-                  <div className="glass-card p-4 text-center hover-lift">
+                  <div className="p-4 text-center rounded-lg border border-border/50">
                     <p className="text-sm font-medium text-muted-foreground mb-2">Overdue</p>
                     <p className="text-3xl font-bold text-destructive">{billsOverdue}</p>
-                    <div className="w-8 h-1 bg-destructive rounded-full mx-auto mt-2" />
                   </div>
                 </div>
                 
@@ -261,21 +225,21 @@ const EnhancedDashboard = () => {
                       {(billsPaid / bills.length * 100).toFixed(1)}%
                     </span>
                   </div>
-                  <Progress value={(billsPaid / bills.length) * 100} className="h-3" />
-                  <p className="text-sm text-muted-foreground">
+                  <Progress value={(billsPaid / bills.length) * 100} className="h-2" />
+                  <p className="text-subtle">
                     {billsPaid} of {bills.length} bills completed
                   </p>
                 </div>
                 
-                <Button variant="outline" className="w-full hover-lift">
+                <Button variant="outline" className="w-full">
                   Manage Bills
                 </Button>
               </>
             ) : (
-              <div className="text-center py-8">
-                <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <div className="text-center py-12">
+                <FileText className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
                 <p className="text-muted-foreground">No bills added</p>
-                <p className="text-sm text-muted-foreground">Add your first bill to track payments</p>
+                <p className="text-subtle">Add your first bill to track payments</p>
               </div>
             )}
           </CardContent>
@@ -283,45 +247,43 @@ const EnhancedDashboard = () => {
       </div>
 
       {/* Enhanced Budget Overview */}
-      <Card className="glass-card hover-lift border-0">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl font-bold text-foreground flex items-center gap-3">
-            <div className="p-2 bg-success/10 rounded-xl">
-              <Coins className="w-5 h-5 text-success" />
-            </div>
+      <Card className="card-clean">
+        <CardHeader>
+          <CardTitle className="heading-secondary flex items-center gap-3">
+            <Coins className="w-5 h-5 text-primary" />
             Budget Overview
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="card-spacing">
           {budgets.length > 0 ? (
             <>
               <div className="flex items-center justify-between">
                 <p className="text-foreground font-medium">
                   Active Budgets ({totalBudgets})
                 </p>
-                <Badge variant="secondary" className="bg-success/20 text-success">
+                <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
                   On Track
                 </Badge>
               </div>
               
               <div className="grid gap-4">
                 {budgets.map((budget) => (
-                  <div key={budget.id} className="glass-card p-4 hover-lift group/budget">
+                  <div key={budget.id} className="p-4 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary/20 rounded-xl flex items-center justify-center">
-                          <Coins className="w-4 h-4 text-primary" />
+                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <Coins className="w-4 h-4 text-primary/70" />
                         </div>
                         <div>
-                          <p className="font-semibold text-foreground capitalize">{budget.category}</p>
-                          <p className="text-sm text-muted-foreground">Monthly Budget</p>
+                          <p className="font-medium text-foreground">{budget.category}</p>
+                          <p className="text-subtle">Monthly Budget</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-foreground">
                           {formatCurrency(budget.amount, profile?.currency || "USD")}
                         </p>
-                        <p className="text-sm text-muted-foreground">allocated</p>
+                        <p className="text-subtle">allocated</p>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -335,16 +297,16 @@ const EnhancedDashboard = () => {
                 ))}
               </div>
               
-              <Button variant="outline" className="w-full hover-lift">
+              <Button variant="outline" className="w-full">
                 Manage All Budgets
               </Button>
             </>
           ) : (
-            <div className="text-center py-8">
-              <Coins className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <div className="text-center py-12">
+              <Coins className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
               <p className="text-muted-foreground">No budgets created</p>
-              <p className="text-sm text-muted-foreground">Create your first budget to track spending</p>
-              <Button className="mt-4 hover-lift">
+              <p className="text-subtle">Create your first budget to track spending</p>
+              <Button className="mt-4">
                 Create Budget
               </Button>
             </div>

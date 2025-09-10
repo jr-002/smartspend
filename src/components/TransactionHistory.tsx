@@ -168,43 +168,20 @@ const TransactionHistory = () => {
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <Card className="w-full shadow-card bg-gradient-card border-0">
+    <div className="section-spacing">
+    <Card className="w-full card-clean">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-foreground">Transaction History</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4 flex items-center space-x-4">
-          <Input
-            type="text"
-            placeholder="Search transactions..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="income">Income</SelectItem>
-              <SelectItem value="expense">Expense</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filterCategory} onValueChange={setFilterCategory}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="Food">Food</SelectItem>
-              <SelectItem value="Shopping">Shopping</SelectItem>
-              <SelectItem value="Salary">Salary</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="heading-primary">Transaction History</CardTitle>
+            <CardDescription className="mt-2">
+              Track and manage all your financial transactions
+            </CardDescription>
+          </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline">
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
                 Add Transaction
               </Button>
             </DialogTrigger>
@@ -300,14 +277,56 @@ const TransactionHistory = () => {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit">Submit</Button>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {editingTransaction ? 'Updating...' : 'Adding...'}
+                        </>
+                      ) : (
+                        editingTransaction ? 'Update Transaction' : 'Add Transaction'
+                      )}
+                    </Button>
                   </form>
                 </Form>
               </div>
             </DialogContent>
           </Dialog>
         </div>
-        <div className="overflow-x-auto">
+      </CardHeader>
+      <CardContent>
+        <div className="mb-6 flex flex-wrap items-center gap-4">
+          <Input
+            type="text"
+            placeholder="Search transactions..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-xs"
+          />
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="income">Income</SelectItem>
+              <SelectItem value="expense">Expense</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="Food">Food</SelectItem>
+              <SelectItem value="Shopping">Shopping</SelectItem>
+              <SelectItem value="Salary">Salary</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="rounded-lg border border-border overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -333,16 +352,19 @@ const TransactionHistory = () => {
               {!transactionsLoading && filteredTransactions.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center">
-                    No transactions found.
+                    <div className="text-muted-foreground">
+                      No transactions found.
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
               {!transactionsLoading && filteredTransactions.map((transaction) => (
-                <TableRow key={transaction.id}>
+                <TableRow key={transaction.id} className="hover:bg-muted/30">
                   <TableCell>{transaction.date}</TableCell>
                   <TableCell>{transaction.description}</TableCell>
                   <TableCell>
-                    <Badge variant={transaction.transaction_type === 'income' ? 'default' : 'destructive'}>
+                    <Badge variant={transaction.transaction_type === 'income' ? 'default' : 'secondary'} 
+                           className={transaction.transaction_type === 'income' ? 'bg-success/10 text-success border-success/20' : 'bg-destructive/10 text-destructive border-destructive/20'}>
                       {transaction.transaction_type === 'income' ? 'Income' : 'Expense'}
                     </Badge>
                   </TableCell>
@@ -351,32 +373,38 @@ const TransactionHistory = () => {
                     {transaction.transaction_type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount, profile?.currency || "USD")}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(transaction)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(transaction.id)}>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => handleEdit(transaction)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(transaction.id)} className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
-        <div className="mt-4 flex justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">
+        
+        <div className="mt-6 p-4 bg-muted/30 rounded-lg">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">
               Total Income: <span className="text-success">{formatCurrency(totalIncome, profile?.currency || "USD")}</span>
             </p>
-            <p className="text-sm text-muted-foreground">
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">
               Total Expenses: <span className="text-destructive">{formatCurrency(totalExpenses, profile?.currency || "USD")}</span>
             </p>
+            </div>
           </div>
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 };
 

@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,6 +18,23 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: [
+					"system-ui",
+					"-apple-system",
+					"BlinkMacSystemFont",
+					'"Segoe UI"',
+					"Roboto",
+					'"Helvetica Neue"',
+					"Arial",
+					'"Noto Sans"',
+					"sans-serif",
+					'"Apple Color Emoji"',
+					'"Segoe UI Emoji"',
+					'"Segoe UI Symbol"',
+					'"Noto Color Emoji"',
+				],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -78,6 +94,10 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			spacing: {
+				'18': '4.5rem',
+				'88': '22rem',
+			},
 			keyframes: {
 				'accordion-down': {
 					from: {
@@ -102,32 +122,18 @@ export default {
 				'slide-up': {
 					'0%': { opacity: '0', transform: 'translateY(20px)' },
 					'100%': { opacity: '1', transform: 'translateY(0)' }
-				},
-				'glow-pulse': {
-					'0%, 100%': { boxShadow: '0 0 20px hsl(var(--primary-glow) / 0.3)' },
-					'50%': { boxShadow: '0 0 40px hsl(var(--primary-glow) / 0.6)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'pulse-glow': 'glow-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
 				'fade-in': 'fade-in 0.3s ease-out',
 				'slide-up': 'slide-up 0.3s ease-out'
-			},
-			backgroundImage: {
-				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-success': 'var(--gradient-success)',
-				'gradient-card': 'var(--gradient-card)',
-				'gradient-background': 'var(--gradient-background)'
 			},
 			boxShadow: {
 				'card': 'var(--shadow-card)',
 				'glow': 'var(--shadow-glow)',
 				'floating': 'var(--shadow-floating)'
-			},
-			backdropBlur: {
-				'glass': '12px'
 			},
 			transitionProperty: {
 				'theme': 'background-color, color, border-color, box-shadow',

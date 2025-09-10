@@ -96,11 +96,123 @@ const AIInsights = () => {
   };
 
   return (
-    <Card className="shadow-card bg-gradient-card border-0">
+    <div className="section-spacing">
+    <Card className="card-clean">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Brain className="w-6 h-6 text-primary" />
+          <div>
+            <CardTitle className="heading-primary flex items-center gap-3">
+              <Brain className="w-6 h-6 text-primary" />
+              AI Financial Insights
+            </CardTitle>
+            <CardDescription className="mt-2">
+              AI-powered personalized recommendations based on your financial behavior and goals
+            </CardDescription>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={generateInsights}
+            disabled={isLoading}
+            size="sm"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Refresh
+              </>
+            )}
+          </Button>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="card-spacing">
+        {error && (
+          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <p className="text-sm text-destructive">{error.message}</p>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {insights?.map((insight) => (
+            <div key={insight.id} className="p-6 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-primary/10 rounded-lg text-primary flex-shrink-0">
+                  {getTypeIcon(insight.type)}
+                </div>
+                
+                <div className="flex-1 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-semibold text-lg text-foreground">{insight.title}</h3>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge className={getTypeColor(insight.type)}>
+                          {insight.type.charAt(0).toUpperCase() + insight.type.slice(1)}
+                        </Badge>
+                        <Badge className={getImpactColor(insight.impact)}>
+                          {insight.impact.charAt(0).toUpperCase() + insight.impact.slice(1)} Impact
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-muted-foreground leading-relaxed">
+                    {insight.description}
+                  </p>
+                  
+                  <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                    <p className="text-sm font-medium text-foreground mb-2">💡 Recommended Action:</p>
+                    <p className="text-sm text-muted-foreground">{insight.action}</p>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      Learn More
+                    </Button>
+                    <Button size="sm">
+                      Apply Suggestion
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {!isLoading && !error && (!insights || insights.length === 0) && (
+            <div className="text-center py-16">
+              <Brain className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">No insights available</h3>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                Add more transactions and financial data to get AI-powered personalized insights
+              </p>
+              <Button onClick={generateInsights}>
+                Generate Insights
+              </Button>
+            </div>
+          )}
+          
+          {isLoading && (
+            <div className="text-center py-16">
+              <Loader2 className="w-16 h-16 text-primary animate-spin mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Generating Insights</h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Our AI is analyzing your financial data to provide personalized recommendations...
+              </p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+    </div>
+  );
+};
+
+export default AIInsights;
+
             AI Financial Insights
           </CardTitle>
           <Button 

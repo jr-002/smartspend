@@ -69,7 +69,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ categories, activeId, onSelect 
   };
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarContent>
         {categories.map((category) => (
           <Collapsible 
@@ -79,7 +79,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ categories, activeId, onSelect 
           >
             <SidebarGroup>
               <CollapsibleTrigger asChild>
-                <SidebarGroupLabel className="cursor-pointer hover:bg-accent/50 rounded-md p-2 flex items-center justify-between group">
+                <SidebarGroupLabel className="cursor-pointer hover:bg-accent/50 rounded-lg px-3 py-2 flex items-center justify-between group">
                   <span>{category.label}</span>
                   {!collapsed && (
                     <ChevronDown className={`h-4 w-4 transition-transform ${

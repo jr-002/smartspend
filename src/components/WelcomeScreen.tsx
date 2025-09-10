@@ -219,16 +219,16 @@ const WelcomeScreen = () => {
 
   return (
     <div className="min-h-screen bg-gradient-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-card bg-gradient-card border-0">
+      <Card className="w-full max-w-md card-clean">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-glow">
+          <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-6">
             <img 
               src="/Picture1.png" 
               alt="SmartSpend Logo" 
               className="w-12 h-12 object-contain"
             />
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">
+          <CardTitle className="text-2xl font-bold text-foreground mb-2">
             Welcome to SmartSpend
           </CardTitle>
           <p className="text-muted-foreground">
@@ -236,7 +236,7 @@ const WelcomeScreen = () => {
           </p>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="card-spacing">
           {error && (
             <Alert className="border-destructive bg-destructive/10">
               <AlertDescription className="text-destructive">
@@ -246,59 +246,59 @@ const WelcomeScreen = () => {
           )}
 
           {step === 1 && (
-            <div className="space-y-6">
+            <div className="card-spacing">
               <div className="text-center space-y-3">
-                <Badge variant="secondary" className="px-3 py-1 text-xs font-medium bg-primary/10 text-primary border-primary/20">
+                <Badge variant="secondary" className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary border-primary/20">
                   <Sparkles className="w-3 h-3 mr-1" />
                   Smart Financial Management
                 </Badge>
-                <h3 className="text-xl font-bold">Take Control of Your Financial Future</h3>
-                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                <h3 className="text-xl font-semibold text-foreground">Take Control of Your Financial Future</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
                   Join thousands of users who've transformed their financial health with AI-powered insights and smart budgeting tools.
                 </p>
               </div>
               
               <div className="grid grid-cols-1 gap-3">
-                <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                     <Wallet className="w-5 h-5 text-primary" />
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-medium">Smart Expense Tracking</p>
-                    <p className="text-xs text-muted-foreground">Automatically categorize and analyze your spending</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">Automatically categorize and analyze your spending</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 bg-success/5 rounded-lg border border-success/20">
-                  <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
+                <div className="flex items-center gap-3 p-4 bg-success/5 rounded-lg border border-success/20">
+                  <div className="w-10 h-10 bg-success/10 rounded-lg flex items-center justify-center">
                     <Target className="w-5 h-5 text-success" />
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-medium">Goal Achievement</p>
-                    <p className="text-xs text-muted-foreground">Set and reach your financial milestones faster</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">Set and reach your financial milestones faster</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 bg-warning/5 rounded-lg border border-warning/20">
-                  <div className="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center">
+                <div className="flex items-center gap-3 p-4 bg-warning/5 rounded-lg border border-warning/20">
+                  <div className="w-10 h-10 bg-warning/10 rounded-lg flex items-center justify-center">
                     <Brain className="w-5 h-5 text-warning" />
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-medium">AI Financial Coach</p>
-                    <p className="text-xs text-muted-foreground">Get personalized advice and insights</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">Get personalized advice and insights</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 bg-purple-500/5 rounded-lg border border-purple-500/20">
-                  <div className="w-10 h-10 bg-purple-500/10 rounded-full flex items-center justify-center">
+                <div className="flex items-center gap-3 p-4 bg-purple-500/5 rounded-lg border border-purple-500/20">
+                  <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
                     <Globe className="w-5 h-5 text-purple-500" />
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-medium">Global Currency Support</p>
-                    <p className="text-xs text-muted-foreground">Manage finances in any currency worldwide</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">Manage finances in any currency worldwide</p>
                   </div>
                 </div>
               </div>
 
-              <div className="text-center space-y-2">
-                <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Shield className="w-3 h-3" />
                     <span>Bank-level security</span>
@@ -326,7 +326,7 @@ const WelcomeScreen = () => {
                   Sign In
                 </Button>
                 <Button
-                  className="flex-1 bg-gradient-primary hover:opacity-90 transition-opacity"
+                  className="flex-1"
                   onClick={() => {
                     setIsLogin(false);
                     setStep(2);
@@ -339,17 +339,17 @@ const WelcomeScreen = () => {
           )}
 
           {step === 2 && (
-            <div className="space-y-4">
+            <div className="card-spacing">
               <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold">
+                <h3 className="text-lg font-semibold text-foreground">
                   {isLogin ? "Welcome back!" : "Create your account"}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-subtle">
                   {isLogin ? "Sign in to continue" : "Join thousands of users managing their finances"}
                 </p>
               </div>
 
-              <div className="space-y-4">
+              <div className="card-spacing">
                 <div>
                   <Label htmlFor="email" className="flex items-center gap-2">
                     <Mail className="w-4 h-4" />
@@ -394,10 +394,10 @@ const WelcomeScreen = () => {
                     </Button>
                   </div>
                   {!isLogin && formData.password && (
-                    <div className="mt-2 p-3 bg-muted/30 rounded-lg border border-border/50">
+                    <div className="mt-2 p-3 bg-muted/50 rounded-lg border border-border/50">
                       <div className="flex items-start gap-2">
                         <Info className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-muted-foreground leading-relaxed">
                           <p className="font-medium mb-1">Password Requirements:</p>
                           <p>Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character</p>
                         </div>
@@ -455,10 +455,10 @@ const WelcomeScreen = () => {
           )}
 
           {step === 3 && !isLogin && (
-            <div className="space-y-4">
+            <div className="card-spacing">
               <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold">Tell us about yourself</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="text-lg font-semibold text-foreground">Tell us about yourself</h3>
+                <p className="text-subtle">
                   This helps us personalize your experience
                 </p>
               </div>
@@ -481,10 +481,10 @@ const WelcomeScreen = () => {
           )}
 
           {step === 4 && !isLogin && (
-            <div className="space-y-4">
+            <div className="card-spacing">
               <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold">Financial preferences</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="text-lg font-semibold text-foreground">Financial preferences</h3>
+                <p className="text-subtle">
                   Help us provide better recommendations
                 </p>
               </div>
@@ -511,14 +511,14 @@ const WelcomeScreen = () => {
                   onChange={(e) => setFormData({...formData, monthlyIncome: parseFloat(e.target.value) || 0})}
                   className="mt-1"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   This helps us provide better budget recommendations
                 </p>
               </div>
             </div>
           )}
 
-          <div className="flex justify-between pt-4">
+          <div className="flex justify-between pt-6">
             {step > 1 && (
               <Button variant="outline" onClick={handleBack} disabled={loading}>
                 Back
@@ -533,7 +533,7 @@ const WelcomeScreen = () => {
               >
                 {loading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     {isLogin ? "Signing in..." : "Creating account..."}
                   </>
                 ) : (
@@ -553,11 +553,11 @@ const WelcomeScreen = () => {
             )}
           </div>
 
-          <div className="flex justify-center space-x-2">
+          <div className="flex justify-center space-x-2 pt-4">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className={`w-2 h-2 rounded-full ${
+                className={`w-2 h-2 rounded-full transition-colors ${
                   i === step ? "bg-primary" : "bg-muted"
                 } ${isLogin && i > 2 ? "hidden" : ""}`}
               />

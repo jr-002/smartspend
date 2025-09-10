@@ -123,37 +123,37 @@ const Index = () => {
 
         <div className="flex-1 flex flex-col">
           {/* App Header */}
-          <header className="glass-card border-b border-border/50 sticky top-0 z-50 backdrop-blur-glass">
-            <div className="px-4 lg:px-6 py-3 flex items-center justify-between">
+          <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
+            <div className="px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <SidebarTrigger className="lg:hidden" />
-                <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                   <img
                     src="/Picture1.png"
                     alt="SmartSpend logo"
-                    className="w-6 h-6 object-contain"
+                    className="w-7 h-7 object-contain"
                     loading="lazy"
                   />
                 </div>
                 <div>
-                  <h1 className="text-lg font-semibold text-foreground leading-tight">{activeItem.label}</h1>
-                  <p className="text-xs text-muted-foreground">{getPageDescription(activeItem.id)}</p>
+                  <h1 className="text-xl font-semibold text-foreground">{activeItem.label}</h1>
+                  <p className="text-sm text-muted-foreground">{getPageDescription(activeItem.id)}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 lg:gap-4">
+              <div className="flex items-center gap-4">
                 <ProfileSettings>
-                  <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-card/50 rounded-full border border-border/50 hover:bg-card/80 transition-colors cursor-pointer">
-                    <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center">
-                      <User className="w-3.5 h-3.5 text-primary-foreground" />
+                  <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer">
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                      <User className="w-4 h-4 text-primary-foreground" />
                     </div>
-                    <span className="text-sm font-medium text-foreground max-w-32 truncate">
+                    <span className="text-sm font-medium text-foreground">
                       {profile?.name || user?.email}
                     </span>
                   </div>
                 </ProfileSettings>
                 <ThemeToggle />
-                <Button variant="outline" size="sm" onClick={handleSignOut} className="border-border/50">
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
                   Sign Out
                 </Button>
               </div>
@@ -161,16 +161,16 @@ const Index = () => {
           </header>
 
           {/* Main Content */}
-          <main className="px-4 lg:px-6 py-6">
-            <div className="animate-fade-in">
+          <main className="flex-1 overflow-auto">
+            <div className="px-6 py-8 max-w-7xl mx-auto">
               <Suspense
                 fallback={
-                  <div className="space-y-4">
-                    <div className="h-7 w-40 bg-muted rounded-md" />
+                  <div className="space-y-6">
+                    <div className="h-8 w-48 bg-muted rounded-lg animate-pulse" />
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="h-32 bg-card rounded-xl border border-border/50" />
-                      <div className="h-32 bg-card rounded-xl border border-border/50" />
-                      <div className="h-32 bg-card rounded-xl border border-border/50" />
+                      <div className="h-32 bg-muted rounded-lg animate-pulse" />
+                      <div className="h-32 bg-muted rounded-lg animate-pulse" />
+                      <div className="h-32 bg-muted rounded-lg animate-pulse" />
                     </div>
                   </div>
                 }

@@ -267,43 +267,49 @@ const SmartBudgeting = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="section-spacing">
       {/* Budget Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardContent className="p-6">
+        <Card className="card-clean">
+          <CardContent className="content-spacing">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Budgeted</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Budgeted</p>
                 <p className="text-2xl font-bold text-foreground">{formatCurrency(totalBudgeted, profile?.currency || "USD")}</p>
               </div>
-              <Calculator className="w-8 h-8 text-primary" />
+              <div className="p-2 bg-muted rounded-lg">
+                <Calculator className="w-6 h-6 text-muted-foreground" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardContent className="p-6">
+        <Card className="card-clean">
+          <CardContent className="content-spacing">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Spent</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Spent</p>
                 <p className="text-2xl font-bold text-foreground">{formatCurrency(totalSpent, profile?.currency || "USD")}</p>
               </div>
-              <Target className="w-8 h-8 text-warning" />
+              <div className="p-2 bg-muted rounded-lg">
+                <Target className="w-6 h-6 text-muted-foreground" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-card bg-gradient-card border-0">
-          <CardContent className="p-6">
+        <Card className="card-clean">
+          <CardContent className="content-spacing">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Remaining</p>
+                <p className="text-sm font-medium text-muted-foreground">Remaining</p>
                 <p className={`text-2xl font-bold ${totalBudgeted - totalSpent >= 0 ? 'text-success' : 'text-destructive'}`}>
                   {formatCurrency(totalBudgeted - totalSpent, profile?.currency || "USD")}
                 </p>
               </div>
-              <TrendingUp className={`w-8 h-8 ${totalBudgeted - totalSpent >= 0 ? 'text-success' : 'text-destructive'}`} />
+              <div className="p-2 bg-muted rounded-lg">
+                <TrendingUp className={`w-6 h-6 ${totalBudgeted - totalSpent >= 0 ? 'text-success' : 'text-destructive'}`} />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -312,9 +318,9 @@ const SmartBudgeting = () => {
       {/* Charts */}
       {pieChartData.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="shadow-card bg-gradient-card border-0">
+          <Card className="card-clean">
             <CardHeader>
-              <CardTitle>Spending Distribution</CardTitle>
+              <CardTitle className="heading-secondary">Spending Distribution</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[300px]">
@@ -339,9 +345,9 @@ const SmartBudgeting = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-card bg-gradient-card border-0">
+          <Card className="card-clean">
             <CardHeader>
-              <CardTitle>Budget vs Actual</CardTitle>
+              <CardTitle className="heading-secondary">Budget vs Actual</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[300px]">
@@ -350,8 +356,8 @@ const SmartBudgeting = () => {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip formatter={(value) => formatCurrency(Number(value), profile?.currency || "USD")} />
-                    <Bar dataKey="budgeted" fill="#94A3B8" name="Budgeted" />
-                    <Bar dataKey="spent" fill="#3B82F6" name="Spent" />
+                    <Bar dataKey="budgeted" fill="hsl(var(--muted-foreground))" name="Budgeted" />
+                    <Bar dataKey="spent" fill="hsl(var(--primary))" name="Spent" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -361,10 +367,10 @@ const SmartBudgeting = () => {
       )}
 
       {/* Budget Categories */}
-      <Card className="shadow-card bg-gradient-card border-0">
+      <Card className="card-clean">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold text-foreground">Budget Categories</CardTitle>
+            <CardTitle className="heading-primary">Budget Categories</CardTitle>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
@@ -392,7 +398,7 @@ const SmartBudgeting = () => {
                       id="period"
                       value={newBudget.period}
                       onChange={(e) => setNewBudget({...newBudget, period: e.target.value as 'weekly' | 'monthly' | 'yearly'})}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                     >
                       <option value="weekly">Weekly</option>
                       <option value="monthly">Monthly</option>
@@ -430,20 +436,20 @@ const SmartBudgeting = () => {
         </CardHeader>
         
         <CardContent>
-          <div className="space-y-6">
+          <div className="space-y-4">
             {budgetCategories.map((category) => {
               const progressPercentage = getProgressPercentage(category.spent, category.budgeted);
               
               return (
-                <div key={category.id} className="p-6 border rounded-lg bg-card/50 hover:bg-card transition-colors">
+                <div key={category.id} className="p-6 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: category.color }}></div>
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }}></div>
                       <div>
-                        <h3 className="font-semibold text-lg text-foreground">{category.name}</h3>
+                        <h3 className="font-semibold text-foreground">{category.name}</h3>
                         <div className="flex items-center gap-2 mt-1">
                           {getTrendIcon(category.trend)}
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-subtle">
                             {category.trend === 'up' ? 'Trending up' : 
                              category.trend === 'down' ? 'Trending down' : 'Stable'}
                           </span>
@@ -452,8 +458,8 @@ const SmartBudgeting = () => {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-foreground">{formatCurrency(category.spent, profile?.currency || "USD")}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xl font-bold text-foreground">{formatCurrency(category.spent, profile?.currency || "USD")}</p>
+                        <p className="text-subtle">
                           of {formatCurrency(category.budgeted, profile?.currency || "USD")}
                         </p>
                       </div>
