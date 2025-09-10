@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { UpdateValueDialog } from "@/components/ui/update-value-dialog";
 import { TrendingUp, TrendingDown, DollarSign, PieChart, BarChart3, Plus, Loader2, Trash2, Edit } from "lucide-react";
@@ -110,6 +110,9 @@ const InvestmentTracking = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add New Investment</DialogTitle>
+                <DialogDescription>
+                  Add a new investment to track its performance and value.
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>

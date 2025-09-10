@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -208,6 +208,9 @@ const SmartBudgeting = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create New Budget</DialogTitle>
+                <DialogDescription>
+                  Create a new budget category with spending limits and tracking.
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>

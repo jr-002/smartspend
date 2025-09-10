@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Wallet, Target, TrendingUp, Brain, Sparkles, Mail, Lock, User, DollarSign, CheckCircle, Eye, EyeOff, Info, Shield, Zap, Globe, Star } from "lucide-react";
+import { Wallet, Target, TrendingUp, Brain, Sparkles, Mail, Lock, User, DollarSign, CheckCircle, Eye, EyeOff, Info, Shield, Zap, Globe, Star, Loader2 } from "lucide-react";
 import CurrencySelector from "./CurrencySelector";
 import { getDefaultCurrency } from "@/utils/currencies";
 import { useAuth } from "@/contexts/AuthContext";

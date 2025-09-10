@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { UpdateValueDialog } from "@/components/ui/update-value-dialog";
 import { Progress } from "@/components/ui/progress";
 import { Plus, Target, Trash2, Loader2 } from "lucide-react";
@@ -101,6 +101,9 @@ const SavingsGoals = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create New Savings Goal</DialogTitle>
+                <DialogDescription>
+                  Set up a new savings goal with target amount and deadline.
+                </DialogDescription>
               </DialogHeader>
               <div className="card-spacing">
                 <div>

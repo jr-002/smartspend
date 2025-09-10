@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Calendar, CreditCard, Zap, Wifi, Phone, Car, Plus, Loader2, Trash2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -127,6 +127,9 @@ const BillPayments = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add New Bill</DialogTitle>
+                <DialogDescription>
+                  Add a new recurring bill to track and manage your payments.
+                </DialogDescription>
               </DialogHeader>
               <div className="card-spacing">
                 <div>
