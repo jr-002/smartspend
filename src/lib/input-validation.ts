@@ -18,7 +18,7 @@ export class InputSanitizer {
       .replace(/vbscript:/gi, '') // Remove vbscript: protocols
       .replace(/on\w+\s*=/gi, '') // Remove event handlers
       // Remove control characters (ASCII 0-31) and DEL (ASCII 127)
-      .replace(/[\u0000-\u001F\u007F]/g, '');
+      .replace(/[\x00-\x1F\x7F]/g, '');
   }
 
   // Sanitize AI prompts to prevent injection attacks

@@ -57,7 +57,7 @@ export class PerformanceMonitor {
 export const monitor = PerformanceMonitor.getInstance();
 
 // Error boundary wrapper for components
-export const withErrorTracking = <T extends Record<string, any>>(
+export const withErrorTracking = <T extends Record<string, unknown>>(
   Component: React.ComponentType<T>
 ): React.ComponentType<T> => {
   return (props: T) => {

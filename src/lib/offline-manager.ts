@@ -5,7 +5,7 @@ import { logger } from './environment-config';
 interface OfflineAction {
   id: string;
   type: string;
-  data: any;
+  data: Record<string, unknown>;
   timestamp: number;
   retries: number;
 }
@@ -64,7 +64,7 @@ class OfflineManager {
     }
   }
 
-  public queueAction(type: string, data: any): string {
+  public queueAction(type: string, data: Record<string, unknown>): string {
     const action: OfflineAction = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type,
