@@ -55,8 +55,8 @@ export class InputSanitizer {
   }
 
   // Sanitize financial data
-  static sanitizeFinancialAmount(amount: any): number {
-    const num = parseFloat(amount);
+  static sanitizeFinancialAmount(amount: unknown): number {
+    const num = parseFloat(String(amount));
     
     if (isNaN(num) || !isFinite(num)) {
       throw new Error('Invalid amount: must be a valid number');
@@ -74,7 +74,7 @@ export class InputSanitizer {
   }
 
   // Sanitize user ID (UUID format)
-  static sanitizeUserId(userId: any): string {
+  static sanitizeUserId(userId: unknown): string {
     if (typeof userId !== 'string') {
       throw new Error('User ID must be a string');
     }
@@ -133,7 +133,7 @@ export const apiValidationSchemas = {
 
   riskPrediction: z.object({
     userId: z.string().uuid('Invalid user ID format').optional(),
-    financialData: z.any().optional(),
+    financialData: z.unknown().optional(),
   }),
 
   financialData: z.object({
@@ -231,7 +231,10 @@ export function validateRequest<T>(
 }
 
 // Recursively sanitize object inputs
-function sanitizeObjectInputs(obj: any): void {
+function sanitizeObjectInputs(obj: unknown): void {
+  if (typeof obj !== 'object' || obj === null) {
+    return;
+  }
   if (Array.isArray(obj)) {
     obj.forEach(item => {
       if (typeof item === 'object' && item !== null) {

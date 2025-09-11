@@ -140,5 +140,5 @@ export default {
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [require("./src/lib/tailwind-plugins").default],
 } satisfies Config;

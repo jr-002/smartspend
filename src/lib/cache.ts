@@ -61,7 +61,7 @@ class MemoryCache {
 export const memoryCache = new MemoryCache();
 
 // Cache wrapper for async functions
-export function withCache<T extends any[], R>(
+export function withCache<T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
   keyGenerator: (...args: T) => string,
   ttl: number = 5 * 60 * 1000 // 5 minutes default

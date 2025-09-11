@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -48,34 +48,7 @@ const FinancialRiskPredictor = () => {
   });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const analyzeFinancialRisks = async () => {
-    setIsAnalyzing(true);
-
-    const newPredictions = generateRiskPredictions();
-    const newHealthScore = calculateHealthScore();
-
-    try {
-      await analyzeFinancialRisk({
-        transactions,
-        budgets,
-        monthlyIncome: profile?.monthly_income || 0
-      });
-    } catch (error) {
-      console.error('AI analysis failed:', error);
-    }
-
-    setPredictions(newPredictions);
-    setHealthScore(newHealthScore);
-    setIsAnalyzing(false);
-  };
-
-  useEffect(() => {
-    if (transactions.length > 0) {
-      analyzeFinancialRisks();
-    }
-  }, [transactions, budgets, profile]);
-
-  const generateRiskPredictions = (): RiskPrediction[] => {
+  const generateRiskPredictions = useCallback((): RiskPrediction[] => {
     const predictions: RiskPrediction[] = [];
     
     // Analyze current month spending
@@ -164,9 +137,9 @@ const FinancialRiskPredictor = () => {
       const severityOrder = { high: 3, medium: 2, low: 1 };
       return severityOrder[b.severity] - severityOrder[a.severity];
     });
-  };
+  }, [transactions, budgets, profile]);
 
-  const calculateHealthScore = (): FinancialHealth => {
+  const calculateHealthScore = useCallback((): FinancialHealth => {
     const factors = [
       {
         name: 'Spending Control',
@@ -215,7 +188,36 @@ const FinancialRiskPredictor = () => {
       grade,
       factors
     };
-  };
+  }, [predictions, budgets, transactions, profile]);
+
+  const analyzeFinancialRisks = useCallback(async () => {
+    setIsAnalyzing(true);
+
+    const newPredictions = generateRiskPredictions();
+    const newHealthScore = calculateHealthScore();
+
+    try {
+      await analyzeFinancialRisk({
+        transactions,
+        budgets,
+        monthlyIncome: profile?.monthly_income || 0
+      });
+    } catch (error) {
+      console.error('AI analysis failed:', error);
+    }
+
+    setPredictions(newPredictions);
+    setHealthScore(newHealthScore);
+    setIsAnalyzing(false);
+  }, [transactions, budgets, profile, generateRiskPredictions, calculateHealthScore]);
+
+  useEffect(() => {
+    if (transactions.length > 0) {
+      analyzeFinancialRisks();
+    }
+  }, [transactions, analyzeFinancialRisks]);
+
+  // Functions moved to useCallback hooks above
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {

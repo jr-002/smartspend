@@ -16,12 +16,12 @@ export interface PerformanceMetric {
   operation: string;
   duration: number;
   status: 'success' | 'error';
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SecurityEvent {
   type: 'rate_limit_exceeded' | 'invalid_auth' | 'injection_attempt' | 'suspicious_activity';
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   ip?: string;
   userAgent?: string;
 }
@@ -88,7 +88,7 @@ class EnhancedMonitor {
     this.performanceMetrics.set(operation, performance.now());
   }
 
-  endTimer(operation: string, metadata: Record<string, any> = {}): number {
+  endTimer(operation: string, metadata: Record<string, unknown> = {}): number {
     const startTime = this.performanceMetrics.get(operation);
     if (!startTime) {
       console.warn(`No start time found for operation: ${operation}`);
@@ -131,7 +131,7 @@ class EnhancedMonitor {
     // Clean old events (keep last hour)
     const oneHourAgo = Date.now() - 3600000;
     this.securityEvents = this.securityEvents.filter(
-      e => (e as any).timestamp > oneHourAgo
+      e => ('timestamp' in e && typeof e.timestamp === 'number' && e.timestamp > oneHourAgo)
     );
 
     // Log security event
@@ -145,7 +145,7 @@ class EnhancedMonitor {
 
     // Check for security alert thresholds
     const recentEvents = this.securityEvents.filter(
-      e => (e as any).timestamp > Date.now() - 60000 // last minute
+      e => ('timestamp' in e && typeof e.timestamp === 'number' && e.timestamp > Date.now() - 60000) // last minute
     );
 
     if (recentEvents.length >= this.alertThresholds.securityEvents) {
@@ -292,13 +292,13 @@ class EnhancedMonitor {
 export const enhancedMonitor = EnhancedMonitor.getInstance();
 
 // Convenience functions
-export const trackError = (error: Error, context?: Record<string, any>) => 
+export const trackError = (error: Error, context?: Record<string, unknown>) => 
   enhancedMonitor.trackError(error, context);
 
 export const trackSecurityEvent = (event: SecurityEvent) => 
   enhancedMonitor.trackSecurityEvent(event);
 
-export const trackUserAction = (action: string, userId?: string, metadata?: Record<string, any>) => 
+export const trackUserAction = (action: string, userId?: string, metadata?: Record<string, unknown>) => 
   enhancedMonitor.trackUserAction(action, userId, metadata);
 
 export const trackAPICall = (endpoint: string, method: string, status: number, duration: number, userId?: string) => 
@@ -307,5 +307,5 @@ export const trackAPICall = (endpoint: string, method: string, status: number, d
 export const startPerformanceTimer = (operation: string) => 
   enhancedMonitor.startTimer(operation);
 
-export const endPerformanceTimer = (operation: string, metadata?: Record<string, any>) => 
+export const endPerformanceTimer = (operation: string, metadata?: Record<string, unknown>) => 
   enhancedMonitor.endTimer(operation, metadata);

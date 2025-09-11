@@ -2,7 +2,7 @@
 import React from 'react';
 
 // Debounce function for search inputs and API calls
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -15,7 +15,7 @@ export function debounce<T extends (...args: any[]) => any>(
 }
 
 // Throttle function for scroll events and frequent updates
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
@@ -31,7 +31,7 @@ export function throttle<T extends (...args: any[]) => any>(
 }
 
 // Memoization utility for expensive calculations
-export function memoize<T extends (...args: any[]) => any>(
+export function memoize<T extends (...args: unknown[]) => ReturnType<T>>(
   func: T,
   getKey?: (...args: Parameters<T>) => string
 ): T {
@@ -58,22 +58,22 @@ export function memoize<T extends (...args: any[]) => any>(
 }
 
 // Lazy loading utility for heavy components
-export function createLazyComponent<T extends React.ComponentType<any>>(
-  importFunc: () => Promise<{ default: T }>,
+export function createLazyComponent<P extends object>(
+  importFunc: () => Promise<{ default: React.ComponentType<P> }>,
   fallback?: React.ComponentType
 ) {
   const LazyComponent = React.lazy(importFunc);
   
-  return React.forwardRef<any, React.ComponentProps<T>>((props, ref) => {
+  return React.forwardRef<React.ComponentType<P>, P>((props, ref) => {
     const FallbackComponent = fallback;
     return React.createElement(
       React.Suspense,
-      { 
-        fallback: FallbackComponent 
+      {
+        fallback: FallbackComponent
           ? React.createElement(FallbackComponent)
-          : React.createElement('div', {}, 'Loading...')
+          : React.createElement('div', null, 'Loading...')
       },
-      React.createElement(LazyComponent, { ...props } as any)
+      React.createElement(LazyComponent, { ...props, ref })
     );
   });
 }
@@ -118,7 +118,7 @@ export class PerformanceMonitor {
 // Memory usage monitoring
 export function logMemoryUsage(label: string): void {
   if ('memory' in performance) {
-    const memory = (performance as any).memory;
+    const memory = (performance as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number; } }).memory;
     console.log(`Memory Usage (${label}):`, {
       used: `${Math.round(memory.usedJSHeapSize / 1024 / 1024)} MB`,
       total: `${Math.round(memory.totalJSHeapSize / 1024 / 1024)} MB`,
@@ -128,12 +128,12 @@ export function logMemoryUsage(label: string): void {
 }
 
 // Bundle size analyzer helper
-export function analyzeComponentSize(componentName: string, component: any): void {
+export function analyzeComponentSize(componentName: string, component: unknown): void {
   if (process.env.NODE_ENV === 'development') {
     console.log(`Component ${componentName} loaded:`, {
       type: typeof component,
-      hasDefaultExport: !!component.default,
-      keys: Object.keys(component),
+      hasDefaultExport: component !== null && typeof component === 'object' && 'default' in component,
+      keys: component !== null && typeof component === 'object' ? Object.keys(component) : [],
     });
   }
 }

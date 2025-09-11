@@ -93,20 +93,20 @@ export const getPerformanceSetting = (setting: keyof AppConfig['performance']): 
 export const logLevel = isDevelopment ? 'debug' : 'error';
 
 export const logger = {
-  debug: (...args: any[]) => {
+  debug: (...args: unknown[]) => {
     if (isDevelopment) {
       console.log('[DEBUG]', ...args);
     }
   },
-  info: (...args: any[]) => {
+  info: (...args: unknown[]) => {
     if (isDevelopment || appConfig.ui.showDebugInfo) {
       console.info('[INFO]', ...args);
     }
   },
-  warn: (...args: any[]) => {
+  warn: (...args: unknown[]) => {
     console.warn('[WARN]', ...args);
   },
-  error: (...args: any[]) => {
+  error: (...args: unknown[]) => {
     console.error('[ERROR]', ...args);
   },
 };

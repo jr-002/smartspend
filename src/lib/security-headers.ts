@@ -117,7 +117,7 @@ export function handleCORSPreflight(config?: SecurityConfig): Response {
 // Security audit logging
 export function logSecurityEvent(
   event: string,
-  details: Record<string, any>,
+  details: Record<string, unknown>,
   request: Request
 ) {
   const logData = {

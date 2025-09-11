@@ -4,7 +4,7 @@
 interface RateLimitConfig {
   maxRequests: number;
   windowMs: number;
-  keyGenerator?: (context: any) => string;
+  keyGenerator?: (context: Record<string, unknown>) => string;
 }
 
 interface RateLimitEntry {
@@ -32,14 +32,14 @@ class RateLimiter {
     }
   }
 
-  private getKey(context: any): string {
+  private getKey(context: Record<string, unknown>): string {
     if (this.config.keyGenerator) {
       return this.config.keyGenerator(context);
     }
     return 'default';
   }
 
-  isAllowed(context: any = {}): boolean {
+  isAllowed(context: Record<string, unknown> = {}): boolean {
     const key = this.getKey(context);
     const now = Date.now();
     const entry = this.storage.get(key);
@@ -61,7 +61,7 @@ class RateLimiter {
     return true;
   }
 
-  getRemainingRequests(context: any = {}): number {
+  getRemainingRequests(context: Record<string, unknown> = {}): number {
     const key = this.getKey(context);
     const entry = this.storage.get(key);
     
@@ -72,7 +72,7 @@ class RateLimiter {
     return Math.max(0, this.config.maxRequests - entry.count);
   }
 
-  getResetTime(context: any = {}): number {
+  getResetTime(context: Record<string, unknown> = {}): number {
     const key = this.getKey(context);
     const entry = this.storage.get(key);
     
@@ -112,7 +112,7 @@ export const riskPredictionLimiter = new RateLimiter({
 // Utility function to check rate limit before API call
 export const withRateLimit = async <T>(
   limiter: RateLimiter,
-  context: any,
+  context: Record<string, unknown>,
   apiCall: () => Promise<T>,
   onRateLimited?: (resetTime: number) => void
 ): Promise<T> => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +42,7 @@ const SmartBudgeting = () => {
   });
 
   // Calculate current month spending by category
-  const getCurrentMonthSpending = () => {
+  const getCurrentMonthSpending = useCallback(() => {
     const currentMonth = new Date().toISOString().slice(0, 7);
     const safeTransactions = Array.isArray(transactions) ? transactions : [];
     const currentMonthTransactions = safeTransactions.filter(t => 
@@ -55,7 +55,7 @@ const SmartBudgeting = () => {
     });
 
     return categorySpending;
-  };
+  }, [transactions]);
 
   const handleAddBudget = async () => {
     if (!newBudget.category?.trim() || !newBudget.amount || newBudget.amount <= 0) {

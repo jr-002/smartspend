@@ -37,7 +37,7 @@ export class NetworkError extends AppError {
 }
 
 // Error handler for async operations
-export const handleAsyncError = <T extends any[], R>(
+export const handleAsyncError = <T extends unknown[], R>(
   fn: (...args: T) => Promise<R>
 ) => {
   return async (...args: T): Promise<R | null> => {
@@ -59,7 +59,7 @@ export const handleAsyncError = <T extends any[], R>(
 };
 
 // Safe async wrapper that doesn't throw
-export const safeAsync = <T extends any[], R>(
+export const safeAsync = <T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
   fallback: R
 ) => {
@@ -74,7 +74,7 @@ export const safeAsync = <T extends any[], R>(
 };
 
 // Error logging utility
-export const logError = (error: Error, context?: Record<string, any>) => {
+export const logError = (error: Error, context?: Record<string, unknown>) => {
   const errorInfo = {
     message: error.message,
     stack: error.stack,
