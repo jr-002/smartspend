@@ -223,7 +223,7 @@ export const useBudgets = () => {
 
   useEffect(() => {
     fetchBudgets();
-  }, [user]);
+  }, [user, fetchBudgets]);
 
   return {
     budgets,

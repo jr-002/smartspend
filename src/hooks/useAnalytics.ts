@@ -217,7 +217,7 @@ export const useAnalytics = (period: string = '3months') => {
 
   useEffect(() => {
     fetchAnalyticsData();
-  }, [user, period]);
+  }, [user, period, fetchAnalyticsData]);
 
   return {
     analyticsData,
@@ -228,7 +228,7 @@ export const useAnalytics = (period: string = '3months') => {
 };
 
 // Helper functions
-function generateMonthlyData(transactions: any[], budgets: any[], startDate: Date, endDate: Date) {
+function generateMonthlyData(transactions: Array<{ transaction_type: string; date: string; amount: number; category: string }>, budgets: Array<{ period: string; amount: number }>, startDate: Date, endDate: Date) {
   const monthlyData = [];
   const current = new Date(startDate);
   
@@ -255,7 +255,7 @@ function generateMonthlyData(transactions: any[], budgets: any[], startDate: Dat
   return monthlyData;
 }
 
-function generateCategoryBreakdown(expenseTransactions: any[]) {
+function generateCategoryBreakdown(expenseTransactions: Array<{ amount: number; category: string }>) {
   const categoryTotals: Record<string, number> = {};
   const totalExpenses = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
   
@@ -276,7 +276,7 @@ function generateCategoryBreakdown(expenseTransactions: any[]) {
     .slice(0, 8); // Top 8 categories
 }
 
-function generateIncomeVsExpensesData(transactions: any[], startDate: Date, endDate: Date) {
+function generateIncomeVsExpensesData(transactions: Array<{ transaction_type: string; date: string; amount: number }>, startDate: Date, endDate: Date) {
   const monthlyData = [];
   const current = new Date(startDate);
   
@@ -305,7 +305,7 @@ function generateIncomeVsExpensesData(transactions: any[], startDate: Date, endD
   return monthlyData;
 }
 
-function calculateKeyMetrics(transactions: any[], budgets: any[]) {
+function calculateKeyMetrics(transactions: Array<{ transaction_type: string; date: string; amount: number; category: string }>, budgets: Array<{ period: string; amount: number }>) {
   const currentMonth = new Date().toISOString().slice(0, 7);
   const lastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 7);
   

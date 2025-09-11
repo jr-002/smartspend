@@ -10,7 +10,7 @@ interface ApiResponse<T> {
 interface ApiRequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   headers?: Record<string, string>;
-  body?: any;
+  body?: Record<string, unknown> | string | FormData;
   timeout?: number;
 }
 
@@ -89,14 +89,14 @@ class ApiClient {
   }
 
   // AI-related API calls
-  async generateFinancialInsights(userId: string): Promise<ApiResponse<any[]>> {
+  async generateFinancialInsights(userId: string): Promise<ApiResponse<Array<Record<string, unknown>>>> {
     return this.request('/api/ai-insights', {
       method: 'POST',
       body: { userId },
     });
   }
 
-  async generateBudgetRecommendations(userId: string): Promise<ApiResponse<any>> {
+  async generateBudgetRecommendations(userId: string): Promise<ApiResponse<Record<string, unknown>>> {
     return this.request('/api/budget-ai', {
       method: 'POST',
       body: { userId },
@@ -117,7 +117,7 @@ class ApiClient {
     });
   }
 
-  async analyzeFinancialRisk(financialData: any): Promise<ApiResponse<any>> {
+  async analyzeFinancialRisk(financialData: Record<string, unknown>): Promise<ApiResponse<Record<string, unknown>>> {
     return this.request('/api/risk-prediction', {
       method: 'POST',
       body: { financialData },
@@ -163,8 +163,8 @@ export const withCache = <T>(
   ttl: number = 5 * 60 * 1000 // 5 minutes default
 ): Promise<ApiResponse<T>> => {
   // Check memory cache first (faster)
-  const memoryCache = (window as any).__smartspend_cache || new Map();
-  (window as any).__smartspend_cache = memoryCache;
+  const memoryCache = (window as Window & { __smartspend_cache?: Map<string, { data: T; timestamp: number }> }).__smartspend_cache || new Map<string, { data: T; timestamp: number }>();
+  (window as Window & { __smartspend_cache?: Map<string, { data: T; timestamp: number }> }).__smartspend_cache = memoryCache;
   
   const memoryCached = memoryCache.get(cacheKey);
   if (memoryCached && Date.now() - memoryCached.timestamp < ttl) {
@@ -218,7 +218,7 @@ export const withCache = <T>(
 
 // Supabase-specific caching utilities
 export const clearApiCache = (pattern?: string): void => {
-  const memoryCache = (window as any).__smartspend_cache;
+  const memoryCache = (window as Window & { __smartspend_cache?: Map<string, { data: unknown; timestamp: number }> }).__smartspend_cache;
   if (memoryCache) {
     if (pattern) {
       for (const key of memoryCache.keys()) {
@@ -245,14 +245,14 @@ export const clearApiCache = (pattern?: string): void => {
 export const preloadCriticalData = async (userId: string): Promise<void> => {
   if (!userId) return;
   
-  const criticalApis = [
+  const criticalApis: Array<() => Promise<ApiResponse<unknown>>> = [
     () => apiClient.generateFinancialInsights(userId),
     () => apiClient.generateBudgetRecommendations(userId),
   ];
   
   // Preload in background without blocking UI
-  criticalApis.forEach(apiCall => {
-    withCache(`preload_${userId}_${apiCall.name}`, apiCall, 10 * 60 * 1000)
+  criticalApis.forEach((apiCall, index) => {
+    withCache(`preload_${userId}_${index}`, apiCall, 10 * 60 * 1000)
       .catch(error => console.warn('Preload failed:', error));
   });
 };

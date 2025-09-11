@@ -7,7 +7,7 @@ interface CacheEntry<T> {
 }
 
 class MemoryCache {
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
   private maxSize = 100;
 
   set<T>(key: string, data: T, ttl: number = 5 * 60 * 1000): void {
@@ -37,7 +37,7 @@ class MemoryCache {
       return null;
     }
 
-    return entry.data;
+    return entry.data as T;
   }
 
   has(key: string): boolean {

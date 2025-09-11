@@ -11,13 +11,13 @@ interface Props {
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
   formName?: string;
   onDataRecover?: () => void;
-  formData?: any;
+  formData?: Record<string, unknown>;
 }
 
 interface State {
   hasError: boolean;
   error: Error | null;
-  savedFormData: any;
+  savedFormData: Record<string, unknown>;
   retryCount: number;
 }
 

@@ -199,7 +199,7 @@ export const useBills = () => {
 
   useEffect(() => {
     fetchBills();
-  }, [user]);
+  }, [user, fetchBills]);
 
   return {
     bills,

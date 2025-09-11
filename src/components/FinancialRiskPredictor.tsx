@@ -48,12 +48,6 @@ const FinancialRiskPredictor = () => {
   });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  useEffect(() => {
-    if (transactions.length > 0) {
-      analyzeFinancialRisks();
-    }
-  }, [transactions, budgets, profile]);
-
   const analyzeFinancialRisks = async () => {
     setIsAnalyzing(true);
 
@@ -74,6 +68,12 @@ const FinancialRiskPredictor = () => {
     setHealthScore(newHealthScore);
     setIsAnalyzing(false);
   };
+
+  useEffect(() => {
+    if (transactions.length > 0) {
+      analyzeFinancialRisks();
+    }
+  }, [transactions, budgets, profile]);
 
   const generateRiskPredictions = (): RiskPrediction[] => {
     const predictions: RiskPrediction[] = [];

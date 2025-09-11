@@ -48,7 +48,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ children }) => {
 
     setIsLoading(true);
     try {
-      const updates: any = {
+      const updates: Record<string, unknown> = {
         name: formData.name,
         currency: formData.currency,
       };

@@ -119,7 +119,7 @@ const SmartBudgeting = () => {
     }));
 
     setBudgetCategories(categories);
-  }, [transactions, budgets, transactionsLoading, budgetsLoading]);
+  }, [transactions, budgets, transactionsLoading, budgetsLoading, getCurrentMonthSpending]);
 
   const getColorForCategory = (category: string): string => {
     const colors = [

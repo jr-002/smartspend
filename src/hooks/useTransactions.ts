@@ -231,7 +231,7 @@ export const useTransactions = () => {
 
   useEffect(() => {
     fetchTransactions();
-  }, [user]);
+  }, [user, fetchTransactions]);
 
   return {
     transactions,

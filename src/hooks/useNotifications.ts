@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import type { Json } from '@/integrations/supabase/types';
 
 export interface Notification {
   id: string;
@@ -10,7 +11,7 @@ export interface Notification {
   type: 'budget' | 'bill' | 'goal' | 'investment' | 'spending' | 'system';
   priority: 'high' | 'medium' | 'low';
   read: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -95,7 +96,7 @@ export const useNotifications = () => {
           type: notification.type,
           priority: notification.priority,
           read: notification.read,
-          data: notification.data,
+          data: notification.data as unknown as Json,
         })
         .select()
         .single();
@@ -244,7 +245,7 @@ export const useNotifications = () => {
 
   useEffect(() => {
     fetchNotifications();
-  }, [user]);
+  }, [user, fetchNotifications]);
 
   return {
     notifications,

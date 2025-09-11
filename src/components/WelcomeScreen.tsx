@@ -73,8 +73,9 @@ const WelcomeScreen = () => {
         // Validate email format
         try {
           emailSchema.parse(formData.email);
-        } catch (err: any) {
-          setError(err.issues?.[0]?.message || "Please enter a valid email address");
+        } catch (err: unknown) {
+          const error = err as { issues?: Array<{ message: string }> };
+          setError(error.issues?.[0]?.message || "Please enter a valid email address");
           setLoading(false);
           return;
         }
@@ -87,16 +88,18 @@ const WelcomeScreen = () => {
 
         try {
           passwordSchema.parse(formData.password);
-        } catch (err: any) {
-          setError(err.issues?.[0]?.message || "Password does not meet requirements");
+        } catch (err: unknown) {
+          const error = err as { issues?: Array<{ message: string }> };
+          setError(error.issues?.[0]?.message || "Password does not meet requirements");
           setLoading(false);
           return;
         }
 
         try {
           nameSchema.parse(formData.name.trim());
-        } catch (err: any) {
-          setError(err.issues?.[0]?.message || "Please enter a valid name");
+        } catch (err: unknown) {
+          const error = err as { issues?: Array<{ message: string }> };
+          setError(error.issues?.[0]?.message || "Please enter a valid name");
           setLoading(false);
           return;
         }
@@ -104,8 +107,9 @@ const WelcomeScreen = () => {
         // Validate currency
         try {
           currencyCodeSchema.parse(formData.currency);
-        } catch (err: any) {
-          setError(err.issues?.[0]?.message || "Please select a valid currency");
+        } catch (err: unknown) {
+          const error = err as { issues?: Array<{ message: string }> };
+          setError(error.issues?.[0]?.message || "Please select a valid currency");
           setLoading(false);
           return;
         }

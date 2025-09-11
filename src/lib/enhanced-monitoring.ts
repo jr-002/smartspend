@@ -6,7 +6,7 @@ export interface MonitoringEvent {
   type: 'error' | 'warning' | 'info' | 'security' | 'performance';
   category: string;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   severity: 'low' | 'medium' | 'high' | 'critical';
   userId?: string;
   timestamp: number;
@@ -45,7 +45,7 @@ class EnhancedMonitor {
   }
 
   // Enhanced error tracking with pattern detection
-  trackError(error: Error, context: Record<string, any> = {}) {
+  trackError(error: Error, context: Record<string, unknown> = {}) {
     const errorKey = `${error.name}:${error.message.substring(0, 100)}`;
     const count = this.errorPatterns.get(errorKey) || 0;
     this.errorPatterns.set(errorKey, count + 1);
@@ -53,8 +53,8 @@ class EnhancedMonitor {
     // Log to monitoring service
     captureException(error, {
       tags: {
-        category: context.category || 'general',
-        severity: context.severity || 'medium',
+        category: (context.category as string) || 'general',
+        severity: (context.severity as string) || 'medium',
       },
       extra: {
         ...context,

@@ -200,7 +200,7 @@ export const useSavingsGoals = () => {
 
   useEffect(() => {
     fetchGoals();
-  }, [user]);
+  }, [user, fetchGoals]);
 
   return {
     goals,

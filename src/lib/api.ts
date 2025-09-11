@@ -81,7 +81,7 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
       return getFallbackInsights();
     }
 
-    return data.insights.map((insight: any, index: number) => ({
+    return data.insights.map((insight: Record<string, unknown>, index: number) => ({
       id: insight.id || `fallback-${Date.now()}-${index}`,
       type: insight.type || 'spending',
       title: insight.title || 'Financial Insight',
@@ -170,7 +170,7 @@ export async function generateFinancialAdvice(userContext: string): Promise<stri
   });
 }
 
-export async function analyzeFinancialRisk(financialData: any): Promise<string> {
+export async function analyzeFinancialRisk(financialData: Record<string, unknown>): Promise<string> {
   try {
     const { data, error } = await supabase.functions.invoke('risk-prediction', {
       body: { financialData }

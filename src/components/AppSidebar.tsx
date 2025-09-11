@@ -17,7 +17,7 @@ export type SidebarItem = {
   id: string;
   label: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  component: React.LazyExoticComponent<React.ComponentType<any>>;
+  component: React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>>;
 };
 
 export type SidebarCategory = {

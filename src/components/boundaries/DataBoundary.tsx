@@ -75,7 +75,7 @@ class DataBoundary extends Component<Props, State> {
       errorType: this.state.errorType,
       isOnline: this.state.isOnline,
       timestamp: new Date().toISOString(),
-      connectionType: (navigator as any).connection?.effectiveType || 'unknown',
+      connectionType: (navigator as Navigator & { connection?: { effectiveType?: string } })?.connection?.effectiveType || 'unknown',
       userAgent: navigator.userAgent,
     });
 
@@ -91,7 +91,7 @@ class DataBoundary extends Component<Props, State> {
         errorInfo,
         connectionInfo: {
           onLine: navigator.onLine,
-          connectionType: (navigator as any).connection?.effectiveType,
+          connectionType: (navigator as Navigator & { connection?: { effectiveType?: string } })?.connection?.effectiveType,
         },
       },
     });

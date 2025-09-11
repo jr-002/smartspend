@@ -195,7 +195,7 @@ export const useInvestments = () => {
 
   useEffect(() => {
     fetchInvestments();
-  }, [user]);
+  }, [user, fetchInvestments]);
 
   return {
     investments,

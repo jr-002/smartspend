@@ -36,13 +36,13 @@ export const passwordSchema = z
   .string()
   .min(6, "Password must be at least 6 characters")
   .max(128, "Password must be less than 128 characters")
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};\\':"\\|<>?,.\/`~])/, "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character");
+  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=\[\]{}|;':",.<>/?`~-])/, "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character");
 
 export const nameSchema = z
   .string()
   .min(2, "Name must be at least 2 characters")
   .max(100, "Name must be less than 100 characters")
-  .regex(/^[a-zA-Z\s\-'\.]+$/, "Name contains invalid characters");
+  .regex(/^[a-zA-Z\s'.-]+$/, "Name contains invalid characters");
 
 export const currencyCodeSchema = z
   .string()
@@ -116,11 +116,11 @@ export const billSchema = z.object({
 });
 
 // Validation helper functions
-export const validateAndSanitizeTransaction = (data: any) => {
+export const validateAndSanitizeTransaction = (data: Record<string, unknown>) => {
   const sanitized = {
-    description: sanitizeString(data.description),
-    amount: sanitizeAmount(data.amount),
-    category: sanitizeString(data.category),
+    description: sanitizeString(data.description as string),
+    amount: sanitizeAmount(data.amount as number),
+    category: sanitizeString(data.category as string),
     transaction_type: data.transaction_type,
     date: data.date,
   };
@@ -128,10 +128,10 @@ export const validateAndSanitizeTransaction = (data: any) => {
   return transactionSchema.parse(sanitized);
 };
 
-export const validateAndSanitizeBudget = (data: any) => {
+export const validateAndSanitizeBudget = (data: Record<string, unknown>) => {
   const sanitized = {
-    category: sanitizeString(data.category),
-    amount: sanitizeAmount(data.amount),
+    category: sanitizeString(data.category as string),
+    amount: sanitizeAmount(data.amount as number),
     period: data.period,
   };
   

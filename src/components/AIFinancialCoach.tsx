@@ -30,6 +30,7 @@ const AIFinancialCoach = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const { profile } = useAuth();
+  const { toast } = useToast();
 
   const currency = profile?.currency || 'USD';
   const quickQuestions = [
@@ -48,7 +49,6 @@ const AIFinancialCoach = () => {
     const lastMessage = localStorage.getItem('lastCoachMessage');
     const now = Date.now();
     if (lastMessage && now - parseInt(lastMessage) < 3000) {
-      const { toast } = useToast();
       toast({
         title: "Please wait",
         description: "Please wait a moment before sending another message.",
@@ -197,7 +197,7 @@ What specific area would you like me to dive deeper into?`;
     if (!isListening) {
       // Start voice recognition
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+        const SpeechRecognition = (window as Window & typeof globalThis & { webkitSpeechRecognition?: typeof SpeechRecognition; SpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition || (window as Window & typeof globalThis & { webkitSpeechRecognition?: typeof SpeechRecognition; SpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition;
         const recognition = new SpeechRecognition();
         
         recognition.continuous = false;
@@ -208,8 +208,9 @@ What specific area would you like me to dive deeper into?`;
           setIsListening(true);
         };
         
-        recognition.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
+        recognition.onresult = (event: Event) => {
+          const speechEvent = event as unknown as { results: { [key: number]: { [key: number]: { transcript: string } } } };
+          const transcript = speechEvent.results[0][0].transcript;
           setInputMessage(transcript);
           setIsListening(false);
         };

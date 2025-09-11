@@ -203,7 +203,7 @@ export const useDebts = () => {
 
   useEffect(() => {
     fetchDebts();
-  }, [user]);
+  }, [user, fetchDebts]);
 
   return {
     debts,
