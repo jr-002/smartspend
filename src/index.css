@@ -53,9 +53,9 @@ All colors MUST be HSL.
     --gradient-background: linear-gradient(180deg, hsl(210 40% 99%), hsl(220 13% 97%));
 
     /* Shadows */
-    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-glow: 0 0 0 1px hsl(var(--primary) / 0.05);
-    --shadow-floating: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --shadow-glow: 0 0 0 1px hsla(var(--primary), 0.05);
+    --shadow-floating: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 
     /* Animation Variables */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -200,7 +200,8 @@ All colors MUST be HSL.
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-border/60 rounded-full;
+    @apply bg-border rounded-full;
+    opacity: 0.6;
   }
 
   ::-webkit-scrollbar-thumb:hover {
@@ -217,7 +218,7 @@ All colors MUST be HSL.
   }
 
   .dark ::-webkit-scrollbar-thumb {
-    background: hsl(var(--border) / 0.6);
+    background: hsla(var(--border), 0.6);
   }
 
   .dark ::-webkit-scrollbar-thumb:hover {
@@ -226,18 +227,18 @@ All colors MUST be HSL.
 
   /* Selection colors */
   ::selection {
-    background: hsl(var(--primary) / 0.1);
+    background: hsla(var(--primary), 0.1);
     color: hsl(var(--primary-foreground));
   }
 
   .dark ::selection {
-    background: hsl(var(--primary) / 0.2);
+    background: hsla(var(--primary), 0.2);
     color: hsl(var(--foreground));
   }
 
   /* Focus ring enhancements */
   :focus-visible {
-    outline: 2px solid hsl(var(--ring) / 0.5);
+    outline: 2px solid hsla(var(--ring), 0.5);
     outline-offset: 2px;
   }
 
@@ -255,11 +256,13 @@ All colors MUST be HSL.
   }
 
   .glass-card {
-    @apply bg-card border border-border/50 shadow-card;
+    @apply bg-card border shadow-card;
+    border-color: hsla(var(--border), 0.5);
   }
 
   .dark .glass-card {
-    @apply bg-card border border-border/50 shadow-card;
+    @apply bg-card border shadow-card;
+    border-color: hsla(var(--border), 0.5);
   }
 
   .theme-transition {
