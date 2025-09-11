@@ -59,7 +59,42 @@ const groq = new Groq({
   apiKey: Deno.env.get('GROQ_API_KEY'),
 });
 
-async function analyzeFinancialRisk(financialData: any): Promise<string> {
+interface FinancialRiskData {
+  profile?: {
+    monthly_income: number;
+    currency: string;
+  };
+  transactions: Array<{
+    amount: number;
+    category: string;
+    transaction_type: 'income' | 'expense';
+    date: string;
+  }>;
+  budgets?: Array<{
+    category: string;
+    amount: number;
+    spent?: number;
+    utilization?: number;
+  }>;
+  savingsGoals?: Array<{
+    target_amount: number;
+    current_amount: number;
+  }>;
+  bills?: Array<{
+    amount: number;
+    status: string;
+  }>;
+  debts?: Array<{
+    balance: number;
+  }>;
+  totalDebt?: number;
+  totalSavings?: number;
+  monthlyExpenses?: number;
+  monthlyIncome?: number;
+  currency?: string;
+}
+
+async function analyzeFinancialRisk(financialData: FinancialRiskData): Promise<string> {
   try {
     const dataString = JSON.stringify(financialData);
     

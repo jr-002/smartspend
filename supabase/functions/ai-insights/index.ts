@@ -123,9 +123,16 @@ async function generateFinancialInsights(data: FinancialData): Promise<AIInsight
       throw new Error('No response from Groq API');
     }
 
-    const insights = JSON.parse(response);
+    const insights = JSON.parse(response) as Array<{
+      type?: string;
+      title?: string;
+      description?: string;
+      impact?: 'high' | 'medium' | 'low';
+      action?: string;
+      priority?: number;
+    }>;
     
-    return insights.map((insight: any, index: number) => ({
+    return insights.map((insight, index: number) => ({
       id: `ai-${Date.now()}-${index}`,
       type: insight.type || 'spending',
       title: insight.title || 'Financial Insight',

@@ -223,7 +223,15 @@ function calculateMonthlyAverages(transactions: TransactionData[]): Record<strin
 }
 
 function createBudgetAnalysisPrompt(
-  analysisData: any,
+  analysisData: {
+    recentCategorySpending: Record<string, number>;
+    olderCategorySpending: Record<string, number>;
+    categoryTrends: Record<string, { trend: 'increasing' | 'decreasing' | 'stable'; change: number }>;
+    monthlyAverages: Record<string, number>;
+    totalRecentSpending: number;
+    transactionCount: number;
+    averageTransactionAmount: number;
+  },
   monthlyIncome: number,
   currency: string
 ): string {
@@ -239,7 +247,10 @@ ${Object.entries(analysisData.recentCategorySpending)
 
 SPENDING TRENDS:
 ${Object.entries(analysisData.categoryTrends)
-  .map(([cat, trend]) => `- ${cat}: ${(trend as any).trend} (${(trend as any).change.toFixed(1)}% change)`)
+  .map(([cat, trend]) => {
+    const { trend: trendType, change } = trend as { trend: string; change: number };
+    return `- ${cat}: ${trendType} (${change.toFixed(1)}% change)`;
+  })
   .join('\n')}
 
 MONTHLY AVERAGES:
@@ -280,7 +291,20 @@ Focus on practical, achievable recommendations based on the user's actual spendi
 }
 
 function validateAndFormatRecommendation(
-  recommendation: any,
+  recommendation: {
+    totalBudget: number;
+    categories: Array<{
+      category: string;
+      suggestedAmount: number;
+      confidence: number;
+      reasoning: string;
+      trend: 'increasing' | 'decreasing' | 'stable';
+      seasonalFactor: number;
+    }>;
+    savingsRate: number;
+    emergencyFund: number;
+    insights: string[];
+  },
   monthlyIncome: number
 ): BudgetRecommendation {
   const maxBudget = monthlyIncome * 0.8;
@@ -288,7 +312,7 @@ function validateAndFormatRecommendation(
     recommendation.totalBudget = maxBudget;
     
     const reductionFactor = maxBudget / recommendation.totalBudget;
-    recommendation.categories = recommendation.categories.map((cat: any) => ({
+    recommendation.categories = recommendation.categories.map((cat) => ({
       ...cat,
       suggestedAmount: cat.suggestedAmount * reductionFactor
     }));
@@ -347,7 +371,7 @@ function getFallbackBudgetRecommendation(
   };
 }
 
-async function generateSpendingPredictions(transactions: any[], currency: string): Promise<Record<string, number>> {
+async function generateSpendingPredictions(transactions: TransactionData[], currency: string): Promise<Record<string, number>> {
   const now = new Date();
   const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
   

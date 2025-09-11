@@ -219,7 +219,7 @@ class EnhancedMonitor {
   }
 
   // User action tracking for behavior analysis
-  trackUserAction(action: string, userId?: string, metadata?: Record<string, any>) {
+  trackUserAction(action: string, userId?: string, metadata?: Record<string, unknown>) {
     this.logEvent({
       type: 'info',
       category: 'user_action',

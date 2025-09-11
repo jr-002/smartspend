@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -28,7 +28,7 @@ export const useTransactions = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     if (!user) {
       setTransactions([]);
       setLoading(false);
@@ -77,7 +77,7 @@ export const useTransactions = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const addTransaction = async (newTransaction: NewTransaction): Promise<boolean> => {
     if (!user) {

@@ -140,5 +140,5 @@ export default {
 			}
 		}
 	},
-	plugins: [require("./src/lib/tailwind-plugins").default],
+	plugins: [(await import("./src/lib/tailwind-plugins")).default],
 } satisfies Config;
