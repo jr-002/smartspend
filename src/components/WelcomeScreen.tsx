@@ -20,6 +20,8 @@ const WelcomeScreen = () => {
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [emailError, setEmailError] = useState<string>('');
   
   const [formData, setFormData] = useState({
     email: "",
@@ -32,7 +34,59 @@ const WelcomeScreen = () => {
 
   const { signUp, signIn } = useAuth();
 
+  // Real-time password validation
+  const validatePassword = (password: string) => {
+    const errors: string[] = [];
+    
+    if (password.length < 6) {
+      errors.push("At least 6 characters");
+    }
+    if (!/[a-z]/.test(password)) {
+      errors.push("One lowercase letter");
+    }
+    if (!/[A-Z]/.test(password)) {
+      errors.push("One uppercase letter");
+    }
+    if (!/\d/.test(password)) {
+      errors.push("One number");
+    }
+    if (!/[!@#$%^&*()_+=[\]{}|;':",.<>/?`~-]/.test(password)) {
+      errors.push("One special character");
+    }
+    
+    setPasswordErrors(errors);
+    return errors.length === 0;
+  };
+
+  // Real-time email validation
+  const validateEmail = (email: string) => {
+    try {
+      emailSchema.parse(email);
+      setEmailError('');
+      return true;
+    } catch (err: unknown) {
+      const error = err as { issues?: Array<{ message: string }> };
+      setEmailError(error.issues?.[0]?.message || "Invalid email format");
+      return false;
+    }
+  };
+
   const handleNext = () => {
+    // Validate current step before proceeding
+    if (step === 2 && !isLogin) {
+      // Validate email and password before proceeding
+      const isEmailValid = validateEmail(formData.email);
+      const isPasswordValid = validatePassword(formData.password);
+      const passwordsMatch = formData.password === formData.confirmPassword;
+      
+      if (!isEmailValid || !isPasswordValid || !passwordsMatch) {
+        if (!passwordsMatch) {
+          setError("Passwords do not match");
+        }
+        return;
+      }
+    }
+    
     if (step < 4) {
       setStep(step + 1);
     }
@@ -58,6 +112,12 @@ const WelcomeScreen = () => {
           return;
         }
 
+        // Validate email format for login
+        if (!validateEmail(formData.email)) {
+          setLoading(false);
+          return;
+        }
+
         const { error } = await signIn(formData.email, formData.password);
         if (error) {
           setError(error.message);
@@ -70,15 +130,9 @@ const WelcomeScreen = () => {
           return;
         }
 
-        // Validate email format
-        try {
-          emailSchema.parse(formData.email);
-        } catch (err: unknown) {
-          const error = err as { issues?: Array<{ message: string }> };
-          setError(error.issues?.[0]?.message || "Please enter a valid email address");
-          setLoading(false);
-          return;
-        }
+        // Final validation before signup
+        const isEmailValid = validateEmail(formData.email);
+        const isPasswordValid = validatePassword(formData.password);
 
         if (formData.password !== formData.confirmPassword) {
           setError("Passwords do not match");
@@ -86,11 +140,8 @@ const WelcomeScreen = () => {
           return;
         }
 
-        try {
-          passwordSchema.parse(formData.password);
-        } catch (err: unknown) {
-          const error = err as { issues?: Array<{ message: string }> };
-          setError(error.issues?.[0]?.message || "Password does not meet requirements");
+        if (!isEmailValid || !isPasswordValid) {
+          setError("Please fix the validation errors before proceeding");
           setLoading(false);
           return;
         }
@@ -139,7 +190,16 @@ const WelcomeScreen = () => {
   const canProceed = () => {
     switch (step) {
       case 2:
-        return formData.email && formData.password && (!isLogin ? formData.confirmPassword : true);
+        if (isLogin) {
+          return formData.email && formData.password;
+        } else {
+          return formData.email && 
+                 formData.password && 
+                 formData.confirmPassword && 
+                 passwordErrors.length === 0 && 
+                 !emailError &&
+                 formData.password === formData.confirmPassword;
+        }
       case 3:
         return !isLogin ? formData.name.trim() : true;
       case 4:
@@ -357,16 +417,22 @@ const WelcomeScreen = () => {
                 <div>
                   <Label htmlFor="email" className="flex items-center gap-2">
                     <Mail className="w-4 h-4" />
-                    Email Address
+                    Email
                   </Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="you@example.com"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => {
+                      setFormData({...formData, email: e.target.value});
+                      if (e.target.value) validateEmail(e.target.value);
+                    }}
                     className="mt-1"
                   />
+                  {emailError && (
+                    <p className="text-xs text-destructive mt-1">{emailError}</p>
+                  )}
                 </div>
 
                 <div>
@@ -378,9 +444,12 @@ const WelcomeScreen = () => {
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
+                      placeholder="Create a secure password"
                       value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      onChange={(e) => {
+                        setFormData({...formData, password: e.target.value});
+                        if (!isLogin && e.target.value) validatePassword(e.target.value);
+                      }}
                       className="pr-10"
                     />
                     <Button
@@ -397,14 +466,26 @@ const WelcomeScreen = () => {
                       )}
                     </Button>
                   </div>
-                  {!isLogin && formData.password && (
-                    <div className="mt-2 p-3 bg-muted/50 rounded-lg border border-border/50">
+                  {!isLogin && formData.password && passwordErrors.length > 0 && (
+                    <div className="mt-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
                       <div className="flex items-start gap-2">
-                        <Info className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                        <div className="text-xs text-muted-foreground leading-relaxed">
-                          <p className="font-medium mb-1">Password Requirements:</p>
-                          <p>Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character</p>
+                        <Info className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
+                        <div className="text-xs leading-relaxed">
+                          <p className="font-medium mb-1 text-destructive">Password Requirements:</p>
+                          <ul className="space-y-1">
+                            {passwordErrors.map((error, index) => (
+                              <li key={index} className="text-destructive">• {error}</li>
+                            ))}
+                          </ul>
                         </div>
+                      </div>
+                    </div>
+                  )}
+                  {!isLogin && formData.password && passwordErrors.length === 0 && (
+                    <div className="mt-2 p-3 bg-success/10 rounded-lg border border-success/20">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-success" />
+                        <p className="text-xs text-success font-medium">Password meets all requirements</p>
                       </div>
                     </div>
                   )}
@@ -420,7 +501,7 @@ const WelcomeScreen = () => {
                       <Input
                         id="confirmPassword"
                         type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm your password"
+                        placeholder="Re-enter your password"
                         value={formData.confirmPassword}
                         onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                         className="pr-10"
@@ -439,6 +520,15 @@ const WelcomeScreen = () => {
                         )}
                       </Button>
                     </div>
+                    {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                      <p className="text-xs text-destructive mt-1">Passwords do not match</p>
+                    )}
+                    {formData.confirmPassword && formData.password === formData.confirmPassword && formData.password && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <CheckCircle className="w-3 h-3 text-success" />
+                        <p className="text-xs text-success">Passwords match</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -470,12 +560,12 @@ const WelcomeScreen = () => {
               <div>
                 <Label htmlFor="name" className="flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  Full Name
+                  Name
                 </Label>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="Enter your full name"
+                  placeholder="Your name"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   className="mt-1"

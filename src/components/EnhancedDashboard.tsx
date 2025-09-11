@@ -35,6 +35,9 @@ const EnhancedDashboard = () => {
   const safeBudgets = Array.isArray(budgets) ? budgets : [];
   const safeSavingsGoals = Array.isArray(savingsGoals) ? savingsGoals : [];
 
+  // Get user's preferred currency
+  const userCurrency = profile?.currency || "USD";
+
   const totalIncome = safeTransactions
     .filter((t) => t?.transaction_type === 'income' && typeof t.amount === 'number')
     .reduce((sum, t) => sum + t.amount, 0);
@@ -71,7 +74,7 @@ const EnhancedDashboard = () => {
                 <p className={`text-3xl font-bold tracking-tight ${
                   balance >= 0 ? 'text-success' : 'text-destructive'
                 }`}>
-                  {formatCurrency(balance, profile?.currency || "USD")}
+                  {formatCurrency(balance, userCurrency)}
                 </p>
               </div>
               <div className="p-3 bg-muted rounded-lg">
@@ -87,7 +90,7 @@ const EnhancedDashboard = () => {
               <div className="space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">Total Income</p>
                 <p className="text-3xl font-bold text-success tracking-tight">
-                  {formatCurrency(totalIncome, profile?.currency || "USD")}
+                  {formatCurrency(totalIncome, userCurrency)}
                 </p>
               </div>
               <div className="p-3 bg-muted rounded-lg">
@@ -103,7 +106,7 @@ const EnhancedDashboard = () => {
               <div className="space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">Total Expenses</p>
                 <p className="text-3xl font-bold text-destructive tracking-tight">
-                  {formatCurrency(totalExpenses, profile?.currency || "USD")}
+                  {formatCurrency(totalExpenses, userCurrency)}
                 </p>
               </div>
               <div className="p-3 bg-muted rounded-lg">
@@ -120,8 +123,8 @@ const EnhancedDashboard = () => {
                 <p className="text-sm font-medium text-muted-foreground">Savings Goals</p>
                 <p className="text-3xl font-bold text-warning tracking-tight">
                   {savingsGoals.length > 0 
-                    ? formatCurrency(totalCurrentSavings, profile?.currency || "USD")
-                    : formatCurrency(0, profile?.currency || "USD")
+                    ? formatCurrency(totalCurrentSavings, userCurrency)
+                    : formatCurrency(0, userCurrency)
                   }
                 </p>
               </div>
@@ -171,7 +174,7 @@ const EnhancedDashboard = () => {
                             transaction.transaction_type === 'income' ? 'text-success' : 'text-destructive'
                           }`}>
                             {transaction.transaction_type === 'income' ? '+' : '-'}
-                            {formatCurrency(transaction.amount, profile?.currency || "USD")}
+                            {formatCurrency(transaction.amount, userCurrency)}
                           </p>
                           <p className="text-xs text-muted-foreground">{transaction.date}</p>
                         </div>
@@ -281,7 +284,7 @@ const EnhancedDashboard = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-foreground">
-                          {formatCurrency(budget.amount, profile?.currency || "USD")}
+                          {formatCurrency(budget.amount, userCurrency)}
                         </p>
                         <p className="text-subtle">allocated</p>
                       </div>

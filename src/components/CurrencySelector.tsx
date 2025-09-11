@@ -38,9 +38,9 @@ const CurrencySelector = ({ value, onValueChange, className }: CurrencySelectorP
             {selectedCurrency ? (
               <>
                 <span className="text-lg">{selectedCurrency.flag}</span>
-                <span className="font-mono">{selectedCurrency.symbol}</span>
+                <span className="font-mono text-sm bg-muted px-1.5 py-0.5 rounded">{selectedCurrency.symbol}</span>
                 <span>{selectedCurrency.code}</span>
-                <span className="text-muted-foreground">- {selectedCurrency.name}</span>
+                <span className="text-muted-foreground text-sm">- {selectedCurrency.name}</span>
               </>
             ) : (
               "Select currency..."
