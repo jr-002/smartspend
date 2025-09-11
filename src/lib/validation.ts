@@ -1,5 +1,29 @@
 import { z } from "zod";
 
+// Add missing validation schemas that are referenced but not defined
+export const emailSchema = z
+  .string()
+  .email("Invalid email format")
+  .min(5, "Email must be at least 5 characters")
+  .max(254, "Email must be less than 254 characters");
+
+export const passwordSchema = z
+  .string()
+  .min(6, "Password must be at least 6 characters")
+  .max(128, "Password must be less than 128 characters")
+  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{}|;':",.<>/?`~-])/, "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character");
+
+export const nameSchema = z
+  .string()
+  .min(2, "Name must be at least 2 characters")
+  .max(100, "Name must be less than 100 characters")
+  .regex(/^[a-zA-Z\s'.-]+$/, "Name contains invalid characters");
+
+export const currencyCodeSchema = z
+  .string()
+  .length(3, "Currency code must be exactly 3 characters")
+  .regex(/^[A-Z]{3}$/, "Currency code must be uppercase letters");
+
 // Common validation schemas
 export const currencyAmountSchema = z
   .number()

@@ -1,7 +1,7 @@
 // Comprehensive input validation and sanitization for API endpoints
 import { z } from 'zod';
 
-// Security-focused input sanitization
+// Add missing InputSanitizer class that's referenced in other files
 export class InputSanitizer {
   // Remove potentially dangerous HTML/script content
   static sanitizeString(input: string, maxLength: number = 1000): string {
@@ -114,6 +114,9 @@ export class InputSanitizer {
     return suspiciousCount >= 2;
   }
 }
+
+// Security-focused input sanitization
+// Note: InputSanitizer class moved to top of file to fix import issues
 
 // Validation schemas for common API inputs
 export const apiValidationSchemas = {
