@@ -56,7 +56,7 @@ jobs:
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
       
       - name: Deploy to Vercel
-        uses: vercel/action@v1
+        uses: vercel/vercel-action@v3
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
