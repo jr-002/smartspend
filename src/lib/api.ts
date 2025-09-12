@@ -155,19 +155,21 @@ export async function generateFinancialAdvice(userContext: string): Promise<stri
   }
   localStorage.setItem('lastAIRequest', now.toString());
 
-  return monitoredAPICall('ai-coach', async () => {
+  try {
     const { data, error } = await supabase.functions.invoke('ai-coach', {
       body: { userContext }
     });
 
     if (error) {
-      captureException(error);
       console.error('Error calling ai-coach function:', error);
       return getFallbackFinancialAdvice(userContext);
     }
 
     return data.advice || getFallbackFinancialAdvice(userContext);
-  });
+  } catch (error) {
+    console.error('Error in generateFinancialAdvice:', error);
+    return getFallbackFinancialAdvice(userContext);
+  }
 }
 
 export async function analyzeFinancialRisk(financialData: Record<string, unknown>): Promise<string> {

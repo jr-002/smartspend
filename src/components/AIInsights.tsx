@@ -66,16 +66,39 @@ export default function AIInsights() {
     }
 
     const result = await generateInsights(async () => {
-      const apiInsights = await generateAIInsights(user.id);
-      // generateAIInsights returns AIInsight[]
-      return apiInsights.map((insight, index) => ({
-        id: insight.id || `insight-${index}`,
-        type: insight.type as 'spending' | 'saving' | 'budget' | 'investment',
-        title: insight.title || `Insight #${index + 1}`,
-        message: insight.description || insight.action || 'No description available',
-        priority: insight.impact as 'high' | 'medium' | 'low',
-        actionable: true
-      }));
+      try {
+        const apiInsights = await generateAIInsights(user.id);
+        // generateAIInsights returns AIInsight[]
+        return apiInsights.map((insight, index) => ({
+          id: insight.id || `insight-${index}`,
+          type: insight.type as 'spending' | 'saving' | 'budget' | 'investment',
+          title: insight.title || `Insight #${index + 1}`,
+          message: insight.description || insight.action || 'No description available',
+          priority: insight.impact as 'high' | 'medium' | 'low',
+          actionable: true
+        }));
+      } catch (error) {
+        console.error('Error generating insights:', error);
+        // Return fallback insights
+        return [
+          {
+            id: 'fallback-1',
+            type: 'spending' as const,
+            title: 'Track Your Spending',
+            message: 'Start by adding more transactions to get personalized insights about your spending patterns.',
+            priority: 'medium' as const,
+            actionable: true
+          },
+          {
+            id: 'fallback-2',
+            type: 'budget' as const,
+            title: 'Create Budgets',
+            message: 'Set up budget categories to better control your spending and reach your financial goals.',
+            priority: 'high' as const,
+            actionable: true
+          }
+        ];
+      }
     });
 
     if (result) {

@@ -44,11 +44,15 @@ class ErrorBoundary extends Component<Props, State> {
     if (import.meta.env.PROD) {
       // Example: Send to monitoring service
       try {
-        fetch('/api/errors', {
+        console.error('Production error logged:', errorDetails);
+        // In a real production environment, this would send to a monitoring service
+        /*
+        await fetch('/api/errors', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(errorDetails)
-        }).catch(console.error);
+        });
+        */
       } catch (e) {
         console.error('Failed to log error to monitoring service:', e);
       }
