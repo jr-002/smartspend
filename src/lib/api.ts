@@ -2,6 +2,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import { captureException } from './sentry';
 import { monitoredAPICall } from './monitoring';
+import { resourceAwareAPICall } from './resource-monitor';
+import { queuedAPICall } from './request-queue';
 
 export interface FinancialData {
   transactions: Array<{
@@ -64,10 +66,18 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
     return getFallbackInsights();
   }
 
-  return monitoredAPICall('ai-insights', async () => {
-    const { data, error } = await supabase.functions.invoke('ai-insights', {
-      body: { userId }
-    });
+  return resourceAwareAPICall(
+    () => monitoredAPICall('ai-insights', async () => {
+      return queuedAPICall(
+        () => supabase.functions.invoke('ai-insights', {
+          body: { userId }
+        }),
+        3 // High priority for AI insights
+      );
+    }),
+    () => getFallbackInsights()
+  ).then(result => {
+    const { data, error } = result as { data: any; error: any };
 
     if (error) {
       captureException(error);
@@ -100,9 +110,15 @@ export async function generateBudgetRecommendations(userId: string): Promise<Bud
   }
 
   try {
-    const { data, error } = await supabase.functions.invoke('budget-ai', {
-      body: { userId }
-    });
+    const { data, error } = await resourceAwareAPICall(
+      () => queuedAPICall(
+        () => supabase.functions.invoke('budget-ai', {
+          body: { userId }
+        }),
+        2 // Medium priority
+      ),
+      () => ({ data: { recommendations: getFallbackBudgetRecommendations() }, error: null })
+    );
 
     if (error) {
       console.error('Error calling budget-ai function:', error);
@@ -156,9 +172,15 @@ export async function generateFinancialAdvice(userContext: string): Promise<stri
   localStorage.setItem('lastAIRequest', now.toString());
 
   try {
-    const { data, error } = await supabase.functions.invoke('ai-coach', {
-      body: { userContext }
-    });
+    const { data, error } = await resourceAwareAPICall(
+      () => queuedAPICall(
+        () => supabase.functions.invoke('ai-coach', {
+          body: { userContext }
+        }),
+        3 // High priority for user interactions
+      ),
+      () => ({ data: { advice: getFallbackFinancialAdvice(userContext) }, error: null })
+    );
 
     if (error) {
       console.error('Error calling ai-coach function:', error);

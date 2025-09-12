@@ -8,13 +8,14 @@ interface CacheEntry<T> {
 
 class MemoryCache {
   private cache = new Map<string, CacheEntry<unknown>>();
-  private maxSize = 100;
+  private maxSize = 50; // Reduced cache size to prevent memory issues
 
   set<T>(key: string, data: T, ttl: number = 5 * 60 * 1000): void {
-    // Clean up if cache is getting too large
+    // More aggressive cleanup if cache is getting large
     if (this.cache.size >= this.maxSize) {
-      const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
+      // Remove oldest 25% of entries
+      const keysToRemove = Array.from(this.cache.keys()).slice(0, Math.floor(this.maxSize * 0.25));
+      keysToRemove.forEach(key => this.cache.delete(key));
     }
 
     this.cache.set(key, {
@@ -50,6 +51,14 @@ class MemoryCache {
 
   clear(): void {
     this.cache.clear();
+    // Force garbage collection if available
+    if ('gc' in window && typeof (window as any).gc === 'function') {
+      try {
+        (window as any).gc();
+      } catch (error) {
+        console.warn('Garbage collection failed:', error);
+      }
+    }
   }
 
   size(): number {

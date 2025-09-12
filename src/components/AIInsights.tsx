@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { generateAIInsights } from '@/lib/api';
 import { useAsyncOperation } from '@/hooks/useAsyncOperation';
 import { toast } from '@/hooks/use-toast';
+import { resourceMonitor } from '@/lib/resource-monitor';
 
 interface AIInsight {
   id: string;
@@ -65,6 +66,15 @@ export default function AIInsights() {
       return;
     }
 
+    // Check resource availability before making expensive AI call
+    if (!resourceMonitor.canMakeRequest()) {
+      toast({
+        title: "System Busy",
+        description: "Please wait a moment and try again. Close other browser tabs if needed.",
+        variant: "destructive"
+      });
+      return;
+    }
     const result = await generateInsights(async () => {
       try {
         const apiInsights = await generateAIInsights(user.id);
@@ -99,7 +109,7 @@ export default function AIInsights() {
           }
         ];
       }
-    });
+    }, 2); // Allow 2 retries for AI insights
 
     if (result) {
       setInsights(result);

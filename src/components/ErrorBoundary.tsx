@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { resourceMonitor } from '@/lib/resource-monitor';
 
 interface Props {
   children: ReactNode;
@@ -28,6 +29,16 @@ class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     
+    // Check if this is a resource-related error
+    const isResourceError = error.message.includes('resources') || 
+                           error.message.includes('memory') ||
+                           error.message.includes('ERR_INSUFFICIENT_RESOURCES');
+    
+    if (isResourceError) {
+      console.warn('Resource error detected, triggering cleanup');
+      resourceMonitor.cleanup();
+    }
+    
     // Log error details for debugging
     const errorDetails = {
       message: error.message,
@@ -35,7 +46,9 @@ class ErrorBoundary extends Component<Props, State> {
       componentStack: errorInfo.componentStack,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
-      url: window.location.href
+      url: window.location.href,
+      resourceStatus: resourceMonitor.getResourceStatus(),
+      isResourceError
     };
     
     console.error('Error details:', errorDetails);

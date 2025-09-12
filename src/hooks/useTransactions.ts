@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { resourceAwareAPICall } from '@/lib/resource-monitor';
+import { queuedAPICall } from '@/lib/request-queue';
 
 export interface Transaction {
   id: string;
@@ -39,11 +41,18 @@ export const useTransactions = () => {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: false });
+      const { data, error: fetchError } = await resourceAwareAPICall(
+        () => queuedAPICall(
+          () => supabase
+            .from('transactions')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('date', { ascending: false })
+            .limit(100), // Limit initial load to prevent memory issues
+          1 // High priority for transactions
+        ),
+        () => ({ data: [], error: null }) // Fallback to empty array
+      );
 
       if (fetchError) {
         throw fetchError;

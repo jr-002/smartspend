@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import ProfileSettings from "@/components/ProfileSettings";
+import { resourceMonitor } from "@/lib/resource-monitor";
 import {
   LayoutDashboard,
   Calculator,
@@ -21,6 +22,8 @@ import {
 } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar, { SidebarCategory } from "@/components/AppSidebar";
+import LoadingFallback from "@/components/LoadingFallback";
+import ResourceMonitor from "@/components/ResourceMonitor";
 
 // Lazy-load all heavy feature components
 const EnhancedDashboard = lazy(() => import("@/components/EnhancedDashboard"));
@@ -46,12 +49,36 @@ const Index = () => {
 
   // Prevent multiple simultaneous component loads
   const [loadedComponents, setLoadedComponents] = useState(new Set(['dashboard']));
+  const [resourceStatus, setResourceStatus] = useState(resourceMonitor.getResourceStatus());
   
   const handleTabChange = (tabId: string) => {
+    // Check resources before switching tabs
+    if (!resourceMonitor.canMakeRequest()) {
+      console.warn('Deferring tab change due to resource constraints');
+      setTimeout(() => setActiveTab(tabId), 1000);
+      return;
+    }
+    
     setActiveTab(tabId);
   };
 
+  // Monitor resource usage
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setResourceStatus(resourceMonitor.getResourceStatus());
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      resourceMonitor.cleanup();
+    };
+  }, []);
   const handleSignOut = async () => {
+    resourceMonitor.cleanup();
     await signOut();
   };
 
@@ -175,16 +202,13 @@ const Index = () => {
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
             <div className="px-8 py-8 max-w-7xl mx-auto">
+              <ResourceMonitor />
               <Suspense
                 fallback={
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-center py-12">
-                      <div className="text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                        <p className="text-muted-foreground">Loading {activeItem.label}...</p>
-                      </div>
-                    </div>
-                  </div>
+                  <LoadingFallback 
+                    message={`Loading ${activeItem.label}...`}
+                    showResourceWarning={!resourceStatus.canMakeRequest}
+                  />
                 }
               >
                 <ActiveComponent />

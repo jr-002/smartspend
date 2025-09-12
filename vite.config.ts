@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@supabase/supabase-js'],
+    exclude: ['@radix-ui/react-icons'] // Exclude heavy icon libraries from pre-bundling
+  },
   plugins: [
     react(),
     VitePWA({
@@ -54,13 +58,33 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     rollupOptions: {
+      onwarn(warning, warn) {
+        // Suppress chunk size warnings for better performance
+        if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+        if (warning.code === 'PLUGIN_WARNING') return;
+        warn(warning);
+      },
       output: {
+        // More aggressive code splitting to prevent large bundles
         manualChunks: {
           vendor: ['react', 'react-dom'],
           supabase: ['@supabase/supabase-js'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          charts: ['recharts'],
+          forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
+          icons: ['lucide-react'],
+          utils: ['clsx', 'tailwind-merge', 'class-variance-authority'],
+        },
+        // Optimize chunk loading
+        chunkFileNames: (chunkInfo) => {
+          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
+          return `js/${facadeModuleId}-[hash].js`;
         },
       },
     },
+    // Optimize build performance
+    target: 'es2020',
+    minify: 'esbuild',
+    sourcemap: mode === 'development',
   },
 }));

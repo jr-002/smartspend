@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { resourceAwareAPICall } from '@/lib/resource-monitor';
+import { queuedAPICall } from '@/lib/request-queue';
 
 export interface Budget {
   id: string;
@@ -36,11 +38,17 @@ export const useBudgets = () => {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
-        .from('budgets')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('category', { ascending: true });
+      const { data, error: fetchError } = await resourceAwareAPICall(
+        () => queuedAPICall(
+          () => supabase
+            .from('budgets')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('category', { ascending: true }),
+          2 // Medium priority
+        ),
+        () => ({ data: [], error: null })
+      );
 
       if (fetchError) {
         throw fetchError;
