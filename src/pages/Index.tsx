@@ -44,6 +44,13 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const { user, profile, signOut } = useAuth();
 
+  // Prevent multiple simultaneous component loads
+  const [loadedComponents, setLoadedComponents] = useState(new Set(['dashboard']));
+  
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    setLoadedComponents(prev => new Set([...prev, tabId]));
+  };
   const handleSignOut = async () => {
     await signOut();
   };
@@ -166,16 +173,23 @@ const Index = () => {
               <Suspense
                 fallback={
                   <div className="space-y-6">
-                    <div className="h-8 w-48 bg-muted rounded-lg animate-pulse" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="h-32 bg-muted rounded-lg animate-pulse" />
-                      <div className="h-32 bg-muted rounded-lg animate-pulse" />
-                      <div className="h-32 bg-muted rounded-lg animate-pulse" />
+                    <div className="flex items-center justify-center py-12">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                        <p className="text-muted-foreground">Loading {activeItem.label}...</p>
+                      </div>
                     </div>
                   </div>
                 }
               >
-                <ActiveComponent />
+                {loadedComponents.has(activeTab) ? <ActiveComponent /> : (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">Loading {activeItem.label}...</p>
+                    </div>
+                  </div>
+                )}
               </Suspense>
             </div>
           </main>

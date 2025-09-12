@@ -36,6 +36,9 @@ export const useBudgets = () => {
       setLoading(true);
       setError(null);
 
+      // Add delay to prevent overwhelming the API
+      await new Promise(resolve => setTimeout(resolve, 150));
+
       const { data, error: fetchError } = await supabase
         .from('budgets')
         .select('*')

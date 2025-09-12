@@ -18,7 +18,10 @@ const EnhancedDashboard = () => {
   const { goals: savingsGoals, loading: savingsLoading } = useSavingsGoals();
   const { profile } = useAuth();
 
-  if (transactionsLoading || billsLoading || budgetsLoading || savingsLoading) {
+  // Show loading only if all are loading (initial load)
+  const isInitialLoading = transactionsLoading && billsLoading && budgetsLoading && savingsLoading;
+  
+  if (isInitialLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">

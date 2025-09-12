@@ -39,6 +39,9 @@ export const useInvestments = () => {
       setLoading(true);
       setError(null);
 
+      // Add delay to prevent overwhelming the API
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       const { data, error: fetchError } = await supabase
         .from('investments')
         .select('*')

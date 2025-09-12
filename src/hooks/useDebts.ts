@@ -46,6 +46,9 @@ export const useDebts = () => {
       setLoading(true);
       setError(null);
 
+      // Add delay to prevent overwhelming the API
+      await new Promise(resolve => setTimeout(resolve, 350));
+
       const { data, error: fetchError } = await supabase
         .from('debts')
         .select('*')
