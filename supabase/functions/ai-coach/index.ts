@@ -1,6 +1,93 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import Groq from 'https://esm.sh/groq-sdk@0.7.0';
+import Groq from 'npm:groq-sdk@0.7.0';
+
+// Enhanced input validation and sanitization
+interface ValidatedRequest {
+  userContext: string;
+}
+
+// Input sanitization utility
+function sanitizeString(input: string, maxLength: number = 2000): string {
+  if (typeof input !== 'string') {
+    throw new Error('Input must be a string');
+  }
+
+  return input
+    .trim()
+    .slice(0, maxLength)
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/javascript:/gi, '') // Remove javascript: protocols
+    .replace(/vbscript:/gi, '') // Remove vbscript: protocols
+    .replace(/on\w+\s*=/gi, '') // Remove event handlers
+    .replace(/[\x00-\x1F\x7F]/g, ''); // Remove control characters
+}
+
+function sanitizeAIPrompt(prompt: string): string {
+  if (typeof prompt !== 'string') {
+    throw new Error('Prompt must be a string');
+  }
+
+  // Check for common prompt injection patterns
+  const dangerousPatterns = [
+    /ignore\s+previous\s+instructions/gi,
+    /forget\s+everything/gi,
+    /you\s+are\s+now/gi,
+    /system\s*:/gi,
+    /assistant\s*:/gi,
+    /\[system\]/gi,
+    /\[\/system\]/gi,
+    /<\|.*?\|>/gi, // Special tokens
+  ];
+
+  let sanitized = sanitizeString(prompt, 5000);
+
+  // Log and clean potential injection attempts
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(sanitized)) {
+      console.warn('Potential prompt injection detected:', {
+        pattern: pattern.source,
+        prompt: sanitized.substring(0, 100),
+        timestamp: new Date().toISOString(),
+      });
+      sanitized = sanitized.replace(pattern, '');
+    }
+  }
+
+  return sanitized;
+}
+
+// Enhanced request validation
+function validateRequest(body: unknown): ValidatedRequest {
+  if (!body || typeof body !== 'object') {
+    throw new Error('Request body must be a valid JSON object');
+  }
+
+  const { userContext } = body as Record<string, unknown>;
+
+  if (!userContext || typeof userContext !== 'string') {
+    throw new Error('userContext is required and must be a string');
+  }
+
+  if (userContext.length < 10) {
+    throw new Error('userContext must be at least 10 characters long');
+  }
+
+  if (userContext.length > 2000) {
+    throw new Error('userContext must not exceed 2000 characters');
+  }
+
+  // Sanitize the user context
+  const sanitizedContext = sanitizeAIPrompt(userContext);
+
+  if (sanitizedContext.length < 5) {
+    throw new Error('userContext contains insufficient valid content after sanitization');
+  }
+
+  return {
+    userContext: sanitizedContext,
+  };
+}
 
 // Enhanced security headers with comprehensive protection
 const corsHeaders = {
@@ -84,7 +171,7 @@ async function generateFinancialAdvice(userContext: string): Promise<string> {
   }
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   const startTime = Date.now();
   
   // Enhanced security logging
@@ -125,23 +212,11 @@ serve(async (req) => {
   }
 
   try {
-    const { userContext } = await req.json();
+    // Enhanced request validation and sanitization
+    const requestBody = await req.json();
+    const validatedData = validateRequest(requestBody);
 
-    if (!userContext || typeof userContext !== 'string') {
-      return new Response(JSON.stringify({ error: 'User context is required and must be a string' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (userContext.length > 2000) {
-      return new Response(JSON.stringify({ error: 'User context is too long. Please keep it under 2000 characters.' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const advice = await generateFinancialAdvice(userContext);
+    const advice = await generateFinancialAdvice(validatedData.userContext);
 
     return new Response(JSON.stringify({ advice }), {
       headers: { 
@@ -155,7 +230,24 @@ serve(async (req) => {
 
 
   } catch (error) {
-    console.error('Error in ai-coach function:', error);
+    console.error('Error in ai-coach function:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+      identifier,
+    });
+    
+    // Return appropriate error response based on error type
+    if (error instanceof Error && error.message.includes('Validation')) {
+      return new Response(JSON.stringify({ 
+        error: error.message,
+        advice: 'Please check your input and try again with a valid question.'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
       advice: 'I apologize, but I\'m experiencing technical difficulties. Please try again later.'

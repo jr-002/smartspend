@@ -11,6 +11,7 @@ import { formatCurrency } from "@/utils/currencies";
 import { generateFinancialAdvice } from "@/lib/api";
 import { debounceAPICall } from "@/lib/debounce";
 import { resourceMonitor } from "@/lib/resource-monitor";
+import { enhancedMonitor } from "@/lib/enhanced-monitoring";
 
 interface ChatMessage {
   id: string;
@@ -58,6 +59,10 @@ const AIFinancialCoach = () => {
       });
       return;
     }
+    
+    // Track request for monitoring
+    resourceMonitor.trackRequest();
+    
     // Rate limiting check
     const lastMessage = localStorage.getItem('lastCoachMessage');
     const now = Date.now();
@@ -82,6 +87,9 @@ const AIFinancialCoach = () => {
     setInputMessage("");
     setIsLoading(true);
 
+    // Start performance monitoring
+    enhancedMonitor.startTimer('ai_coach_response');
+
     try {
       const aiResponse = await debouncedGenerateAdvice(inputMessage);
       const assistantMessage: ChatMessage = {
@@ -92,8 +100,17 @@ const AIFinancialCoach = () => {
       };
       
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // End performance monitoring
+      const duration = enhancedMonitor.endTimer('ai_coach_response');
+      enhancedMonitor.trackAPICall('ai-coach', 'POST', 200, duration);
     } catch (error) {
       console.error('Error getting AI response:', error);
+      enhancedMonitor.trackError(error instanceof Error ? error : new Error('Unknown error'), {
+        category: 'ai_coach_interaction',
+        severity: 'medium'
+      });
+      
       // Fallback to local response
       const fallbackResponse = generateAIResponse(inputMessage);
       const assistantMessage: ChatMessage = {

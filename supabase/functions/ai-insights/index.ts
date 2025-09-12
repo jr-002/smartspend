@@ -1,6 +1,40 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
-import Groq from 'https://esm.sh/groq-sdk@0.7.0';
+import { createClient } from 'npm:@supabase/supabase-js@2.7.1';
+import Groq from 'npm:groq-sdk@0.7.0';
+
+// Enhanced input validation
+interface ValidatedRequest {
+  userId: string;
+}
+
+function sanitizeUserId(userId: unknown): string {
+  if (typeof userId !== 'string') {
+    throw new Error('User ID must be a string');
+  }
+
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  
+  if (!uuidRegex.test(userId)) {
+    throw new Error('Invalid user ID format - must be a valid UUID');
+  }
+
+  return userId.toLowerCase();
+}
+
+function validateRequest(body: unknown): ValidatedRequest {
+  if (!body || typeof body !== 'object') {
+    throw new Error('Request body must be a valid JSON object');
+  }
+
+  const { userId } = body as Record<string, unknown>;
+
+  if (!userId) {
+    throw new Error('userId is required');
+  }
+
+  return {
+    userId: sanitizeUserId(userId),
+  };
+}
 
 // Enhanced security headers with comprehensive protection
 const corsHeaders = {
@@ -252,7 +286,7 @@ function getFallbackInsights(data: FinancialData): AIInsight[] {
   return insights.slice(0, 4);
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   const startTime = Date.now();
   
   // Enhanced security logging
@@ -293,14 +327,9 @@ serve(async (req) => {
   }
 
   try {
-    const { userId } = await req.json();
-
-    if (!userId) {
-      return new Response(JSON.stringify({ error: 'User ID is required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // Enhanced request validation and sanitization
+    const requestBody = await req.json();
+    const validatedData = validateRequest(requestBody);
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -321,11 +350,11 @@ serve(async (req) => {
     }
 
     const [transactionsResult, budgetsResult, savingsGoalsResult, billsResult, profileResult] = await Promise.all([
-      supabase.from('transactions').select('*').eq('user_id', userId).order('date', { ascending: false }),
-      supabase.from('budgets').select('*').eq('user_id', userId),
-      supabase.from('savings_goals').select('*').eq('user_id', userId),
-      supabase.from('bills').select('*').eq('user_id', userId),
-      supabase.from('profiles').select('*').eq('id', userId).limit(1)
+      supabase.from('transactions').select('*').eq('user_id', validatedData.userId).order('date', { ascending: false }),
+      supabase.from('budgets').select('*').eq('user_id', validatedData.userId),
+      supabase.from('savings_goals').select('*').eq('user_id', validatedData.userId),
+      supabase.from('bills').select('*').eq('user_id', validatedData.userId),
+      supabase.from('profiles').select('*').eq('id', validatedData.userId).limit(1)
     ]);
 
     if (transactionsResult.error || budgetsResult.error || savingsGoalsResult.error || billsResult.error) {
@@ -380,7 +409,24 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in ai-insights function:', error);
+    console.error('Error in ai-insights function:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+      identifier,
+    });
+    
+    // Return appropriate error response based on error type
+    if (error instanceof Error && error.message.includes('validation')) {
+      return new Response(JSON.stringify({ 
+        error: error.message,
+        insights: []
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -6,9 +6,27 @@ import { initSentry } from './lib/sentry'
 import { registerServiceWorker } from './lib/offline-manager'
 import { getPerformanceSetting } from './lib/environment-config'
 import { resourceMonitor } from './lib/resource-monitor'
+import { environmentValidator } from './lib/environment-validator'
 
 // Initialize Sentry for error monitoring
 initSentry()
+
+// Validate environment configuration before starting the app
+const envValidation = environmentValidator.validateEnvironment();
+environmentValidator.displayValidationResults(envValidation);
+
+// If environment validation fails, show error UI and stop execution
+if (!envValidation.isValid) {
+  const errorUI = environmentValidator.createEnvironmentErrorUI(envValidation);
+  document.body.appendChild(errorUI);
+  
+  // Log critical configuration errors
+  console.error('🚨 CRITICAL: Application cannot start due to environment configuration errors');
+  envValidation.errors.forEach(error => console.error(`  ❌ ${error}`));
+  
+  // Stop execution - do not render the app
+  throw new Error('Environment validation failed - check console for details');
+}
 
 // Set up global error handlers
 setupGlobalErrorHandlers()

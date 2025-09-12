@@ -11,6 +11,8 @@ import { useTransactions } from "@/hooks/useTransactions";
 import { useBudgets } from "@/hooks/useBudgets";
 import { formatCurrency } from "@/utils/currencies";
 import { analyzeFinancialRisk } from "@/lib/api";
+import { enhancedMonitor } from "@/lib/enhanced-monitoring";
+import { resourceMonitor } from "@/lib/resource-monitor";
 
 interface RiskPrediction {
   type: 'balance' | 'overspend' | 'goal' | 'emergency';
@@ -193,6 +195,22 @@ const FinancialRiskPredictor = () => {
   const analyzeFinancialRisks = useCallback(async () => {
     setIsAnalyzing(true);
 
+    // Check resource availability before making expensive AI call
+    if (!resourceMonitor.canMakeRequest()) {
+      toast({
+        title: "System Busy",
+        description: "Please wait a moment and try again.",
+        variant: "destructive"
+      });
+      setIsAnalyzing(false);
+      return;
+    }
+    
+    // Track request for monitoring
+    resourceMonitor.trackRequest();
+    enhancedMonitor.trackUserAction('risk_analysis');
+    enhancedMonitor.startTimer('risk_analysis');
+
     const newPredictions = generateRiskPredictions();
     const newHealthScore = calculateHealthScore();
 
@@ -202,8 +220,16 @@ const FinancialRiskPredictor = () => {
         budgets,
         monthlyIncome: profile?.monthly_income || 0
       });
+      
+      // End performance monitoring
+      const duration = enhancedMonitor.endTimer('risk_analysis');
+      enhancedMonitor.trackAPICall('risk-prediction', 'POST', 200, duration);
     } catch (error) {
       console.error('AI analysis failed:', error);
+      enhancedMonitor.trackError(error instanceof Error ? error : new Error('Unknown error'), {
+        category: 'risk_analysis',
+        severity: 'medium'
+      });
     }
 
     setPredictions(newPredictions);

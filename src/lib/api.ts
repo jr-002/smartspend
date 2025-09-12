@@ -4,6 +4,7 @@ import { captureException } from './sentry';
 import { monitoredAPICall } from './monitoring';
 import { resourceAwareAPICall } from './resource-monitor';
 import { queuedAPICall } from './request-queue';
+import { enhancedMonitor } from './enhanced-monitoring';
 
 export interface FinancialData {
   transactions: Array<{
@@ -66,6 +67,9 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
     return getFallbackInsights();
   }
 
+  // Track user action for monitoring
+  enhancedMonitor.trackUserAction('ai_insights_generation', userId);
+
   return resourceAwareAPICall(
     () => monitoredAPICall('ai-insights', async () => {
       return queuedAPICall(
@@ -82,6 +86,11 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
     if (error) {
       captureException(error);
       console.error('Error calling ai-insights function:', error);
+      enhancedMonitor.trackError(error, { 
+        category: 'ai_insights', 
+        userId,
+        severity: 'medium' 
+      });
       return getFallbackInsights();
     }
 
@@ -109,6 +118,9 @@ export async function generateBudgetRecommendations(userId: string): Promise<Bud
     return getFallbackBudgetRecommendations();
   }
 
+  // Track user action for monitoring
+  enhancedMonitor.trackUserAction('budget_recommendations_generation', userId);
+
   try {
     const { data, error } = await resourceAwareAPICall(
       () => queuedAPICall(
@@ -122,6 +134,11 @@ export async function generateBudgetRecommendations(userId: string): Promise<Bud
 
     if (error) {
       console.error('Error calling budget-ai function:', error);
+      enhancedMonitor.trackError(error, { 
+        category: 'budget_ai', 
+        userId,
+        severity: 'medium' 
+      });
       return getFallbackBudgetRecommendations();
     }
 
@@ -134,6 +151,11 @@ export async function generateBudgetRecommendations(userId: string): Promise<Bud
     return data.recommendations;
   } catch (error) {
     console.error('Error in generateBudgetRecommendations:', error);
+    enhancedMonitor.trackError(error instanceof Error ? error : new Error('Unknown error'), { 
+      category: 'budget_recommendations', 
+      userId,
+      severity: 'medium' 
+    });
     // Return fallback recommendations instead of throwing
     return getFallbackBudgetRecommendations();
   }
@@ -171,6 +193,9 @@ export async function generateFinancialAdvice(userContext: string): Promise<stri
   }
   localStorage.setItem('lastAIRequest', now.toString());
 
+  // Track user action for monitoring
+  enhancedMonitor.trackUserAction('ai_coach_query');
+
   try {
     const { data, error } = await resourceAwareAPICall(
       () => queuedAPICall(
@@ -184,17 +209,28 @@ export async function generateFinancialAdvice(userContext: string): Promise<stri
 
     if (error) {
       console.error('Error calling ai-coach function:', error);
+      enhancedMonitor.trackError(error, { 
+        category: 'ai_coach', 
+        severity: 'medium' 
+      });
       return getFallbackFinancialAdvice(userContext);
     }
 
     return data.advice || getFallbackFinancialAdvice(userContext);
   } catch (error) {
     console.error('Error in generateFinancialAdvice:', error);
+    enhancedMonitor.trackError(error instanceof Error ? error : new Error('Unknown error'), { 
+      category: 'financial_advice', 
+      severity: 'medium' 
+    });
     return getFallbackFinancialAdvice(userContext);
   }
 }
 
 export async function analyzeFinancialRisk(financialData: Record<string, unknown>): Promise<string> {
+  // Track user action for monitoring
+  enhancedMonitor.trackUserAction('risk_analysis');
+
   try {
     const { data, error } = await supabase.functions.invoke('risk-prediction', {
       body: { financialData }
@@ -202,6 +238,10 @@ export async function analyzeFinancialRisk(financialData: Record<string, unknown
 
     if (error) {
       console.error('Error calling risk-prediction function:', error);
+      enhancedMonitor.trackError(error, { 
+        category: 'risk_prediction', 
+        severity: 'medium' 
+      });
       // Return fallback analysis instead of throwing
       return getFallbackRiskAnalysis();
     }
@@ -209,6 +249,10 @@ export async function analyzeFinancialRisk(financialData: Record<string, unknown
     return data.analysis || '';
   } catch (error) {
     console.error('Error in analyzeFinancialRisk:', error);
+    enhancedMonitor.trackError(error instanceof Error ? error : new Error('Unknown error'), { 
+      category: 'risk_analysis', 
+      severity: 'medium' 
+    });
     // Return fallback analysis instead of throwing
     return getFallbackRiskAnalysis();
   }

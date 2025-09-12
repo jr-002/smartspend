@@ -1,6 +1,76 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
-import Groq from 'https://esm.sh/groq-sdk@0.7.0';
+import { createClient } from 'npm:@supabase/supabase-js@2.7.1';
+import Groq from 'npm:groq-sdk@0.7.0';
+
+// Enhanced input validation
+interface ValidatedRequest {
+  userId?: string;
+  financialData?: FinancialRiskData;
+}
+
+function sanitizeUserId(userId: unknown): string {
+  if (typeof userId !== 'string') {
+    throw new Error('User ID must be a string');
+  }
+
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  
+  if (!uuidRegex.test(userId)) {
+    throw new Error('Invalid user ID format - must be a valid UUID');
+  }
+
+  return userId.toLowerCase();
+}
+
+function validateFinancialData(data: unknown): FinancialRiskData | undefined {
+  if (!data || typeof data !== 'object') {
+    return undefined;
+  }
+
+  // Basic validation for financial data structure
+  const financialData = data as Record<string, unknown>;
+  
+  // Validate transactions array if present
+  if (financialData.transactions && Array.isArray(financialData.transactions)) {
+    const validTransactions = financialData.transactions.filter(t => 
+      t && typeof t === 'object' && 
+      typeof (t as any).amount === 'number' && 
+      typeof (t as any).category === 'string'
+    );
+    
+    if (validTransactions.length !== financialData.transactions.length) {
+      console.warn('Some transactions were filtered out due to invalid format');
+    }
+    
+    financialData.transactions = validTransactions;
+  }
+
+  return financialData as FinancialRiskData;
+}
+
+function validateRequest(body: unknown): ValidatedRequest {
+  if (!body || typeof body !== 'object') {
+    throw new Error('Request body must be a valid JSON object');
+  }
+
+  const { userId, financialData } = body as Record<string, unknown>;
+
+  // At least one of userId or financialData must be provided
+  if (!userId && !financialData) {
+    throw new Error('Either userId or financialData must be provided');
+  }
+
+  const result: ValidatedRequest = {};
+
+  if (userId) {
+    result.userId = sanitizeUserId(userId);
+  }
+
+  if (financialData) {
+    result.financialData = validateFinancialData(financialData);
+  }
+
+  return result;
+}
 
 // Enhanced security headers with comprehensive protection
 const corsHeaders = {
@@ -170,7 +240,7 @@ function calculateHealthScore(analysis: string): number {
   }
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   const startTime = Date.now();
   
   // Enhanced security logging
@@ -211,9 +281,11 @@ serve(async (req) => {
   }
 
   try {
-    const { financialData, userId } = await req.json();
+    // Enhanced request validation and sanitization
+    const requestBody = await req.json();
+    const validatedData = validateRequest(requestBody);
 
-    if (userId && !financialData) {
+    if (validatedData.userId && !validatedData.financialData) {
       const supabase = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -233,12 +305,12 @@ serve(async (req) => {
       }
 
       const [transactionsResult, budgetsResult, savingsGoalsResult, billsResult, debtsResult, profileResult] = await Promise.all([
-        supabase.from('transactions').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(100),
-        supabase.from('budgets').select('*').eq('user_id', userId),
-        supabase.from('savings_goals').select('*').eq('user_id', userId),
-        supabase.from('bills').select('*').eq('user_id', userId),
-        supabase.from('debts').select('*').eq('user_id', userId),
-        supabase.from('profiles').select('*').eq('id', userId).single()
+        supabase.from('transactions').select('*').eq('user_id', validatedData.userId).order('date', { ascending: false }).limit(100),
+        supabase.from('budgets').select('*').eq('user_id', validatedData.userId),
+        supabase.from('savings_goals').select('*').eq('user_id', validatedData.userId),
+        supabase.from('bills').select('*').eq('user_id', validatedData.userId),
+        supabase.from('debts').select('*').eq('user_id', validatedData.userId),
+        supabase.from('profiles').select('*').eq('id', validatedData.userId).single()
       ]);
 
       if (transactionsResult.error || profileResult.error) {
@@ -305,14 +377,14 @@ serve(async (req) => {
       });
     }
 
-    if (!financialData) {
-      return new Response(JSON.stringify({ error: 'Financial data or user ID is required' }), {
+    if (!validatedData.financialData) {
+      return new Response(JSON.stringify({ error: 'Financial data is required when userId is not provided' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const analysis = await analyzeFinancialRisk(financialData);
+    const analysis = await analyzeFinancialRisk(validatedData.financialData);
 
     return new Response(JSON.stringify({ analysis }), {
       headers: { 
@@ -325,7 +397,24 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in risk-prediction function:', error);
+    console.error('Error in risk-prediction function:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+      identifier,
+    });
+    
+    // Return appropriate error response based on error type
+    if (error instanceof Error && error.message.includes('validation')) {
+      return new Response(JSON.stringify({ 
+        error: error.message,
+        analysis: 'Unable to analyze risk due to invalid input data.'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
       analysis: 'Risk analysis is temporarily unavailable due to technical difficulties.'

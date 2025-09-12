@@ -7,6 +7,7 @@ import { generateAIInsights } from '@/lib/api';
 import { useAsyncOperation } from '@/hooks/useAsyncOperation';
 import { toast } from '@/hooks/use-toast';
 import { resourceMonitor } from '@/lib/resource-monitor';
+import { enhancedMonitor } from '@/lib/enhanced-monitoring';
 
 interface AIInsight {
   id: string;
@@ -75,9 +76,22 @@ export default function AIInsights() {
       });
       return;
     }
+    
+    // Track request for monitoring
+    resourceMonitor.trackRequest();
+    enhancedMonitor.trackUserAction('ai_insights_generation', user.id);
+    
     const result = await generateInsights(async () => {
+      // Start performance monitoring
+      enhancedMonitor.startTimer('ai_insights_generation');
+      
       try {
         const apiInsights = await generateAIInsights(user.id);
+        
+        // End performance monitoring
+        const duration = enhancedMonitor.endTimer('ai_insights_generation');
+        enhancedMonitor.trackAPICall('ai-insights', 'POST', 200, duration, user.id);
+        
         // generateAIInsights returns AIInsight[]
         return apiInsights.map((insight, index) => ({
           id: insight.id || `insight-${index}`,
@@ -89,6 +103,12 @@ export default function AIInsights() {
         }));
       } catch (error) {
         console.error('Error generating insights:', error);
+        enhancedMonitor.trackError(error instanceof Error ? error : new Error('Unknown error'), {
+          category: 'ai_insights_generation',
+          userId: user.id,
+          severity: 'medium'
+        });
+        
         // Return fallback insights
         return [
           {
