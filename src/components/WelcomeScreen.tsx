@@ -38,6 +38,11 @@ const WelcomeScreen = () => {
   const validatePassword = (password: string) => {
     const errors: string[] = [];
     
+    if (!password) {
+      setPasswordErrors([]);
+      return false;
+    }
+    
     if (password.length < 6) {
       errors.push("At least 6 characters");
     }
@@ -191,14 +196,13 @@ const WelcomeScreen = () => {
     switch (step) {
       case 2:
         if (isLogin) {
-          return formData.email && formData.password;
+          return formData.email && formData.password && !emailError;
         } else {
-          return formData.email && 
-                 formData.password && 
-                 formData.confirmPassword && 
-                 passwordErrors.length === 0 && 
-                 !emailError &&
-                 formData.password === formData.confirmPassword;
+          const isEmailValid = formData.email && !emailError;
+          const isPasswordValid = formData.password && passwordErrors.length === 0;
+          const isConfirmPasswordValid = formData.confirmPassword && formData.password === formData.confirmPassword;
+          
+          return isEmailValid && isPasswordValid && isConfirmPasswordValid;
         }
       case 3:
         return !isLogin ? formData.name.trim() : true;
@@ -707,7 +711,8 @@ const WelcomeScreen = () => {
                           value={formData.password}
                           onChange={(e) => {
                             setFormData({...formData, password: e.target.value});
-                            if (!isLogin && e.target.value) validatePassword(e.target.value);
+                            if (!isLogin) validatePassword(e.target.value);
+                            setError(null); // Clear any previous errors
                           }}
                           className="pr-10"
                         />
@@ -762,17 +767,43 @@ const WelcomeScreen = () => {
                           )}
                         </div>
 
-                        {/* Password Requirements */}
-                        {formData.password && passwordErrors.length > 0 && (
-                          <div className="p-3 bg-warning/10 rounded-lg border border-warning/20">
+                        {/* Password Requirements - Always show for signup */}
+                        {!isLogin && (
+                          <div className={`p-3 rounded-lg border ${
+                            formData.password && passwordErrors.length === 0 
+                              ? 'bg-success/10 border-success/20' 
+                              : 'bg-muted/50 border-border'
+                          }`}>
                             <div className="flex items-start gap-2">
-                              <Info className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
+                              <Info className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+                                formData.password && passwordErrors.length === 0 
+                                  ? 'text-success' 
+                                  : 'text-muted-foreground'
+                              }`} />
                               <div className="space-y-1">
-                                <p className="text-sm font-medium text-warning">Password requirements:</p>
+                                <p className={`text-sm font-medium ${
+                                  formData.password && passwordErrors.length === 0 
+                                    ? 'text-success' 
+                                    : 'text-muted-foreground'
+                                }`}>
+                                  Password requirements:
+                                </p>
                                 <ul className="text-xs space-y-0.5">
-                                  {passwordErrors.map((error, index) => (
-                                    <li key={index} className="flex items-center gap-1 text-muted-foreground">
-                                      • {error}
+                                  {[
+                                    { check: 'At least 6 characters', valid: formData.password?.length >= 6 },
+                                    { check: 'One lowercase letter', valid: /[a-z]/.test(formData.password || '') },
+                                    { check: 'One uppercase letter', valid: /[A-Z]/.test(formData.password || '') },
+                                    { check: 'One number', valid: /\d/.test(formData.password || '') },
+                                    { check: 'One special character', valid: /[!@#$%^&*()_+=[\]{}|;':",.<>/?`~-]/.test(formData.password || '') }
+                                  ].map((requirement, index) => (
+                                    <li key={index} className={`flex items-center gap-2 ${
+                                      requirement.valid ? 'text-success' : 'text-muted-foreground'
+                                    }`}>
+                                      <span className={`w-1 h-1 rounded-full ${
+                                        requirement.valid ? 'bg-success' : 'bg-muted-foreground'
+                                      }`}></span>
+                                      {requirement.check}
+                                      {requirement.valid && <CheckCircle className="w-3 h-3 text-success ml-auto" />}
                                     </li>
                                   ))}
                                 </ul>
@@ -801,13 +832,15 @@ const WelcomeScreen = () => {
                         )}
                       </Button>
                     ) : (
-                      <Button
-                        className="w-full"
-                        onClick={handleNext}
-                        disabled={!canProceed()}
-                      >
-                        Continue
-                      </Button>
+                    <Button
+                      className="w-full"
+                      onClick={handleNext}
+                      disabled={!canProceed()}
+                    >
+                      {!canProceed() && !isLogin && formData.password && passwordErrors.length > 0 
+                        ? "Complete password requirements to continue" 
+                        : "Continue"}
+                    </Button>
                     )}
 
                     <div className="text-center">
