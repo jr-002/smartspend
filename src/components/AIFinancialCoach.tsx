@@ -9,6 +9,8 @@ import { MessageCircle, Send, Bot, User, Sparkles, Mic, MicOff } from "lucide-re
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/utils/currencies";
 import { generateFinancialAdvice } from "@/lib/api";
+import { debounceAPICall } from "@/lib/debounce";
+import { resourceMonitor } from "@/lib/resource-monitor";
 
 interface ChatMessage {
   id: string;
@@ -32,6 +34,8 @@ const AIFinancialCoach = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
 
+  // Debounce the AI advice generation to prevent rapid-fire requests
+  const debouncedGenerateAdvice = debounceAPICall(generateFinancialAdvice, 1000);
   const currency = profile?.currency || 'USD';
   const quickQuestions = [
     "Can I afford this purchase?",
@@ -45,10 +49,19 @@ const AIFinancialCoach = () => {
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
 
+    // Check resource availability before making AI call
+    if (!resourceMonitor.canMakeRequest()) {
+      toast({
+        title: "System Busy",
+        description: "Please wait a moment before sending another message.",
+        variant: "destructive",
+      });
+      return;
+    }
     // Rate limiting check
     const lastMessage = localStorage.getItem('lastCoachMessage');
     const now = Date.now();
-    if (lastMessage && now - parseInt(lastMessage) < 3000) {
+    if (lastMessage && now - parseInt(lastMessage) < 5000) { // Increased cooldown
       toast({
         title: "Please wait",
         description: "Please wait a moment before sending another message.",
@@ -70,7 +83,7 @@ const AIFinancialCoach = () => {
     setIsLoading(true);
 
     try {
-      const aiResponse = await generateFinancialAdvice(inputMessage);
+      const aiResponse = await debouncedGenerateAdvice(inputMessage);
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
