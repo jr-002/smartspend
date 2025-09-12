@@ -49,8 +49,8 @@ const Index = () => {
   
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
-    setLoadedComponents(prev => new Set([...prev, tabId]));
   };
+
   const handleSignOut = async () => {
     await signOut();
   };
@@ -131,36 +131,41 @@ const Index = () => {
         <div className="flex-1 flex flex-col">
           {/* App Header */}
           <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
-            <div className="px-6 py-4 flex items-center justify-between">
+            <div className="px-8 py-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <SidebarTrigger className="lg:hidden" />
-                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg">
                   <img
                     src="/Picture1.png"
                     alt="SmartSpend logo"
-                    className="w-7 h-7 object-contain"
+                    className="w-8 h-8 object-contain"
                     loading="lazy"
                   />
                 </div>
-                <div>
-                  <h1 className="text-xl font-semibold text-foreground">{activeItem.label}</h1>
-                  <p className="text-sm text-muted-foreground">{getPageDescription(activeItem.id)}</p>
+                <div className="ml-2">
+                  <h1 className="text-2xl font-bold text-foreground tracking-tight">{activeItem.label}</h1>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-md">{getPageDescription(activeItem.id)}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 <ProfileSettings>
-                  <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                  <div className="hidden md:flex items-center gap-4 px-5 py-3 bg-muted/50 rounded-xl hover:bg-muted transition-all duration-200 cursor-pointer border border-border/50">
+                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm">
                       <User className="w-4 h-4 text-primary-foreground" />
                     </div>
-                    <span className="text-sm font-medium text-foreground">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-foreground">
                       {profile?.name || user?.email}
-                    </span>
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {profile?.currency || 'USD'}
+                      </span>
+                    </div>
                   </div>
                 </ProfileSettings>
                 <ThemeToggle />
-                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                <Button variant="outline" size="sm" onClick={handleSignOut} className="px-4">
                   Sign Out
                 </Button>
               </div>
@@ -169,7 +174,7 @@ const Index = () => {
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
-            <div className="px-6 py-8 max-w-7xl mx-auto">
+            <div className="px-8 py-8 max-w-7xl mx-auto">
               <Suspense
                 fallback={
                   <div className="space-y-6">
@@ -182,14 +187,7 @@ const Index = () => {
                   </div>
                 }
               >
-                {loadedComponents.has(activeTab) ? <ActiveComponent /> : (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                      <p className="text-muted-foreground">Loading {activeItem.label}...</p>
-                    </div>
-                  </div>
-                )}
+                <ActiveComponent />
               </Suspense>
             </div>
           </main>

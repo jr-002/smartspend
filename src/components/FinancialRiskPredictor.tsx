@@ -209,13 +209,13 @@ const FinancialRiskPredictor = () => {
     setPredictions(newPredictions);
     setHealthScore(newHealthScore);
     setIsAnalyzing(false);
-  }, [transactions, budgets, profile, generateRiskPredictions, calculateHealthScore]);
+  }, [transactions, budgets, profile]);
 
   useEffect(() => {
     if (transactions.length > 0) {
       analyzeFinancialRisks();
     }
-  }, [transactions, analyzeFinancialRisks]);
+  }, [transactions.length]);
 
   // Functions moved to useCallback hooks above
 

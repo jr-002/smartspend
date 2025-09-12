@@ -168,6 +168,8 @@ const TransactionHistory = () => {
     .filter(t => t.transaction_type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
 
+  const balance = totalIncome - totalExpenses;
+
   return (
     <div className="section-spacing">
     <Card className="w-full card-clean">
@@ -390,7 +392,7 @@ const TransactionHistory = () => {
         </div>
         
         <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <p className="text-sm font-medium text-foreground">
               Total Income: <span className="text-success">{formatCurrency(totalIncome, profile?.currency || "USD")}</span>
@@ -400,6 +402,11 @@ const TransactionHistory = () => {
               <p className="text-sm font-medium text-foreground">
               Total Expenses: <span className="text-destructive">{formatCurrency(totalExpenses, profile?.currency || "USD")}</span>
             </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                Net Balance: <span className={balance >= 0 ? "text-success" : "text-destructive"}>{formatCurrency(balance, profile?.currency || "USD")}</span>
+              </p>
             </div>
           </div>
         </div>

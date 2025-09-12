@@ -59,9 +59,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ categories, activeId, onSelect 
         <SidebarMenuButton
           isActive={isActive}
           onClick={() => onSelect(item.id)}
-          className="transition-colors"
+          className="transition-all duration-200 hover:bg-accent/80"
         >
-          <Icon className="mr-2 h-4 w-4" />
+          <Icon className="mr-3 h-5 w-5" />
           {!collapsed && <span>{item.label}</span>}
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -79,10 +79,10 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ categories, activeId, onSelect 
           >
             <SidebarGroup>
               <CollapsibleTrigger asChild>
-                <SidebarGroupLabel className="cursor-pointer hover:bg-accent/50 rounded-lg px-3 py-2 flex items-center justify-between group">
+                <SidebarGroupLabel className="cursor-pointer hover:bg-accent/50 rounded-lg px-4 py-3 flex items-center justify-between group transition-all duration-200">
                   <span>{category.label}</span>
                   {!collapsed && (
-                    <ChevronDown className={`h-4 w-4 transition-transform ${
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${
                       openCategories[category.id] ? 'rotate-180' : ''
                     }`} />
                   )}

@@ -21,17 +21,6 @@ const EnhancedDashboard = () => {
   // Show loading only if all are loading (initial load)
   const isInitialLoading = transactionsLoading && billsLoading && budgetsLoading && savingsLoading;
   
-  if (isInitialLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Calculate financial metrics with safety checks
   const safeTransactions = Array.isArray(transactions) ? transactions : [];
   const safeBills = Array.isArray(bills) ? bills : [];
@@ -64,6 +53,23 @@ const EnhancedDashboard = () => {
   const totalCurrentSavings = safeSavingsGoals
     .filter(goal => typeof goal?.current_amount === 'number')
     .reduce((sum, goal) => sum + goal.current_amount, 0);
+
+  if (isInitialLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="card-clean animate-pulse">
+              <div className="content-spacing">
+                <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
+                <div className="h-8 bg-muted rounded w-3/4"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="section-spacing">

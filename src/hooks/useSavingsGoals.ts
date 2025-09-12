@@ -39,9 +39,6 @@ export const useSavingsGoals = () => {
       setLoading(true);
       setError(null);
 
-      // Add delay to prevent overwhelming the API
-      await new Promise(resolve => setTimeout(resolve, 250));
-
       const { data, error: fetchError } = await supabase
         .from('savings_goals')
         .select('*')

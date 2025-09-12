@@ -39,9 +39,6 @@ export const useTransactions = () => {
       setLoading(true);
       setError(null);
 
-      // Add delay to prevent overwhelming the API
-      await new Promise(resolve => setTimeout(resolve, 100));
-
       const { data, error: fetchError } = await supabase
         .from('transactions')
         .select('*')
