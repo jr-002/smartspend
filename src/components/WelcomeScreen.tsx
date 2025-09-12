@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,11 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Wallet, Target, TrendingUp, Brain, Sparkles, Mail, Lock, User, DollarSign, CheckCircle, Eye, EyeOff, Info, Shield, Zap, Globe, Star, Loader2 } from "lucide-react";
+import { Wallet, Target, TrendingUp, Brain, Sparkles, Mail, Lock, User, DollarSign, CheckCircle, Eye, EyeOff, Info, Shield, Zap, Globe, Star, Loader2, PieChart, TrendingDown, Plus } from "lucide-react";
 import CurrencySelector from "./CurrencySelector";
 import { getDefaultCurrency } from "@/utils/currencies";
 import { useAuth } from "@/contexts/AuthContext";
 import { passwordSchema, emailSchema, nameSchema, currencyCodeSchema } from "@/utils/validation";
+import heroImage from "@/assets/hero-finance.jpg";
 
 const WelcomeScreen = () => {
   const [step, setStep] = useState(1);
@@ -282,86 +282,271 @@ const WelcomeScreen = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md card-clean">
-        <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-6">
-            <img 
-              src="/Picture1.png" 
-              alt="SmartSpend Logo" 
-              className="w-12 h-12 object-contain"
-            />
-          </div>
-          <CardTitle className="text-2xl font-bold text-foreground mb-2">
-            Welcome to SmartSpend
-          </CardTitle>
-          <p className="text-muted-foreground">
-            Your AI-Powered Global Financial Assistant
-          </p>
-        </CardHeader>
+    <div className="min-h-screen bg-gradient-background">
+      {step === 1 ? (
+        // Comprehensive Welcome/Landing Page
+        <>
+          {/* Header */}
+          <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+            <div className="container mx-auto px-4 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+                    <img 
+                      src="/Picture1.png" 
+                      alt="SmartSpend Logo" 
+                      className="w-8 h-8 object-contain"
+                    />
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold text-foreground">SmartSpend</h1>
+                    <p className="text-sm text-muted-foreground">by JR Digital Insights</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setIsLogin(true);
+                    setStep(2);
+                  }}
+                >
+                  Sign In
+                </Button>
+              </div>
+            </div>
+          </header>
 
-        <CardContent className="card-spacing">
-          {error && (
-            <Alert className="border-destructive bg-destructive/10">
-              <AlertDescription className="text-destructive">
-                {error}
-              </AlertDescription>
-            </Alert>
-          )}
+          {/* Hero Section */}
+          <section className="relative overflow-hidden">
+            <div className="container mx-auto px-4 py-16">
+              <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div className="space-y-6 animate-fade-in">
+                  <div className="space-y-4">
+                    <Badge variant="secondary" className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary border-primary/20">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      AI-Powered Financial Assistant
+                    </Badge>
+                    <h2 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
+                      Your Intelligent
+                      <span className="bg-gradient-primary bg-clip-text text-transparent"> Financial</span>
+                      <br />Wellness Assistant
+                    </h2>
+                    <p className="text-lg text-muted-foreground max-w-md">
+                      Track, predict, and optimize your spending habits with AI-powered insights. 
+                      Make every dollar count with SmartSpend.
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button 
+                      size="lg" 
+                      className="bg-gradient-primary shadow-glow"
+                      onClick={() => {
+                        setIsLogin(false);
+                        setStep(2);
+                      }}
+                    >
+                      Get Started Free
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      onClick={() => {
+                        setIsLogin(true);
+                        setStep(2);
+                      }}
+                    >
+                      Sign In
+                    </Button>
+                  </div>
 
-          {step === 1 && (
-            <div className="card-spacing">
-              <div className="text-center space-y-3">
-                <Badge variant="secondary" className="px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary border-primary/20">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  Smart Financial Management
-                </Badge>
-                <h3 className="text-xl font-semibold text-foreground">Take Control of Your Financial Future</h3>
-                <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                  Join thousands of users who've transformed their financial health with AI-powered insights and smart budgeting tools.
+                  <div className="flex items-center space-x-6 pt-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-foreground">50K+</div>
+                      <div className="text-sm text-muted-foreground">Active Users</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-foreground">$2.5B+</div>
+                      <div className="text-sm text-muted-foreground">Money Tracked</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-foreground">4.9★</div>
+                      <div className="text-sm text-muted-foreground">App Rating</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative animate-slide-up">
+                  <img 
+                    src={heroImage} 
+                    alt="SmartSpend Dashboard Preview" 
+                    className="rounded-2xl shadow-floating w-full"
+                    onError={(e) => {
+                      // Hide image if it fails to load
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent rounded-2xl"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Features Section */}
+          <section className="py-16 bg-card/30">
+            <div className="container mx-auto px-4">
+              <div className="text-center mb-12">
+                <h3 className="text-3xl font-bold text-foreground mb-4">
+                  Why Choose SmartSpend?
+                </h3>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Powered by AI and designed for modern financial management
                 </p>
               </div>
-              
-              <div className="grid grid-cols-1 gap-3">
-                <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Wallet className="w-5 h-5 text-primary" />
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="flex flex-col items-center gap-4 p-6 bg-card rounded-lg shadow-card border border-border/50">
+                  <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                    <Wallet className="w-8 h-8 text-primary-foreground" />
                   </div>
-                  <div className="text-left">
-                    <p className="text-sm font-medium">Smart Expense Tracking</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">Automatically categorize and analyze your spending</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-4 bg-success/5 rounded-lg border border-success/20">
-                  <div className="w-10 h-10 bg-success/10 rounded-lg flex items-center justify-center">
-                    <Target className="w-5 h-5 text-success" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-medium">Goal Achievement</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">Set and reach your financial milestones faster</p>
+                  <div className="text-center">
+                    <h4 className="text-lg font-semibold text-foreground mb-2">Smart Expense Tracking</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Automatically categorize and analyze your spending patterns with AI
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-4 bg-warning/5 rounded-lg border border-warning/20">
-                  <div className="w-10 h-10 bg-warning/10 rounded-lg flex items-center justify-center">
-                    <Brain className="w-5 h-5 text-warning" />
+
+                <div className="flex flex-col items-center gap-4 p-6 bg-card rounded-lg shadow-card border border-border/50">
+                  <div className="w-16 h-16 bg-gradient-success rounded-2xl flex items-center justify-center shadow-glow">
+                    <Target className="w-8 h-8 text-success-foreground" />
                   </div>
-                  <div className="text-left">
-                    <p className="text-sm font-medium">AI Financial Coach</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">Get personalized advice and insights</p>
+                  <div className="text-center">
+                    <h4 className="text-lg font-semibold text-foreground mb-2">Goal Achievement</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Set and reach your financial milestones faster with smart insights
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-4 bg-purple-500/5 rounded-lg border border-purple-500/20">
-                  <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                    <Globe className="w-5 h-5 text-purple-500" />
+
+                <div className="flex flex-col items-center gap-4 p-6 bg-card rounded-lg shadow-card border border-border/50">
+                  <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                    <Brain className="w-8 h-8 text-primary-foreground" />
                   </div>
-                  <div className="text-left">
-                    <p className="text-sm font-medium">Global Currency Support</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">Manage finances in any currency worldwide</p>
+                  <div className="text-center">
+                    <h4 className="text-lg font-semibold text-foreground mb-2">AI Financial Coach</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Get personalized advice and insights tailored to your habits
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center gap-4 p-6 bg-card rounded-lg shadow-card border border-border/50">
+                  <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                    <Globe className="w-8 h-8 text-primary-foreground" />
+                  </div>
+                  <div className="text-center">
+                    <h4 className="text-lg font-semibold text-foreground mb-2">Global Currency Support</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Manage finances in any currency worldwide with real-time rates
+                    </p>
                   </div>
                 </div>
               </div>
+            </div>
+          </section>
 
-              <div className="text-center">
+          {/* Dashboard Preview */}
+          <section className="py-16">
+            <div className="container mx-auto px-4">
+              <div className="text-center mb-12">
+                <h3 className="text-3xl font-bold text-foreground mb-4">
+                  Experience Smart Financial Management
+                </h3>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Get real-time insights into your spending patterns with our beautiful, intuitive dashboard
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {/* Balance Card */}
+                <Card className="shadow-card bg-gradient-card border-0">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Current Balance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-foreground">₦125,430</div>
+                    <div className="flex items-center text-sm text-success mt-1">
+                      <TrendingUp className="w-4 h-4 mr-1" />
+                      +12.5% from last month
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Spending Card */}
+                <Card className="shadow-card bg-gradient-card border-0">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      This Month Spent
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-foreground">₦45,280</div>
+                    <div className="flex items-center text-sm text-warning mt-1">
+                      <TrendingDown className="w-4 h-4 mr-1" />
+                      85% of budget used
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Budget Card */}
+                <Card className="shadow-card bg-gradient-card border-0">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Budget Goal
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-foreground">₦53,000</div>
+                    <div className="flex items-center text-sm text-success mt-1">
+                      <Target className="w-4 h-4 mr-1" />
+                      On track to save ₦7,720
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Categories Card */}
+                <Card className="shadow-card bg-gradient-card border-0">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Top Category
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-foreground">Food</div>
+                    <div className="flex items-center text-sm text-muted-foreground mt-1">
+                      <PieChart className="w-4 h-4 mr-1" />
+                      ₦18,500 (41%)
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="text-center space-y-4">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-primary shadow-glow"
+                  onClick={() => {
+                    setIsLogin(false);
+                    setStep(2);
+                  }}
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Start Tracking Today
+                </Button>
                 <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Shield className="w-3 h-3" />
@@ -373,292 +558,402 @@ const WelcomeScreen = () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Star className="w-3 h-3" />
-                    <span>10k+ happy users</span>
+                    <span>50k+ happy users</span>
                   </div>
                 </div>
               </div>
-
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => {
-                    setIsLogin(true);
-                    setStep(2);
-                  }}
-                >
-                  Sign In
-                </Button>
-                <Button
-                  className="flex-1"
-                  onClick={() => {
-                    setIsLogin(false);
-                    setStep(2);
-                  }}
-                >
-                  Get Started Free
-                </Button>
-              </div>
             </div>
-          )}
+          </section>
 
-          {step === 2 && (
-            <div className="card-spacing">
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-foreground">
-                  {isLogin ? "Welcome back!" : "Create your account"}
+          {/* Additional Features */}
+          <section className="py-16 bg-card/30">
+            <div className="container mx-auto px-4">
+              <div className="text-center mb-12">
+                <h3 className="text-3xl font-bold text-foreground mb-4">
+                  Everything You Need for Financial Success
                 </h3>
-                <p className="text-subtle">
-                  {isLogin ? "Sign in to continue" : "Join thousands of users managing their finances"}
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Comprehensive tools and insights to help you achieve your financial goals
                 </p>
               </div>
 
-              <div className="card-spacing">
-                <div>
-                  <Label htmlFor="email" className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={formData.email}
-                    onChange={(e) => {
-                      setFormData({...formData, email: e.target.value});
-                      if (e.target.value) validateEmail(e.target.value);
-                    }}
-                    className="mt-1"
-                  />
-                  {emailError && (
-                    <p className="text-xs text-destructive mt-1">{emailError}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="password" className="flex items-center gap-2">
-                    <Lock className="w-4 h-4" />
-                    Password
-                  </Label>
-                  <div className="relative mt-1">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create a secure password"
-                      value={formData.password}
-                      onChange={(e) => {
-                        setFormData({...formData, password: e.target.value});
-                        if (!isLogin && e.target.value) validatePassword(e.target.value);
-                      }}
-                      className="pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </Button>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center mx-auto shadow-glow">
+                    <span className="text-2xl text-primary-foreground">🧠</span>
                   </div>
-                  {!isLogin && formData.password && passwordErrors.length > 0 && (
-                    <div className="mt-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
-                      <div className="flex items-start gap-2">
-                        <Info className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
-                        <div className="text-xs leading-relaxed">
-                          <p className="font-medium mb-1 text-destructive">Password Requirements:</p>
-                          <ul className="space-y-1">
-                            {passwordErrors.map((error, index) => (
-                              <li key={index} className="text-destructive">• {error}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {!isLogin && formData.password && passwordErrors.length === 0 && (
-                    <div className="mt-2 p-3 bg-success/10 rounded-lg border border-success/20">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-success" />
-                        <p className="text-xs text-success font-medium">Password meets all requirements</p>
-                      </div>
-                    </div>
-                  )}
+                  <h4 className="text-xl font-semibold text-foreground">AI-Powered Insights</h4>
+                  <p className="text-muted-foreground">
+                    Get personalized spending recommendations and automatic transaction categorization
+                  </p>
                 </div>
 
-                {!isLogin && (
-                  <div>
-                    <Label htmlFor="confirmPassword" className="flex items-center gap-2">
-                      <Lock className="w-4 h-4" />
-                      Confirm Password
-                    </Label>
-                    <div className="relative mt-1">
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-gradient-success rounded-2xl flex items-center justify-center mx-auto shadow-glow">
+                    <span className="text-2xl text-success-foreground">📱</span>
+                  </div>
+                  <h4 className="text-xl font-semibold text-foreground">Smart Notifications</h4>
+                  <p className="text-muted-foreground">
+                    Real-time alerts for budget limits, bill reminders, and spending patterns
+                  </p>
+                </div>
+
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center mx-auto shadow-glow">
+                    <span className="text-2xl text-primary-foreground">🔒</span>
+                  </div>
+                  <h4 className="text-xl font-semibold text-foreground">Bank-Level Security</h4>
+                  <p className="text-muted-foreground">
+                    Your financial data is protected with enterprise-grade encryption
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Footer */}
+          <footer className="bg-card border-t border-border py-8">
+            <div className="container mx-auto px-4">
+              <div className="flex flex-col md:flex-row items-center justify-between">
+                <div className="flex items-center space-x-3 mb-4 md:mb-0">
+                  <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+                    <img 
+                      src="/Picture1.png" 
+                      alt="SmartSpend Logo" 
+                      className="w-6 h-6 object-contain"
+                    />
+                  </div>
+                  <span className="font-semibold text-foreground">SmartSpend</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  © 2025 JR Digital Insights. All rights reserved.
+                </p>
+              </div>
+            </div>
+          </footer>
+        </>
+      ) : (
+        // Authentication Flow (Steps 2-4)
+        <div className="min-h-screen bg-gradient-background flex items-center justify-center p-4">
+          <Card className="w-full max-w-md card-clean">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-6">
+                <img 
+                  src="/Picture1.png" 
+                  alt="SmartSpend Logo" 
+                  className="w-12 h-12 object-contain"
+                />
+              </div>
+              <CardTitle className="text-2xl font-bold text-foreground mb-2">
+                Welcome to SmartSpend
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Your AI-Powered Global Financial Assistant
+              </p>
+            </CardHeader>
+
+            <CardContent className="card-spacing">
+              {error && (
+                <Alert className="border-destructive bg-destructive/10">
+                  <AlertDescription className="text-destructive">
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {step === 2 && (
+                <div className="card-spacing">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold text-foreground">
+                      {isLogin ? "Welcome back!" : "Create your account"}
+                    </h3>
+                    <p className="text-subtle">
+                      {isLogin ? "Sign in to continue" : "Join thousands of users managing their finances"}
+                    </p>
+                  </div>
+
+                  <div className="card-spacing">
+                    <div>
+                      <Label htmlFor="email" className="flex items-center gap-2">
+                        <Mail className="w-4 h-4" />
+                        Email
+                      </Label>
                       <Input
-                        id="confirmPassword"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Re-enter your password"
-                        value={formData.confirmPassword}
-                        onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                        className="pr-10"
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={formData.email}
+                        onChange={(e) => {
+                          setFormData({...formData, email: e.target.value});
+                          if (e.target.value) validateEmail(e.target.value);
+                        }}
+                        className="mt-1"
                       />
+                      {emailError && (
+                        <p className="text-xs text-destructive mt-1">{emailError}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="password" className="flex items-center gap-2">
+                        <Lock className="w-4 h-4" />
+                        Password
+                      </Label>
+                      <div className="relative mt-1">
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Create a secure password"
+                          value={formData.password}
+                          onChange={(e) => {
+                            setFormData({...formData, password: e.target.value});
+                            if (!isLogin && e.target.value) validatePassword(e.target.value);
+                          }}
+                          className="pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {!isLogin && (
+                      <>
+                        <div>
+                          <Label htmlFor="confirmPassword" className="flex items-center gap-2">
+                            <Lock className="w-4 h-4" />
+                            Confirm Password
+                          </Label>
+                          <div className="relative mt-1">
+                            <Input
+                              id="confirmPassword"
+                              type={showConfirmPassword ? "text" : "password"}
+                              placeholder="Confirm your password"
+                              value={formData.confirmPassword}
+                              onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                              className="pr-10"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                              {showConfirmPassword ? (
+                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </Button>
+                          </div>
+                          {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                            <p className="text-xs text-destructive mt-1">Passwords do not match</p>
+                          )}
+                        </div>
+
+                        {/* Password Requirements */}
+                        {formData.password && passwordErrors.length > 0 && (
+                          <div className="p-3 bg-warning/10 rounded-lg border border-warning/20">
+                            <div className="flex items-start gap-2">
+                              <Info className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
+                              <div className="space-y-1">
+                                <p className="text-sm font-medium text-warning">Password requirements:</p>
+                                <ul className="text-xs space-y-0.5">
+                                  {passwordErrors.map((error, index) => (
+                                    <li key={index} className="flex items-center gap-1 text-muted-foreground">
+                                      • {error}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    {isLogin ? (
                       <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="w-full"
+                        onClick={handleAuth}
+                        disabled={loading || !canProceed()}
                       >
-                        {showConfirmPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        {loading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Signing In...
+                          </>
                         ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
+                          "Sign In"
                         )}
                       </Button>
+                    ) : (
+                      <Button
+                        className="w-full"
+                        onClick={handleNext}
+                        disabled={!canProceed()}
+                      >
+                        Continue
+                      </Button>
+                    )}
+
+                    <div className="text-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setIsLogin(!isLogin);
+                          setError(null);
+                        }}
+                      >
+                        {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+                      </Button>
                     </div>
-                    {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                      <p className="text-xs text-destructive mt-1">Passwords do not match</p>
-                    )}
-                    {formData.confirmPassword && formData.password === formData.confirmPassword && formData.password && (
-                      <div className="flex items-center gap-2 mt-1">
-                        <CheckCircle className="w-3 h-3 text-success" />
-                        <p className="text-xs text-success">Passwords match</p>
-                      </div>
-                    )}
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => setStep(1)}
+                    >
+                      ← Back to Home
+                    </Button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
-              <div className="text-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setIsLogin(!isLogin);
-                    setError(null);
-                  }}
-                >
-                  {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-                </Button>
-              </div>
-            </div>
-          )}
+              {step === 3 && !isLogin && (
+                <div className="card-spacing">
+                  <div className="text-center mb-6">
+                    <User className="w-12 h-12 text-primary mx-auto mb-3" />
+                    <h3 className="text-lg font-semibold text-foreground">Tell us about yourself</h3>
+                    <p className="text-subtle">Help us personalize your experience</p>
+                  </div>
 
-          {step === 3 && !isLogin && (
-            <div className="card-spacing">
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-foreground">Tell us about yourself</h3>
-                <p className="text-subtle">
-                  This helps us personalize your experience
-                </p>
-              </div>
+                  <div>
+                    <Label htmlFor="name" className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Full Name
+                    </Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      className="mt-1"
+                    />
+                  </div>
 
-              <div>
-                <Label htmlFor="name" className="flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Your name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-          )}
+                  <div className="space-y-3">
+                    <Button
+                      className="w-full"
+                      onClick={handleNext}
+                      disabled={!canProceed()}
+                    >
+                      Continue
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full"
+                      onClick={handleBack}
+                    >
+                      ← Back
+                    </Button>
+                  </div>
+                </div>
+              )}
 
-          {step === 4 && !isLogin && (
-            <div className="card-spacing">
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-foreground">Financial preferences</h3>
-                <p className="text-subtle">
-                  Help us provide better recommendations
-                </p>
-              </div>
+              {step === 4 && !isLogin && (
+                <div className="card-spacing">
+                  <div className="text-center mb-6">
+                    <DollarSign className="w-12 h-12 text-primary mx-auto mb-3" />
+                    <h3 className="text-lg font-semibold text-foreground">Financial Setup</h3>
+                    <p className="text-subtle">Set up your currency and income (optional)</p>
+                  </div>
 
-              <div>
-                <Label htmlFor="currency">Preferred Currency</Label>
-                <CurrencySelector
-                  value={formData.currency}
-                  onValueChange={(currency) => setFormData({...formData, currency})}
-                  className="mt-1"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="income" className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" />
-                  Monthly Income (Optional)
-                </Label>
-                <Input
-                  id="income"
-                  type="number"
-                  placeholder="0"
-                  value={formData.monthlyIncome || ""}
-                  onChange={(e) => setFormData({...formData, monthlyIncome: parseFloat(e.target.value) || 0})}
-                  className="mt-1"
-                />
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  This helps us provide better budget recommendations
-                </p>
-              </div>
-            </div>
-          )}
+                  <div className="card-spacing">
+                    <div>
+                      <Label className="flex items-center gap-2">
+                        <Globe className="w-4 h-4" />
+                        Preferred Currency
+                      </Label>
+                      <div className="mt-1">
+                        <CurrencySelector
+                          value={formData.currency}
+                          onValueChange={(currency) => setFormData({...formData, currency})}
+                        />
+                      </div>
+                    </div>
 
-          <div className="flex justify-between pt-6">
-            {step > 1 && (
-              <Button variant="outline" onClick={handleBack} disabled={loading}>
-                Back
-              </Button>
-            )}
-            
-            {(step === 2 && isLogin) || (step === 4 && !isLogin) ? (
-              <Button 
-                onClick={handleAuth}
-                disabled={!canProceed() || loading}
-                className="ml-auto"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {isLogin ? "Signing in..." : "Creating account..."}
-                  </>
-                ) : (
-                  isLogin ? "Sign In" : "Create Account"
-                )}
-              </Button>
-            ) : (
-              step < 4 && (
-                <Button 
-                  onClick={handleNext}
-                  disabled={!canProceed()}
-                  className="ml-auto"
-                >
-                  Next
-                </Button>
-              )
-            )}
-          </div>
+                    <div>
+                      <Label htmlFor="income" className="flex items-center gap-2">
+                        <DollarSign className="w-4 h-4" />
+                        Monthly Income (Optional)
+                      </Label>
+                      <Input
+                        id="income"
+                        type="number"
+                        placeholder="Enter your monthly income"
+                        value={formData.monthlyIncome || ""}
+                        onChange={(e) => setFormData({
+                          ...formData, 
+                          monthlyIncome: parseFloat(e.target.value) || 0
+                        })}
+                        className="mt-1"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        This helps us provide better budgeting recommendations
+                      </p>
+                    </div>
+                  </div>
 
-          <div className="flex justify-center space-x-2 pt-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  i === step ? "bg-primary" : "bg-muted"
-                } ${isLogin && i > 2 ? "hidden" : ""}`}
-              />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+                  <div className="space-y-3">
+                    <Button
+                      className="w-full"
+                      onClick={handleAuth}
+                      disabled={loading || !canProceed()}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        "Create Account"
+                      )}
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full"
+                      onClick={handleBack}
+                    >
+                      ← Back
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
