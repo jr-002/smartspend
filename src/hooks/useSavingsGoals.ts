@@ -41,9 +41,9 @@ export const useSavingsGoals = () => {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await resourceAwareAPICall(
+      const result = await resourceAwareAPICall(
         () => queuedAPICall(
-          () => supabase
+          async () => await supabase
             .from('savings_goals')
             .select('*')
             .eq('user_id', user.id)
@@ -52,6 +52,8 @@ export const useSavingsGoals = () => {
         ),
         () => ({ data: [], error: null })
       );
+      
+      const { data, error: fetchError } = result as { data: any; error: any };
 
       if (fetchError) {
         throw fetchError;

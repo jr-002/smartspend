@@ -13,6 +13,7 @@ import { formatCurrency } from "@/utils/currencies";
 import { analyzeFinancialRisk } from "@/lib/api";
 import { enhancedMonitor } from "@/lib/enhanced-monitoring";
 import { resourceMonitor } from "@/lib/resource-monitor";
+import { useToast } from "@/hooks/use-toast";
 
 interface RiskPrediction {
   type: 'balance' | 'overspend' | 'goal' | 'emergency';
@@ -41,6 +42,7 @@ const FinancialRiskPredictor = () => {
   const { profile } = useAuth();
   const { transactions } = useTransactions();
   const { budgets } = useBudgets();
+  const { toast } = useToast();
   
   const [predictions, setPredictions] = useState<RiskPrediction[]>([]);
   const [healthScore, setHealthScore] = useState<FinancialHealth>({

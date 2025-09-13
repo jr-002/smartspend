@@ -70,17 +70,22 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
   // Track user action for monitoring
   enhancedMonitor.trackUserAction('ai_insights_generation', userId);
 
-  return resourceAwareAPICall(
-    () => monitoredAPICall('ai-insights', async () => {
-      return queuedAPICall(
-        () => supabase.functions.invoke('ai-insights', {
-          body: { userId }
-        }),
-        3 // High priority for AI insights
-      );
-    }),
-    () => getFallbackInsights()
-  ).then(result => {
+  try {
+    const result = await resourceAwareAPICall(
+      () => monitoredAPICall('ai-insights', async () => {
+        return queuedAPICall(
+          async () => {
+            const response = await supabase.functions.invoke('ai-insights', {
+              body: { userId }
+            });
+            return response;
+          },
+          3 // High priority for AI insights
+        );
+      }),
+      () => ({ data: { insights: getFallbackInsights() }, error: null })
+    );
+
     const { data, error } = result as { data: any; error: any };
 
     if (error) {
@@ -109,7 +114,11 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
       action: insight.action || 'Review your financial data',
       priority: insight.priority || index + 1
     }));
-  });
+  } catch (error) {
+    captureException(error);
+    console.error('Error in generateAIInsights:', error);
+    return getFallbackInsights();
+  }
 }
 
 export async function generateBudgetRecommendations(userId: string): Promise<BudgetRecommendation> {

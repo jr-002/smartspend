@@ -41,9 +41,9 @@ export const useTransactions = () => {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await resourceAwareAPICall(
+      const result = await resourceAwareAPICall(
         () => queuedAPICall(
-          () => supabase
+          async () => await supabase
             .from('transactions')
             .select('*')
             .eq('user_id', user.id)
@@ -53,6 +53,8 @@ export const useTransactions = () => {
         ),
         () => ({ data: [], error: null }) // Fallback to empty array
       );
+
+      const { data, error: fetchError } = result as { data: any; error: any };
 
       if (fetchError) {
         throw fetchError;
