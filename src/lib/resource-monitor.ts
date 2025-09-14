@@ -1,9 +1,9 @@
 // Resource monitoring and management utility
 class ResourceMonitor {
   private static instance: ResourceMonitor;
-  private memoryThreshold = 100 * 1024 * 1024; // 100MB
+  private memoryThreshold = 500 * 1024 * 1024; // 500MB - much more reasonable
   private requestCount = 0;
-  private maxRequestsPerMinute = 30;
+  private maxRequestsPerMinute = 200; // Increased to prevent false positives
   private requestTimestamps: number[] = [];
 
   static getInstance(): ResourceMonitor {
@@ -15,15 +15,15 @@ class ResourceMonitor {
 
   // Check if we have sufficient resources for a new request
   canMakeRequest(): boolean {
-    // Check memory usage
+    // Only block on truly extreme memory usage
     if (this.isMemoryLow()) {
-      console.warn('Memory usage is high, deferring request');
+      console.warn('Memory usage is critically high, deferring request');
       return false;
     }
 
-    // Check request rate
+    // Much more lenient request rate checking
     if (this.isRequestRateHigh()) {
-      console.warn('Request rate is high, deferring request');
+      console.warn('Request rate is very high, deferring request');
       return false;
     }
 

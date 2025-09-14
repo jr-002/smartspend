@@ -1,10 +1,8 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { resourceAwareAPICall } from '@/lib/resource-monitor';
-import { queuedAPICall } from '@/lib/request-queue';
 
 export interface Budget {
   id: string;
@@ -27,7 +25,7 @@ export const useBudgets = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchBudgets = async () => {
+  const fetchBudgets = useCallback(async () => {
     if (!user) {
       setBudgets([]);
       setLoading(false);
@@ -38,19 +36,11 @@ export const useBudgets = () => {
       setLoading(true);
       setError(null);
 
-      const result = await resourceAwareAPICall(
-        () => queuedAPICall(
-          async () => await supabase
-            .from('budgets')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('category', { ascending: true }),
-          2 // Medium priority
-        ),
-        () => ({ data: [], error: null })
-      );
-      
-      const { data, error: fetchError } = result as { data: any; error: any };
+      const { data, error: fetchError } = await supabase
+        .from('budgets')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('category', { ascending: true });
 
       if (fetchError) {
         throw fetchError;
@@ -70,7 +60,7 @@ export const useBudgets = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const addBudget = async (newBudget: NewBudget): Promise<boolean> => {
     if (!user) {
@@ -233,7 +223,7 @@ export const useBudgets = () => {
 
   useEffect(() => {
     fetchBudgets();
-  }, [user, fetchBudgets]);
+  }, [fetchBudgets]);
 
   return {
     budgets,

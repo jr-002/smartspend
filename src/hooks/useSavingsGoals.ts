@@ -1,9 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { resourceAwareAPICall } from '@/lib/resource-monitor';
-import { queuedAPICall } from '@/lib/request-queue';
 
 export interface SavingsGoal {
   id: string;
@@ -30,7 +28,7 @@ export const useSavingsGoals = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchGoals = async () => {
+  const fetchGoals = useCallback(async () => {
     if (!user) {
       setGoals([]);
       setLoading(false);
@@ -41,19 +39,11 @@ export const useSavingsGoals = () => {
       setLoading(true);
       setError(null);
 
-      const result = await resourceAwareAPICall(
-        () => queuedAPICall(
-          async () => await supabase
-            .from('savings_goals')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('deadline', { ascending: true }),
-          2 // Medium priority
-        ),
-        () => ({ data: [], error: null })
-      );
-      
-      const { data, error: fetchError } = result as { data: any; error: any };
+      const { data, error: fetchError } = await supabase
+        .from('savings_goals')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('deadline', { ascending: true });
 
       if (fetchError) {
         throw fetchError;
@@ -71,7 +61,7 @@ export const useSavingsGoals = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const addGoal = async (newGoal: NewSavingsGoal): Promise<boolean> => {
     if (!user) {
@@ -210,7 +200,7 @@ export const useSavingsGoals = () => {
 
   useEffect(() => {
     fetchGoals();
-  }, [user, fetchGoals]);
+  }, [fetchGoals]);
 
   return {
     goals,

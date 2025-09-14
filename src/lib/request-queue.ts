@@ -8,9 +8,9 @@ class RequestQueue {
     timestamp: number;
   }> = [];
   private processing = false;
-  private maxConcurrent = 2; // Reduced from 3 to prevent resource exhaustion
+  private maxConcurrent = 5; // Increased for better performance
   private currentRequests = 0;
-  private minDelay = 200; // Increased delay between requests
+  private minDelay = 50; // Reduced delay to prevent blocking
   private maxQueueSize = 50; // Prevent queue from growing too large
 
   async add<T>(
