@@ -306,7 +306,7 @@ const TransactionHistory = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-xs"
           />
-          <Select value={filterType} onValueChange={setFilterType}>
+          <Select value={filterType} onValueChange={setFilterType} aria-label="Transaction Type Filter">
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
@@ -316,7 +316,7 @@ const TransactionHistory = () => {
               <SelectItem value="expense">Expense</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <Select value={filterCategory} onValueChange={setFilterCategory} aria-label="Category Filter">
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>

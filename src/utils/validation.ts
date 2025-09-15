@@ -7,8 +7,8 @@ export const sanitizeString = (input: string): string => {
   
   return input
     .trim()
-    .replace(/[<>]/g, '') // Remove potential HTML tags
-    .replace(/javascript:/gi, '') // Remove javascript: protocols
+    .replace(/<[^>]*>.*?<\/[^>]*>|<[^/>][^>]*\/>|<[^>]*>/g, '') // Remove HTML tags and their content
+    .replace(/javascript:|data:|vbscript:/gi, '') // Remove dangerous protocols
     .slice(0, 1000); // Limit length
 };
 

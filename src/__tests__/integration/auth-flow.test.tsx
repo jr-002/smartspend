@@ -47,7 +47,7 @@ describe('Authentication Flow Integration', () => {
   it('renders welcome screen with sign up option', () => {
     render(<WelcomeScreen />, { wrapper: createWrapper() });
     
-    expect(screen.getByText('SmartSpend')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'SmartSpend' })).toBeInTheDocument();
     expect(screen.getByText('Get Started Free')).toBeInTheDocument();
   });
 
