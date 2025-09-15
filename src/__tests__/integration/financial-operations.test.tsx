@@ -69,10 +69,13 @@ describe('Financial Operations Integration', () => {
   it('opens add transaction dialog', async () => {
     render(<TransactionHistory />, { wrapper: createWrapper() });
     
-    fireEvent.click(screen.getByText('Add Transaction'));
+    const addButton = screen.getByRole('button', {
+      name: /add transaction/i,
+    });
+    fireEvent.click(addButton);
     
     await waitFor(() => {
-      expect(screen.getByText('Add Transaction')).toBeInTheDocument();
+      expect(screen.getByLabelText('Add Transaction')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Description')).toBeInTheDocument();
     });
   });
@@ -80,12 +83,22 @@ describe('Financial Operations Integration', () => {
   it('filters transactions by type', async () => {
     render(<TransactionHistory />, { wrapper: createWrapper() });
     
-    // Find and click the filter dropdown
-    const filterButton = screen.getByRole('combobox');
-    fireEvent.click(filterButton);
+    // Find and click the transaction type filter dropdown (first combobox)
+    const filterComboboxes = screen.getAllByRole('combobox');
+    const typeFilter = filterComboboxes[0]; // First one is the type filter
+    fireEvent.click(typeFilter);
     
+    // Wait for the dropdown to appear and select 'Income'
     await waitFor(() => {
-      expect(screen.getByText('Income')).toBeInTheDocument();
+      const incomeOption = screen.getByText('Income');
+      expect(incomeOption).toBeInTheDocument();
+      fireEvent.click(incomeOption);
+    });
+
+    // Verify that filtering works by checking the transaction type badge
+    await waitFor(() => {
+      const expenseBadge = screen.queryByText('Expense');
+      expect(expenseBadge).not.toBeInTheDocument();
     });
   });
 });
