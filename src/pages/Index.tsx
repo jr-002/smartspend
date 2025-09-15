@@ -42,6 +42,7 @@ const GamifiedSavings = lazy(() => import("@/components/GamifiedSavings"));
 const SmartIncomeSplitter = lazy(() => import("@/components/SmartIncomeSplitter"));
 const CommunityBudgetTemplates = lazy(() => import("@/components/CommunityBudgetTemplates"));
 const FinancialRiskPredictor = lazy(() => import("@/components/FinancialRiskPredictor"));
+const ProductionMonitoringDashboard = lazy(() => import("@/components/ProductionMonitoringDashboard"));
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -132,6 +133,14 @@ const Index = () => {
         { id: "community", label: "Community", icon: Users, component: CommunityBudgetTemplates },
         { id: "gamified", label: "Rewards", icon: Trophy, component: GamifiedSavings },
         { id: "notifications", label: "Notifications", icon: Bell, component: NotificationCenter },
+      ]
+    },
+    {
+      id: "admin",
+      label: "System",
+      defaultOpen: false,
+      items: [
+        { id: "monitoring", label: "Monitoring", icon: Activity, component: ProductionMonitoringDashboard },
       ]
     }
   ], []);

@@ -7,9 +7,14 @@ import { registerServiceWorker } from './lib/offline-manager'
 import { getPerformanceSetting } from './lib/environment-config'
 import { resourceMonitor } from './lib/resource-monitor'
 import { environmentValidator } from './lib/environment-validator'
+import { initializeCSP } from './lib/content-security-policy'
+import { sessionSecurity } from './lib/session-security'
 
 // Initialize Sentry for error monitoring
 initSentry()
+
+// Initialize Content Security Policy
+initializeCSP()
 
 // Validate environment configuration before starting the app
 const envValidation = environmentValidator.validateEnvironment();
@@ -34,6 +39,7 @@ setupGlobalErrorHandlers()
 // Set up resource monitoring
 window.addEventListener('beforeunload', () => {
   resourceMonitor.cleanup();
+  sessionSecurity.cleanup();
 });
 
 // Monitor for resource exhaustion

@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import GDPRConsentBanner from "@/components/GDPRConsentBanner";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -22,6 +23,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <GDPRConsentBanner />
             <BrowserRouter>
               <ErrorBoundary fallback={
                 <div className="p-8 text-center">
