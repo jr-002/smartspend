@@ -19,6 +19,7 @@ import {
   Trophy,
   Users,
   AlertTriangle,
+  Activity,
 } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar, { SidebarCategory } from "@/components/AppSidebar";
