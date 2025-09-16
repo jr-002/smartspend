@@ -166,28 +166,28 @@ const Index = () => {
 
         <div className="flex-1 flex flex-col">
           {/* App Header */}
-          <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
-            <div className="px-8 py-6 flex items-center justify-between">
+          <header className="bg-background/95 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
+            <div className="px-8 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <SidebarTrigger className="lg:hidden" />
-                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm">
                   <img
                     src="/Picture1.png"
                     alt="SmartSpend logo"
-                    className="w-8 h-8 object-contain"
+                    className="w-6 h-6 object-contain"
                     loading="lazy"
                   />
                 </div>
-                <div className="ml-2">
-                  <h1 className="text-2xl font-bold text-foreground tracking-tight">{activeItem.label}</h1>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-md">{getPageDescription(activeItem.id)}</p>
+                <div>
+                  <h1 className="text-xl font-bold text-foreground tracking-tight">{activeItem.label}</h1>
+                  <p className="text-xs text-muted-foreground max-w-md hidden sm:block">{getPageDescription(activeItem.id)}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4">
                 <ProfileSettings>
-                  <div className="hidden md:flex items-center gap-4 px-5 py-3 bg-muted/50 rounded-xl hover:bg-muted transition-all duration-200 cursor-pointer border border-border/50">
-                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm">
+                  <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-muted/30 rounded-lg hover:bg-muted/50 transition-all duration-200 cursor-pointer border border-border/30">
+                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                       <User className="w-4 h-4 text-primary-foreground" />
                     </div>
                     <div className="flex flex-col">
@@ -201,7 +201,7 @@ const Index = () => {
                   </div>
                 </ProfileSettings>
                 <ThemeToggle />
-                <Button variant="outline" size="sm" onClick={handleSignOut} className="px-4">
+                <Button variant="outline" size="sm" onClick={handleSignOut} className="px-3">
                   Sign Out
                 </Button>
               </div>
@@ -210,7 +210,7 @@ const Index = () => {
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
-            <div className="px-8 py-8 max-w-7xl mx-auto">
+            <div className="px-8 py-6 max-w-7xl mx-auto">
               <ResourceMonitor />
               <Suspense
                 fallback={
