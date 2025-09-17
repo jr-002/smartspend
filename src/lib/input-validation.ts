@@ -20,7 +20,6 @@ export class InputSanitizer {
       // Remove control characters (ASCII 0-31) and DEL (ASCII 127)
       // eslint-disable-next-line no-control-regex
       .replace(/[\u0000-\u001F\u007F]/g, '');
-      .replace(/[\u0000-\u001F\u007F]/g, '');
   }
 
   // Sanitize AI prompts to prevent injection attacks
