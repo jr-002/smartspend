@@ -33,7 +33,16 @@ export const useBills = () => {
   const { user } = useAuth();
 
   const fetchBills = async () => {
-    if (!user) {
+      console.error('Error fetching bills:', error);
+      
+      // Provide more specific error messages
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        console.error('Network error: Unable to connect to Supabase. Please check:');
+        console.error('1. Your internet connection');
+        console.error('2. Supabase project URL and API key');
+        console.error('3. CORS settings in your Supabase project');
+      }
+      
       setBills([]);
       setLoading(false);
       return;
@@ -41,6 +50,12 @@ export const useBills = () => {
 
     try {
       setLoading(true);
+      
+      // Check if Supabase is properly configured
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        throw new Error('Supabase configuration is missing. Please check your environment variables.');
+      }
+      
       setError(null);
 
       const { data, error: fetchError } = await supabase
