@@ -62,6 +62,7 @@ export class InputSanitizer {
       .replace(/on\w+\s*=/gi, '') // Remove event handlers
       // Remove control characters (ASCII 0-31) and DEL (ASCII 127)
       .replace(/[\u0000-\u001F\u007F]/g, '');
+  }
   static sanitizeAIPrompt(prompt: string): string {
     if (typeof prompt !== 'string') {
       throw new Error('Prompt must be a string');
