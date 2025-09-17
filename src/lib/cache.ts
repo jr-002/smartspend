@@ -52,9 +52,9 @@ class MemoryCache {
   clear(): void {
     this.cache.clear();
     // Force garbage collection if available
-    if ('gc' in window && typeof (window as any).gc === 'function') {
+    if ('gc' in window && typeof window.gc === 'function') {
       try {
-        (window as any).gc();
+        window.gc();
       } catch (error) {
         console.warn('Garbage collection failed:', error);
       }

@@ -86,7 +86,20 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
       () => ({ data: { insights: getFallbackInsights() }, error: null })
     );
 
-    const { data, error } = result as { data: any; error: any };
+    const { data, error } = result as { 
+      data: { 
+        insights: Array<{
+          id: string;
+          type: 'spending' | 'saving' | 'investment' | 'budget' | 'goal';
+          title: string;
+          description: string;
+          impact: 'high' | 'medium' | 'low';
+          action: string;
+          priority: number;
+        }> 
+      }; 
+      error: Error | null 
+    };
 
     if (error) {
       captureException(error);
@@ -105,7 +118,7 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
       return getFallbackInsights();
     }
 
-    return data.insights.map((insight: Record<string, unknown>, index: number) => ({
+    return data.insights.map((insight, index: number): AIInsight => ({
       id: insight.id || `fallback-${Date.now()}-${index}`,
       type: insight.type || 'spending',
       title: insight.title || 'Financial Insight',

@@ -1,4 +1,6 @@
 
+import { serve } from "./deps.ts";
+import type { Request } from "./deps.ts";
 import Groq from 'npm:groq-sdk@0.7.0';
 
 // Enhanced input validation and sanitization
@@ -20,7 +22,7 @@ function sanitizeString(input: string, maxLength: number = 2000): string {
     .replace(/javascript:/gi, '') // Remove javascript: protocols
     .replace(/vbscript:/gi, '') // Remove vbscript: protocols
     .replace(/on\w+\s*=/gi, '') // Remove event handlers
-    .replace(/[\x00-\x1F\x7F]/g, ''); // Remove control characters
+    .replace(/[\u0000-\u001F\u007F]/g, ''); // Remove control characters
 }
 
 function sanitizeAIPrompt(prompt: string): string {
@@ -161,7 +163,7 @@ async function generateFinancialAdvice(userContext: string): Promise<string> {
       ],
       model: 'llama-3.3-70b-versatile',
       temperature: 0.7,
-      max_tokens: 800,
+      maxTokens: 800,
     });
 
     return completion.choices[0]?.message?.content || 'I apologize, but I\'m unable to provide advice at this time. Please try again later or consider consulting with a human financial advisor for personalized guidance.';
@@ -171,7 +173,7 @@ async function generateFinancialAdvice(userContext: string): Promise<string> {
   }
 }
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   const startTime = Date.now();
   
   // Enhanced security logging

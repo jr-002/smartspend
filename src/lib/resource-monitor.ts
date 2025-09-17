@@ -32,7 +32,7 @@ class ResourceMonitor {
 
   private isMemoryLow(): boolean {
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
+      const memory = performance.memory;
       return memory.usedJSHeapSize > this.memoryThreshold;
     }
     return false;
@@ -58,9 +58,9 @@ class ResourceMonitor {
 
   // Force garbage collection if available
   forceGarbageCollection(): void {
-    if ('gc' in window && typeof (window as any).gc === 'function') {
+    if ('gc' in window && typeof window.gc === 'function') {
       try {
-        (window as any).gc();
+        window.gc();
       } catch (error) {
         console.warn('Garbage collection failed:', error);
       }
@@ -69,7 +69,7 @@ class ResourceMonitor {
 
   // Get current resource status
   getResourceStatus() {
-    const memory = 'memory' in performance ? (performance as any).memory : null;
+    const memory = 'memory' in performance ? performance.memory : null;
     
     return {
       memoryUsage: memory ? {

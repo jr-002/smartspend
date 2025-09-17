@@ -1,6 +1,6 @@
 // Enhanced debouncing utilities to prevent resource exhaustion
 
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number,
   options: {
@@ -15,7 +15,7 @@ export function debounce<T extends (...args: any[]) => any>(
   let lastInvokeTime = 0;
   let timerId: NodeJS.Timeout | undefined;
   let lastArgs: Parameters<T> | undefined;
-  let lastThis: any;
+  let lastThis: unknown;
   let result: ReturnType<T> | undefined;
 
   function invokeFunc(time: number) {
@@ -116,7 +116,7 @@ export function debounce<T extends (...args: any[]) => any>(
 }
 
 // Specialized debounce for API calls with resource checking
-export function debounceAPICall<T extends (...args: any[]) => Promise<any>>(
+export function debounceAPICall<T extends (...args: unknown[]) => Promise<unknown>>(
   func: T,
   wait: number = 500
 ): T & { cancel: () => void } {

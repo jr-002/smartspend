@@ -1,0 +1,13 @@
+{
+  "tasks": {
+    "dev": "deno run --watch main.ts",
+    "start": "deno run --allow-net main.ts"
+  },
+  "imports": {
+    "http/": "https://deno.land/std@0.177.0/http/"
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "deno.window", "dom"],
+    "types": ["./types/groq-sdk.d.ts"]
+  }
+}
