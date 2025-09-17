@@ -35,7 +35,7 @@ export const useDebts = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchDebts = async () => {
+  const fetchDebts = useCallback(async () => {
     if (!user) {
       setDebts([]);
       setLoading(false);
@@ -68,7 +68,7 @@ export const useDebts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const addDebt = async (newDebt: NewDebt): Promise<boolean> => {
     if (!user) {
@@ -203,7 +203,7 @@ export const useDebts = () => {
 
   useEffect(() => {
     fetchDebts();
-  }, [user, fetchDebts]);
+  }, [fetchDebts]);
 
   return {
     debts,

@@ -75,7 +75,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ categories, activeId, onSelect 
     <Sidebar collapsible="icon" className="border-r border-border/50 bg-sidebar">
       <SidebarContent>
         {/* Brand Header */}
-        <div className="px-6 py-4 border-b border-border/30">
+        <div className="px-4 sm:px-6 py-4 border-b border-border/30">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm">
               <img
@@ -91,7 +91,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ categories, activeId, onSelect 
             {!collapsed && (
               <div>
                 <h2 className="text-lg font-bold text-foreground">SmartSpend</h2>
-                <p className="text-xs text-muted-foreground">Financial Assistant</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">Financial Assistant</p>
               </div>
             )}
           </div>

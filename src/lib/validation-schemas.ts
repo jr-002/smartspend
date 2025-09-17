@@ -61,6 +61,8 @@ export class InputSanitizer {
       .replace(/vbscript:/gi, '') // Remove vbscript: protocols
       .replace(/on\w+\s*=/gi, '') // Remove event handlers
       // Remove control characters (ASCII 0-31) and DEL (ASCII 127)
+      // Remove control characters (ASCII 0-31) and DEL (ASCII 127)
+      // eslint-disable-next-line no-control-regex
       .replace(/[\u0000-\u001F\u007F]/g, '');
   }
   static sanitizeAIPrompt(prompt: string): string {

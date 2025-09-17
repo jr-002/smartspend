@@ -28,7 +28,7 @@ export const useInvestments = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchInvestments = async () => {
+  const fetchInvestments = useCallback(async () => {
     if (!user) {
       setInvestments([]);
       setLoading(false);
@@ -61,7 +61,7 @@ export const useInvestments = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const addInvestment = async (newInvestment: NewInvestment): Promise<boolean> => {
     if (!user) {
@@ -195,7 +195,7 @@ export const useInvestments = () => {
 
   useEffect(() => {
     fetchInvestments();
-  }, [user, fetchInvestments]);
+  }, [fetchInvestments]);
 
   return {
     investments,

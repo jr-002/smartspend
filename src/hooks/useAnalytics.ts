@@ -68,7 +68,7 @@ export const useAnalytics = (period: string = '3months') => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchAnalyticsData = async () => {
+  const fetchAnalyticsData = useCallback(async () => {
     if (!user) {
       setAnalyticsData(null);
       setLoading(false);
@@ -213,11 +213,11 @@ export const useAnalytics = (period: string = '3months') => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, period]);
 
   useEffect(() => {
     fetchAnalyticsData();
-  }, [user, period, fetchAnalyticsData]);
+  }, [fetchAnalyticsData]);
 
   return {
     analyticsData,

@@ -22,7 +22,8 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     const args = lastArgs!;
     const thisArg = lastThis;
 
-    lastArgs = lastThis = undefined;
+    lastArgs = undefined;
+    lastThis = undefined as ThisParameterType<T>;
     lastInvokeTime = time;
     result = func.apply(thisArg, args);
     return result;
@@ -70,7 +71,8 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     if (trailing && lastArgs) {
       return invokeFunc(time);
     }
-    lastArgs = lastThis = undefined;
+    lastArgs = undefined;
+    lastThis = undefined as ThisParameterType<T>;
     return result;
   }
 
@@ -79,19 +81,22 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
       clearTimeout(timerId);
     }
     lastInvokeTime = 0;
-    lastArgs = lastCallTime = lastThis = timerId = undefined;
+    lastArgs = undefined;
+    lastCallTime = undefined;
+    lastThis = undefined as ThisParameterType<T>;
+    timerId = undefined;
   }
 
   function flush() {
     return timerId === undefined ? result : trailingEdge(Date.now());
   }
 
-  function debounced(this: ThisParameterType<T>, ...args: Parameters<T>): ReturnType<T> | undefined {
+  function debounced(...args: Parameters<T>): ReturnType<T> | undefined {
     const time = Date.now();
     const isInvoking = shouldInvoke(time);
 
     lastArgs = args;
-    lastThis = this;
+    lastThis = this as ThisParameterType<T>;
     lastCallTime = time;
 
     if (isInvoking) {
@@ -136,26 +141,26 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
   let lastFunc: NodeJS.Timeout;
   let lastRan: number;
 
-  const throttled = function(this: ThisParameterType<T>, ...args: Parameters<T>) {
+  function throttled(...args: Parameters<T>) {
     if (!inThrottle) {
-      func.apply(this, args);
+      func.apply(this as ThisParameterType<T>, args);
       lastRan = Date.now();
       inThrottle = true;
     } else {
       clearTimeout(lastFunc);
       lastFunc = setTimeout(() => {
         if (Date.now() - lastRan >= limit) {
-          func.apply(this, args);
+          func.apply(this as ThisParameterType<T>, args);
           lastRan = Date.now();
         }
       }, limit - (Date.now() - lastRan));
     }
-  } as ((...args: Parameters<T>) => ReturnType<T> | undefined) & { cancel: () => void };
+  }
 
   throttled.cancel = () => {
     clearTimeout(lastFunc);
     inThrottle = false;
   };
 
-  return throttled;
+  return throttled as ((...args: Parameters<T>) => ReturnType<T> | undefined) & { cancel: () => void };
 }

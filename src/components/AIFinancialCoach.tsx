@@ -347,20 +347,20 @@ What specific area would you like me to dive deeper into?`;
           </ScrollArea>
 
           {/* Input Area */}
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="flex-1 relative">
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Ask me anything about your finances..."
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="pr-12"
+                className="pr-10 sm:pr-12"
               />
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={toggleVoiceInput}
-                className={`absolute right-1 top-1 h-8 w-8 p-0 ${isListening ? 'text-destructive' : 'text-muted-foreground'}`}
+                className={`absolute right-1 top-1 h-8 w-8 p-0 ${isListening ? 'text-destructive' : 'text-muted-foreground'} hidden sm:flex`}
               >
                 {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </Button>
@@ -368,13 +368,14 @@ What specific area would you like me to dive deeper into?`;
             <Button 
               onClick={handleSendMessage}
               disabled={!inputMessage.trim() || isLoading}
-              className="bg-gradient-primary"
+              className="bg-gradient-primary w-full sm:w-auto"
             >
               <Send className="w-4 h-4" />
+              <span className="sm:hidden ml-2">Send</span>
             </Button>
           </div>
 
-          <div className="text-xs text-muted-foreground text-center">
+          <div className="text-xs text-muted-foreground text-center hidden sm:block">
             💡 Tip: Try voice input by clicking the microphone icon, or ask in Pidgin English!
           </div>
         </CardContent>

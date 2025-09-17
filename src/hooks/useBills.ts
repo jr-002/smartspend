@@ -32,7 +32,7 @@ export const useBills = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchBills = async () => {
+  const fetchBills = useCallback(async () => {
     if (!user) {
       setBills([]);
       setLoading(false);
@@ -80,7 +80,7 @@ export const useBills = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const addBill = async (newBill: NewBill): Promise<boolean> => {
     if (!user) {
@@ -216,7 +216,7 @@ export const useBills = () => {
     if (user) {
       fetchBills();
     }
-  }, [user]);
+  }, [user, fetchBills]);
 
   return {
     bills,

@@ -119,7 +119,7 @@ const SmartBudgeting = () => {
     }));
 
     setBudgetCategories(categories);
-  }, [transactions, budgets, transactionsLoading, budgetsLoading]);
+  }, [transactions, budgets, transactionsLoading, budgetsLoading, getCurrentMonthSpending]);
 
   const getColorForCategory = (category: string): string => {
     const colors = [
@@ -272,15 +272,15 @@ const SmartBudgeting = () => {
   return (
     <div className="section-spacing">
       {/* Budget Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="card-clean">
-          <CardContent className="content-spacing">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Budgeted</p>
-                <p className="text-2xl font-bold text-foreground">{formatCurrency(totalBudgeted, profile?.currency || "USD")}</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{formatCurrency(totalBudgeted, profile?.currency || "USD")}</p>
               </div>
-              <div className="p-2 bg-muted rounded-lg">
+              <div className="p-2 bg-muted rounded-lg hidden sm:block">
                 <Calculator className="w-6 h-6 text-muted-foreground" />
               </div>
             </div>
@@ -288,13 +288,13 @@ const SmartBudgeting = () => {
         </Card>
 
         <Card className="card-clean">
-          <CardContent className="content-spacing">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Spent</p>
-                <p className="text-2xl font-bold text-foreground">{formatCurrency(totalSpent, profile?.currency || "USD")}</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{formatCurrency(totalSpent, profile?.currency || "USD")}</p>
               </div>
-              <div className="p-2 bg-muted rounded-lg">
+              <div className="p-2 bg-muted rounded-lg hidden sm:block">
                 <Target className="w-6 h-6 text-muted-foreground" />
               </div>
             </div>
@@ -302,15 +302,15 @@ const SmartBudgeting = () => {
         </Card>
 
         <Card className="card-clean">
-          <CardContent className="content-spacing">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Remaining</p>
-                <p className={`text-2xl font-bold ${totalBudgeted - totalSpent >= 0 ? 'text-success' : 'text-destructive'}`}>
+                <p className={`text-xl sm:text-2xl font-bold ${totalBudgeted - totalSpent >= 0 ? 'text-success' : 'text-destructive'}`}>
                   {formatCurrency(totalBudgeted - totalSpent, profile?.currency || "USD")}
                 </p>
               </div>
-              <div className="p-2 bg-muted rounded-lg">
+              <div className="p-2 bg-muted rounded-lg hidden sm:block">
                 <TrendingUp className={`w-6 h-6 ${totalBudgeted - totalSpent >= 0 ? 'text-success' : 'text-destructive'}`} />
               </div>
             </div>
@@ -320,13 +320,13 @@ const SmartBudgeting = () => {
 
       {/* Charts */}
       {pieChartData.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <Card className="card-clean">
             <CardHeader>
               <CardTitle className="heading-secondary">Spending Distribution</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
+              <div className="h-[250px] sm:h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -353,7 +353,7 @@ const SmartBudgeting = () => {
               <CardTitle className="heading-secondary">Budget vs Actual</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
+              <div className="h-[250px] sm:h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={comparisonData}>
                     <XAxis dataKey="name" />
@@ -444,8 +444,8 @@ const SmartBudgeting = () => {
               const progressPercentage = getProgressPercentage(category.spent, category.budgeted);
               
               return (
-                <div key={category.id} className="p-6 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors">
-                  <div className="flex items-start justify-between mb-4">
+                <div key={category.id} className="p-4 sm:p-6 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-3 sm:gap-0">
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }}></div>
                       <div>
@@ -459,9 +459,9 @@ const SmartBudgeting = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-between sm:justify-end gap-4">
                       <div className="text-right">
-                        <p className="text-xl font-bold text-foreground">{formatCurrency(category.spent, profile?.currency || "USD")}</p>
+                        <p className="text-lg sm:text-xl font-bold text-foreground">{formatCurrency(category.spent, profile?.currency || "USD")}</p>
                         <p className="text-subtle">
                           of {formatCurrency(category.budgeted, profile?.currency || "USD")}
                         </p>

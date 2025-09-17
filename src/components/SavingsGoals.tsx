@@ -263,7 +263,7 @@ const SavingsGoals = () => {
       </div>
 
       {/* Goals Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {goals.map((goal) => {
           const progress = (goal.current_amount / goal.target_amount) * 100;
           const daysLeft = Math.ceil((new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
@@ -271,15 +271,15 @@ const SavingsGoals = () => {
           return (
             <Card key={goal.id} className="card-clean">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-success/10 rounded-lg flex items-center justify-center">
                       <Target className="w-5 h-5 text-success" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <CardTitle className="heading-secondary">{goal.name}</CardTitle>
                       {goal.description && (
-                        <p className="text-subtle">{goal.description}</p>
+                        <p className="text-subtle truncate">{goal.description}</p>
                       )}
                     </div>
                   </div>
@@ -302,9 +302,9 @@ const SavingsGoals = () => {
                   <Progress value={progress} className="h-2" />
                 </div>
                 
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
                   <div>
-                    <p className="text-xl font-bold">{formatCurrency(goal.current_amount, profile?.currency || "USD")}</p>
+                    <p className="text-lg sm:text-xl font-bold">{formatCurrency(goal.current_amount, profile?.currency || "USD")}</p>
                     <p className="text-subtle">of {formatCurrency(goal.target_amount, profile?.currency || "USD")}</p>
                   </div>
                   <div className="text-right">
@@ -313,7 +313,7 @@ const SavingsGoals = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -322,7 +322,7 @@ const SavingsGoals = () => {
                       goalId: goal.id,
                       type: 'add'
                     })}
-                    className="flex-1"
+                    className="flex-1 w-full sm:w-auto"
                   >
                     Add Money
                   </Button>
@@ -334,7 +334,7 @@ const SavingsGoals = () => {
                       goalId: goal.id,
                       type: 'withdraw'
                     })}
-                    className="flex-1"
+                    className="flex-1 w-full sm:w-auto"
                   >
                     Withdraw
                   </Button>

@@ -314,8 +314,8 @@ const WelcomeScreen = () => {
         // Landing Page
         <>
           {/* Header */}
-          <header className="border-b border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
-            <div className="container mx-auto px-4 py-4">
+          <header className="border-b border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 px-4 sm:px-6">
+            <div className="container mx-auto py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -331,7 +331,7 @@ const WelcomeScreen = () => {
                   </div>
                   <div>
                     <h1 className="text-xl font-bold text-slate-900 dark:text-white">SmartSpend</h1>
-                    <p className="text-sm text-slate-600 dark:text-slate-300">Financial Intelligence</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-300 hidden sm:block">Financial Intelligence</p>
                   </div>
                 </div>
                 <Button 
@@ -351,22 +351,22 @@ const WelcomeScreen = () => {
 
           {/* Hero Section */}
           <section className="relative overflow-hidden">
-            <div className="container mx-auto px-4 py-16 lg:py-24">
-              <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-24">
+              <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
                 <div className="space-y-8">
                   <div className="space-y-6">
                     <Badge variant="secondary" className="px-4 py-2 text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700">
                       <Sparkles className="w-4 h-4 mr-2" />
                       AI-Powered Financial Assistant
                     </Badge>
-                    <h2 className="text-4xl md:text-6xl font-bold text-slate-900 dark:text-white leading-tight">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white leading-tight">
                       Your Intelligent
                       <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent block">
                         Financial
                       </span>
                       Wellness Assistant
                     </h2>
-                    <p className="text-xl text-slate-600 dark:text-slate-300 max-w-lg leading-relaxed">
+                    <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-lg leading-relaxed">
                       Track, predict, and optimize your spending habits with AI-powered insights. 
                       Make every dollar count with SmartSpend.
                     </p>
@@ -397,7 +397,7 @@ const WelcomeScreen = () => {
                     </Button>
                   </div>
 
-                  <div className="flex items-center space-x-8 pt-4">
+                  <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-8 pt-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-slate-900 dark:text-white">50K+</div>
                       <div className="text-sm text-slate-600 dark:text-slate-400">Active Users</div>
@@ -469,12 +469,12 @@ const WelcomeScreen = () => {
                 <h3 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-4">
                   Why Choose SmartSpend?
                 </h3>
-                <p className="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+                <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
                   Powered by AI and designed for modern financial management
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                 {[
                   {
                     icon: Wallet,
@@ -502,12 +502,12 @@ const WelcomeScreen = () => {
                   }
                 ].map((feature, index) => (
                   <div key={index} className="group">
-                    <div className="flex flex-col items-center gap-6 p-8 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex flex-col items-center gap-4 sm:gap-6 p-6 sm:p-8 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                       <div className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                         <feature.icon className="w-8 h-8 text-white" />
                       </div>
                       <div className="text-center">
-                        <h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">{feature.title}</h4>
+                        <h4 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white mb-2 sm:mb-3">{feature.title}</h4>
                         <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                           {feature.description}
                         </p>
@@ -526,12 +526,12 @@ const WelcomeScreen = () => {
                 <h3 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-4">
                   Experience Smart Financial Management
                 </h3>
-                <p className="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+                <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
                   Get real-time insights into your spending patterns with our beautiful, intuitive dashboard
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
                 {[
                   { label: "Current Balance", value: "₦125,430", change: "+12.5%", icon: TrendingUp, positive: true },
                   { label: "This Month Spent", value: "₦45,280", change: "85% of budget", icon: TrendingDown, positive: false },
@@ -539,7 +539,7 @@ const WelcomeScreen = () => {
                   { label: "Top Category", value: "Food", change: "₦18,500 (41%)", icon: PieChart, positive: null }
                 ].map((stat, index) => (
                   <Card key={index} className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between mb-3">
                         <stat.icon className={`w-5 h-5 ${
                           stat.positive === true ? 'text-emerald-600' : 
@@ -547,7 +547,7 @@ const WelcomeScreen = () => {
                         }`} />
                         <span className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</span>
                       </div>
-                      <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">{stat.value}</div>
+                      <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-1">{stat.value}</div>
                       <div className={`text-sm ${
                         stat.positive === true ? 'text-emerald-600' : 
                         stat.positive === false ? 'text-orange-600' : 'text-slate-600 dark:text-slate-300'
@@ -572,7 +572,7 @@ const WelcomeScreen = () => {
                   Start Tracking Today
                 </Button>
                 
-                <div className="flex items-center justify-center gap-8 text-sm text-slate-600 dark:text-slate-400">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-slate-600 dark:text-slate-400">
                   <div className="flex items-center gap-2">
                     <Shield className="w-4 h-4" />
                     <span>Bank-level security</span>
@@ -618,7 +618,7 @@ const WelcomeScreen = () => {
       ) : (
         // Authentication Flow (Steps 2-4)
         <div className="min-h-screen flex items-center justify-center p-4">
-          <Card className="w-full max-w-md shadow-xl border-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
+          <Card className="w-full max-w-sm sm:max-w-md shadow-xl border-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm">
             <CardHeader className="text-center pb-6">
               <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <img 
@@ -713,7 +713,7 @@ const WelcomeScreen = () => {
                             if (!isLogin) validatePassword(e.target.value);
                             setError(null);
                           }}
-                          className="pr-10 border-slate-300 dark:border-slate-600"
+                          className="pr-10 border-slate-300 dark:border-slate-600 text-sm sm:text-base"
                         />
                         <Button
                           type="button"
@@ -745,7 +745,7 @@ const WelcomeScreen = () => {
                               placeholder="Confirm your password"
                               value={formData.confirmPassword}
                               onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                              className="pr-10 border-slate-300 dark:border-slate-600"
+                              className="pr-10 border-slate-300 dark:border-slate-600 text-sm sm:text-base"
                             />
                             <Button
                               type="button"
@@ -787,7 +787,7 @@ const WelcomeScreen = () => {
                                 }`}>
                                   Password requirements:
                                 </p>
-                                <div className="grid grid-cols-1 gap-1">
+                                <div className="grid grid-cols-1 gap-1 text-xs sm:text-sm">
                                   {[
                                     { check: 'At least 6 characters', valid: formData.password?.length >= 6 },
                                     { check: 'One lowercase letter', valid: /[a-z]/.test(formData.password || '') },
@@ -795,7 +795,7 @@ const WelcomeScreen = () => {
                                     { check: 'One number', valid: /\d/.test(formData.password || '') },
                                     { check: 'One special character', valid: /[!@#$%^&*()_+=[\]{}|;':",.<>/?`~-]/.test(formData.password || '') }
                                   ].map((requirement, index) => (
-                                    <div key={index} className={`flex items-center gap-2 text-xs ${
+                                    <div key={index} className={`flex items-center gap-2 ${
                                       requirement.valid ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
                                     }`}>
                                       <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
@@ -889,7 +889,7 @@ const WelcomeScreen = () => {
                       placeholder="Enter your full name"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="mt-2 border-slate-300 dark:border-slate-600"
+                      className="mt-2 border-slate-300 dark:border-slate-600 text-sm sm:text-base"
                     />
                   </div>
 
@@ -954,7 +954,7 @@ const WelcomeScreen = () => {
                           ...formData, 
                           monthlyIncome: parseFloat(e.target.value) || 0
                         })}
-                        className="mt-2 border-slate-300 dark:border-slate-600"
+                        className="mt-2 border-slate-300 dark:border-slate-600 text-sm sm:text-base"
                       />
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         This helps us provide better budgeting recommendations

@@ -75,15 +75,15 @@ const EnhancedDashboard = () => {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {profile?.name || 'User'}!</h1>
-        <p className="text-muted-foreground text-lg">Here's your financial overview for today.</p>
+        <p className="text-muted-foreground text-base sm:text-lg">Here's your financial overview for today.</p>
       </div>
 
       {/* Financial Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card className="hover-lift group relative overflow-hidden border-border/50">
-          <CardContent className="p-6 relative">
+          <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Current Balance</p>
@@ -92,7 +92,7 @@ const EnhancedDashboard = () => {
                 }`}>
                   {formatCurrency(balance, userCurrency)}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground hidden sm:block">
                   {balance >= 0 ? 'Positive balance' : 'Negative balance'}
                 </p>
               </div>
@@ -104,14 +104,14 @@ const EnhancedDashboard = () => {
         </Card>
 
         <Card className="hover-lift group relative overflow-hidden border-border/50">
-          <CardContent className="p-6 relative">
+          <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Total Income</p>
-                <p className="text-3xl font-bold text-success tracking-tight">
+                <p className="text-2xl sm:text-3xl font-bold text-success tracking-tight">
                   {formatCurrency(totalIncome, userCurrency)}
                 </p>
-                <p className="text-xs text-muted-foreground">This month</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">This month</p>
               </div>
               <div className="p-3 bg-success/10 rounded-lg">
                 <ArrowUp className="w-6 h-6 text-success" />
@@ -121,14 +121,14 @@ const EnhancedDashboard = () => {
         </Card>
 
         <Card className="hover-lift group relative overflow-hidden border-border/50">
-          <CardContent className="p-6 relative">
+          <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Total Expenses</p>
-                <p className="text-3xl font-bold text-destructive tracking-tight">
+                <p className="text-2xl sm:text-3xl font-bold text-destructive tracking-tight">
                   {formatCurrency(totalExpenses, userCurrency)}
                 </p>
-                <p className="text-xs text-muted-foreground">This month</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">This month</p>
               </div>
               <div className="p-3 bg-destructive/10 rounded-lg">
                 <ArrowDown className="w-6 h-6 text-destructive" />
@@ -138,17 +138,17 @@ const EnhancedDashboard = () => {
         </Card>
 
         <Card className="hover-lift group relative overflow-hidden border-border/50">
-          <CardContent className="p-6 relative">
+          <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">Savings Goals</p>
-                <p className="text-3xl font-bold text-primary tracking-tight">
+                <p className="text-2xl sm:text-3xl font-bold text-primary tracking-tight">
                   {savingsGoals.length > 0 
                     ? formatCurrency(totalCurrentSavings, userCurrency)
                     : formatCurrency(0, userCurrency)
                   }
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground hidden sm:block">
                   {savingsGoals.length} active goals
                 </p>
               </div>
@@ -161,7 +161,7 @@ const EnhancedDashboard = () => {
       </div>
 
       {/* Financial Activity Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Recent Transactions */}
         <Card className="border-border/50">
           <CardHeader>
@@ -175,11 +175,11 @@ const EnhancedDashboard = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4">
             {transactions.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {transactions.slice(0, 5).map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-4 rounded-lg border border-border/30 hover:bg-muted/30 transition-all duration-200 group">
+                  <div key={transaction.id} className="flex items-center justify-between p-3 sm:p-4 rounded-lg border border-border/30 hover:bg-muted/30 transition-all duration-200 group">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm ${
                           transaction.transaction_type === 'income' 
@@ -192,7 +192,7 @@ const EnhancedDashboard = () => {
                           <p className="font-medium text-foreground group-hover:text-primary transition-colors duration-200">
                             {transaction.description}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground hidden sm:block">
                             {transaction.category}
                           </p>
                         </div>
@@ -204,7 +204,7 @@ const EnhancedDashboard = () => {
                           {transaction.transaction_type === 'income' ? '+' : '−'}
                           {formatCurrency(transaction.amount, userCurrency)}
                         </p>
-                        <p className="text-xs text-muted-foreground">{transaction.date}</p>
+                        <p className="text-xs text-muted-foreground hidden sm:block">{transaction.date}</p>
                       </div>
                   </div>
                 ))}
@@ -212,7 +212,7 @@ const EnhancedDashboard = () => {
             ) : (
               <div className="text-center py-12">
                 <ArrowUpDown className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">No transactions yet</h3>
+                <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">No transactions yet</h3>
                 <p className="text-muted-foreground mb-4">Start by adding your first transaction</p>
                 <Button className="bg-primary hover:bg-primary/90">
                   Add Transaction
@@ -238,26 +238,26 @@ const EnhancedDashboard = () => {
           <CardContent className="space-y-6">
             {bills.length > 0 ? (
               <>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-4 rounded-lg border border-border/30 bg-success/5">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                  <div className="text-center p-3 sm:p-4 rounded-lg border border-border/30 bg-success/5">
                     <div className="w-8 h-8 bg-success/10 rounded-lg flex items-center justify-center mx-auto mb-2">
                       <span className="text-success font-bold text-sm">✓</span>
                     </div>
-                    <p className="text-2xl font-bold text-success">{billsPaid}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-success">{billsPaid}</p>
                     <p className="text-xs text-muted-foreground">Paid</p>
                   </div>
-                  <div className="text-center p-4 rounded-lg border border-border/30 bg-warning/5">
+                  <div className="text-center p-3 sm:p-4 rounded-lg border border-border/30 bg-warning/5">
                     <div className="w-8 h-8 bg-warning/10 rounded-lg flex items-center justify-center mx-auto mb-2">
                       <span className="text-warning font-bold text-sm">⏳</span>
                     </div>
-                    <p className="text-2xl font-bold text-warning">{billsPending}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-warning">{billsPending}</p>
                     <p className="text-xs text-muted-foreground">Pending</p>
                   </div>
-                  <div className="text-center p-4 rounded-lg border border-border/30 bg-destructive/5">
+                  <div className="text-center p-3 sm:p-4 rounded-lg border border-border/30 bg-destructive/5">
                     <div className="w-8 h-8 bg-destructive/10 rounded-lg flex items-center justify-center mx-auto mb-2">
                       <span className="text-destructive font-bold text-sm">!</span>
                     </div>
-                    <p className="text-2xl font-bold text-destructive">{billsOverdue}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-destructive">{billsOverdue}</p>
                     <p className="text-xs text-muted-foreground">Overdue</p>
                   </div>
                 </div>
@@ -278,7 +278,7 @@ const EnhancedDashboard = () => {
             ) : (
               <div className="text-center py-12">
                 <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">No bills added</h3>
+                <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">No bills added</h3>
                 <p className="text-muted-foreground mb-4">Add your first bill to track payments</p>
                 <Button className="bg-primary hover:bg-primary/90">
                   Add Bill
@@ -322,7 +322,7 @@ const EnhancedDashboard = () => {
               
               <div className="grid gap-4">
                 {budgets.slice(0, 3).map((budget) => (
-                  <div key={budget.id} className="p-4 rounded-lg border border-border/30 hover:bg-muted/20 transition-all duration-200">
+                  <div key={budget.id} className="p-3 sm:p-4 rounded-lg border border-border/30 hover:bg-muted/20 transition-all duration-200">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -330,14 +330,14 @@ const EnhancedDashboard = () => {
                         </div>
                         <div>
                           <p className="font-medium text-foreground">{budget.category}</p>
-                          <p className="text-xs text-muted-foreground">Monthly Budget</p>
+                          <p className="text-xs text-muted-foreground hidden sm:block">Monthly Budget</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-foreground">
                           {formatCurrency(budget.amount, userCurrency)}
                         </p>
-                        <p className="text-xs text-muted-foreground">allocated</p>
+                        <p className="text-xs text-muted-foreground hidden sm:block">allocated</p>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -354,7 +354,7 @@ const EnhancedDashboard = () => {
           ) : (
             <div className="text-center py-12">
               <Coins className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">No budgets created</h3>
+              <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">No budgets created</h3>
               <p className="text-muted-foreground mb-4">Create your first budget to track spending</p>
               <Button className="bg-primary hover:bg-primary/90">
                 Create Budget
@@ -371,22 +371,22 @@ const EnhancedDashboard = () => {
           <CardDescription>Common tasks to manage your finances</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <Button variant="outline" className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
               <ArrowUpDown className="w-6 h-6 text-primary" />
-              <span className="text-sm font-medium">Add Transaction</span>
+              <span className="text-xs sm:text-sm font-medium">Add Transaction</span>
             </Button>
-            <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
+            <Button variant="outline" className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
               <Calculator className="w-6 h-6 text-primary" />
-              <span className="text-sm font-medium">Create Budget</span>
+              <span className="text-xs sm:text-sm font-medium">Create Budget</span>
             </Button>
-            <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
+            <Button variant="outline" className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
               <Target className="w-6 h-6 text-primary" />
-              <span className="text-sm font-medium">Set Goal</span>
+              <span className="text-xs sm:text-sm font-medium">Set Goal</span>
             </Button>
-            <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
+            <Button variant="outline" className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
               <Brain className="w-6 h-6 text-primary" />
-              <span className="text-sm font-medium">AI Insights</span>
+              <span className="text-xs sm:text-sm font-medium">AI Insights</span>
             </Button>
           </div>
         </CardContent>

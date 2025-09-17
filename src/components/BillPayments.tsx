@@ -328,17 +328,17 @@ const BillPayments = () => {
               const daysUntilDue = getDaysUntilDue(bill.due_date);
               
               return (
-                <div key={bill.id} className="flex items-center justify-between p-4 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors">
-                  <div className="flex items-center gap-4">
+                <div key={bill.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors gap-3 sm:gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                     <div className="p-2 bg-muted rounded-lg">
                       {getIconForCategory(bill.category)}
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h3 className="font-semibold text-foreground">{bill.name}</h3>
-                      <p className="text-subtle">{bill.provider}</p>
+                      <p className="text-subtle truncate">{bill.provider}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Calendar className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground truncate">
                           Due: {new Date(bill.due_date).toLocaleDateString()}
                           {bill.status === 'pending' && (
                             <span> ({daysUntilDue > 0 ? `${daysUntilDue} days left` : 'Overdue'})</span>
@@ -348,18 +348,18 @@ const BillPayments = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                     <div className="text-right">
-                      <p className="font-semibold text-foreground">{formatCurrency(bill.amount, profile?.currency || "USD")}</p>
+                      <p className="text-base sm:text-lg font-semibold text-foreground">{formatCurrency(bill.amount, profile?.currency || "USD")}</p>
                       <Badge className={getStatusColor(bill.status)}>
                         {bill.status.charAt(0).toUpperCase() + bill.status.slice(1)}
                       </Badge>
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 w-full sm:w-auto">
                       {bill.status === 'pending' && (
                         <Button 
-                          size="sm" 
+                          size="sm"
                           className="bg-primary"
                           onClick={() => handlePayBill(bill.id)}
                         >
@@ -370,7 +370,7 @@ const BillPayments = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteBill(bill.id)}
-                        className="text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive flex-shrink-0"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

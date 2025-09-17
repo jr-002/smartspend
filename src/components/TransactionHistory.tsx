@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -298,45 +297,47 @@ const TransactionHistory = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="mb-6 flex flex-wrap items-center gap-4">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-4">
           <Input
             type="text"
             placeholder="Search transactions..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-xs"
+            className="w-full sm:max-w-xs"
           />
-          <Select value={filterType} onValueChange={setFilterType} aria-label="Transaction Type Filter">
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="income">Income</SelectItem>
-              <SelectItem value="expense">Expense</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filterCategory} onValueChange={setFilterCategory} aria-label="Category Filter">
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="Food">Food</SelectItem>
-              <SelectItem value="Shopping">Shopping</SelectItem>
-              <SelectItem value="Salary">Salary</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Select value={filterType} onValueChange={setFilterType} aria-label="Transaction Type Filter">
+              <SelectTrigger className="w-full sm:w-[140px]">
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="income">Income</SelectItem>
+                <SelectItem value="expense">Expense</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterCategory} onValueChange={setFilterCategory} aria-label="Category Filter">
+              <SelectTrigger className="w-full sm:w-[160px]">
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="Food">Food</SelectItem>
+                <SelectItem value="Shopping">Shopping</SelectItem>
+                <SelectItem value="Salary">Salary</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         
-        <div className="rounded-lg border border-border overflow-hidden">
+        <div className="rounded-lg border border-border overflow-hidden overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>Category</TableHead>
+                <TableHead className="hidden sm:table-cell">Category</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -367,16 +368,16 @@ const TransactionHistory = () => {
                   <TableCell>{transaction.description}</TableCell>
                   <TableCell>
                     <Badge variant={transaction.transaction_type === 'income' ? 'default' : 'secondary'} 
-                           className={transaction.transaction_type === 'income' ? 'bg-success/10 text-success border-success/20' : 'bg-destructive/10 text-destructive border-destructive/20'}>
+                           className={`${transaction.transaction_type === 'income' ? 'bg-success/10 text-success border-success/20' : 'bg-destructive/10 text-destructive border-destructive/20'} text-xs`}>
                       {transaction.transaction_type === 'income' ? 'Income' : 'Expense'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{transaction.category}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{transaction.category}</TableCell>
                   <TableCell className={transaction.transaction_type === 'income' ? 'text-success' : 'text-destructive'}>
                     {transaction.transaction_type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount, profile?.currency || "USD")}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 justify-end">
                       <Button variant="ghost" size="sm" onClick={() => handleEdit(transaction)}>
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -391,8 +392,8 @@ const TransactionHistory = () => {
           </Table>
         </div>
         
-        <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-muted/30 rounded-lg">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div>
               <p className="text-sm font-medium text-foreground">
               Total Income: <span className="text-success">{formatCurrency(totalIncome, profile?.currency || "USD")}</span>

@@ -41,7 +41,7 @@ export const useNotifications = () => {
   });
   const { user } = useAuth();
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!user) {
       setNotifications([]);
       setLoading(false);
@@ -74,7 +74,7 @@ export const useNotifications = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const addNotification = async (notification: Omit<Notification, 'id' | 'created_at' | 'updated_at'>): Promise<boolean> => {
     if (!user) {
@@ -245,7 +245,7 @@ export const useNotifications = () => {
 
   useEffect(() => {
     fetchNotifications();
-  }, [user, fetchNotifications]);
+  }, [fetchNotifications]);
 
   return {
     notifications,
