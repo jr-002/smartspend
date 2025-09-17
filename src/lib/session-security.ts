@@ -1,3 +1,5 @@
+import { supabase } from '@/integrations/supabase/client';
+
 // Enhanced session security management
 export interface SessionConfig {
   maxAge: number; // in milliseconds
