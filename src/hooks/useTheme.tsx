@@ -4,6 +4,8 @@ import { ThemeProviderContext, Theme } from "@/lib/theme-context-utils";
 import { useTheme } from "@/lib/theme-utils";
 
 type Theme = "light" | "dark" | "system";
+
+type ThemeProviderProps = {
   children: React.ReactNode;
   defaultTheme?: Theme;
   storageKey?: string;
