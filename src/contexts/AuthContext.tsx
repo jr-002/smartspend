@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { AuthContext, AuthContextType } from '@/lib/auth-context-utils';
 
 interface UserProfile {
   id: string;
@@ -10,19 +11,6 @@ interface UserProfile {
   created_at: string;
   updated_at: string;
 }
-
-interface AuthContextType {
-  user: User | null;
-  profile: UserProfile | null;
-  session: Session | null;
-  loading: boolean;
-  signUp: (email: string, password: string, userData: { name: string; monthlyIncome: number; currency: string }) => Promise<{ error: AuthError | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signOut: () => Promise<{ error: AuthError | null }>;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<{ error: Error | null }>;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);

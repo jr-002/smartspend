@@ -1,10 +1,9 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { ThemeProviderContext, useTheme } from "@/lib/theme-utils";
+import { ThemeProviderContext, Theme } from "@/lib/theme-context-utils";
+import { useTheme } from "@/lib/theme-utils";
 
 type Theme = "light" | "dark" | "system";
-
-type ThemeProviderProps = {
   children: React.ReactNode;
   defaultTheme?: Theme;
   storageKey?: string;
@@ -78,4 +77,3 @@ export function ThemeProvider({
   );
 }
 
-export { useTheme };
