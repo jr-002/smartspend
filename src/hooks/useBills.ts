@@ -33,16 +33,7 @@ export const useBills = () => {
   const { user } = useAuth();
 
   const fetchBills = async () => {
-      console.error('Error fetching bills:', error);
-      
-      // Provide more specific error messages
-      if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        console.error('Network error: Unable to connect to Supabase. Please check:');
-        console.error('1. Your internet connection');
-        console.error('2. Supabase project URL and API key');
-        console.error('3. CORS settings in your Supabase project');
-      }
-      
+    if (!user) {
       setBills([]);
       setLoading(false);
       return;
@@ -71,6 +62,15 @@ export const useBills = () => {
       setBills((data || []) as Bill[]);
     } catch (err) {
       console.error('Error fetching bills:', err);
+      
+      // Provide more specific error messages
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        console.error('Network error: Unable to connect to Supabase. Please check:');
+        console.error('1. Your internet connection');
+        console.error('2. Supabase project URL and API key');
+        console.error('3. CORS settings in your Supabase project');
+      }
+      
       setError('Failed to load bills');
       toast({
         title: "Error",
@@ -213,8 +213,10 @@ export const useBills = () => {
   };
 
   useEffect(() => {
-    fetchBills();
-  }, [user, fetchBills]);
+    if (user) {
+      fetchBills();
+    }
+  }, [user]);
 
   return {
     bills,
