@@ -31,10 +31,10 @@ function validateFinancialData(data: unknown): FinancialRiskData | undefined {
   
   // Validate transactions array if present
   if (financialData.transactions && Array.isArray(financialData.transactions)) {
-    const validTransactions = financialData.transactions.filter(t => 
+    const validTransactions = financialData.transactions.filter((t: unknown) => 
       t && typeof t === 'object' && 
-      typeof (t as any).amount === 'number' && 
-      typeof (t as any).category === 'string'
+      typeof (t as Record<string, unknown>).amount === 'number' && 
+      typeof (t as Record<string, unknown>).category === 'string'
     );
     
     if (validTransactions.length !== financialData.transactions.length) {

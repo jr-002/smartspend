@@ -22,7 +22,7 @@ function sanitizeString(input: string, maxLength: number = 2000): string {
     .replace(/javascript:/gi, '') // Remove javascript: protocols
     .replace(/vbscript:/gi, '') // Remove vbscript: protocols
     .replace(/on\w+\s*=/gi, '') // Remove event handlers
-    .replace(/[\u0000-\u001F\u007F]/g, ''); // Remove control characters
+    .replace(/[\u0000-\u001F\u007F]/g, ''); // Remove control characters (using Unicode escapes)
 }
 
 function sanitizeAIPrompt(prompt: string): string {
