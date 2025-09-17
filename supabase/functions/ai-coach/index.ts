@@ -147,10 +147,17 @@ function rateLimit(key: string, limit: number, windowMs: number) {
 }
 
 const groq = new Groq({
-  apiKey: Deno.env.get('GROQ_API_KEY'),
+  apiKey: Deno.env.get('GROQ_API_KEY') || '',
 });
 
 async function generateFinancialAdvice(userContext: string): Promise<string> {
+  // Check if API key is available
+  const apiKey = Deno.env.get('GROQ_API_KEY');
+  if (!apiKey) {
+    console.error('GROQ_API_KEY environment variable is not set');
+    return 'I apologize, but the AI service is currently unavailable due to configuration issues. Please contact support or try again later.';
+  }
+
   try {
     const completion = await groq.chat.completions.create({
       messages: [
