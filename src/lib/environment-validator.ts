@@ -30,7 +30,7 @@ export class EnvironmentValidator {
 
     // Critical environment variables
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     const nodeEnv = import.meta.env.NODE_ENV || 'development';
     const appVersion = import.meta.env.VITE_APP_VERSION;
 
@@ -45,9 +45,9 @@ export class EnvironmentValidator {
 
     // Validate Supabase Anonymous Key
     if (!supabaseAnonKey) {
-      errors.push('VITE_SUPABASE_ANON_KEY is required but not defined');
+      errors.push('VITE_SUPABASE_ANON_KEY (or VITE_SUPABASE_PUBLISHABLE_KEY) is required but not defined');
     } else if (!this.isValidJWT(supabaseAnonKey)) {
-      errors.push('VITE_SUPABASE_ANON_KEY is not a valid JWT token');
+      errors.push('VITE_SUPABASE_ANON_KEY (or VITE_SUPABASE_PUBLISHABLE_KEY) is not a valid JWT token');
     } else {
       config.VITE_SUPABASE_ANON_KEY = supabaseAnonKey;
     }
