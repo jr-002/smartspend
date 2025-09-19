@@ -20,9 +20,14 @@ export const sanitizeNumber = (input: number): number => {
 };
 
 export const sanitizeAmount = (input: number): number => {
-  const sanitized = sanitizeNumber(input);
-  // Round to 2 decimal places for currency
-  return Math.round(sanitized * 100) / 100;
+  try {
+    const sanitized = sanitizeNumber(input);
+    // Round to 2 decimal places for currency
+    return Math.round(sanitized * 100) / 100;
+  } catch (error) {
+    console.warn('Failed to sanitize amount:', error);
+    return 0;
+  }
 };
 
 // Validation schemas

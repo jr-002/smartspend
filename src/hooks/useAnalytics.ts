@@ -29,7 +29,9 @@ export interface AnalyticsData {
   incomeVsExpenses: Array<{
     month: string;
     income: number;
-    expenses: number;
+    const avgDailySpending = daysInMonth > 0 && currentMonthExpenses > 0 
+      ? currentMonthExpenses / daysInMonth 
+      : 0;
     savings: number;
   }>;
   
