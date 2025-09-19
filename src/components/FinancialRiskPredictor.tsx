@@ -223,15 +223,15 @@ const FinancialRiskPredictor = () => {
         monthlyIncome: profile?.monthly_income || 0
       });
       
-      // Transform API insights to component format
-      return apiInsights.map((insight, index) => ({
-        id: insight.id || `insight-${index}`,
-        type: insight.type as 'spending' | 'saving' | 'budget' | 'investment',
-        title: insight.title || `Insight #${index + 1}`,
-        message: insight.description || insight.action || 'No description available',
-        priority: insight.impact as 'high' | 'medium' | 'low',
-        actionable: true
-      }));
+      // End performance monitoring
+      const duration = enhancedMonitor.endTimer('risk_analysis');
+      enhancedMonitor.trackAPICall('risk-prediction', 'POST', 200, duration);
+    } catch (apiError) {
+      console.error('API risk analysis failed:', apiError);
+      enhancedMonitor.trackError(apiError instanceof Error ? apiError : new Error('Unknown error'), {
+        category: 'risk_analysis_api',
+        severity: 'medium'
+      });
     }
 
     setPredictions(newPredictions);

@@ -225,9 +225,25 @@ What specific area would you like me to dive deeper into?`;
 
   const toggleVoiceInput = () => {
     if (!isListening) {
-      // Start voice recognition
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = (window as Window & typeof globalThis & { webkitSpeechRecognition?: typeof SpeechRecognition; SpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition || (window as Window & typeof globalThis & { webkitSpeechRecognition?: typeof SpeechRecognition; SpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition;
+      try {
+        // Safe speech recognition with proper type checking
+        interface ExtendedWindow extends Window {
+          webkitSpeechRecognition?: any;
+          SpeechRecognition?: any;
+        }
+
+        const extWindow = window as ExtendedWindow;
+        const SpeechRecognition = extWindow.webkitSpeechRecognition || extWindow.SpeechRecognition;
+        
+        if (!SpeechRecognition) {
+          toast({
+            title: "Speech Recognition Not Supported",
+            description: "Your browser doesn't support speech recognition.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const recognition = new SpeechRecognition();
         
         recognition.continuous = false;
@@ -238,15 +254,29 @@ What specific area would you like me to dive deeper into?`;
           setIsListening(true);
         };
         
-        recognition.onresult = (event: Event) => {
-          const speechEvent = event as unknown as { results: { [key: number]: { [key: number]: { transcript: string } } } };
-          const transcript = speechEvent.results[0][0].transcript;
-          setInputMessage(transcript);
+        recognition.onresult = (event: any) => {
+          try {
+            const transcript = event.results[0][0].transcript;
+            setInputMessage(transcript);
+          } catch (error) {
+            console.error('Error processing speech result:', error);
+            toast({
+              title: "Speech Processing Error",
+              description: "Failed to process speech input.",
+              variant: "destructive",
+            });
+          }
           setIsListening(false);
         };
         
-        recognition.onerror = () => {
+        recognition.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
           setIsListening(false);
+          toast({
+            title: "Speech Recognition Error",
+            description: "Failed to recognize speech. Please try again.",
+            variant: "destructive",
+          });
         };
         
         recognition.onend = () => {
@@ -254,6 +284,14 @@ What specific area would you like me to dive deeper into?`;
         };
         
         recognition.start();
+      } catch (error) {
+        console.error('Speech recognition initialization error:', error);
+        setIsListening(false);
+        toast({
+          title: "Speech Recognition Error",
+          description: "Failed to start speech recognition.",
+          variant: "destructive",
+        });
       }
     } else {
       setIsListening(false);

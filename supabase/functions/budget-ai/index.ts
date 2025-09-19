@@ -1,6 +1,16 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.7.1';
 import Groq from 'npm:groq-sdk@0.7.0';
 
+// Environment validation
+function validateEnvironment() {
+  const required = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'GROQ_API_KEY'];
+  const missing = required.filter(key => !Deno.env.get(key));
+  
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+}
+
 // Enhanced input validation
 interface ValidatedRequest {
   userId: string;
@@ -91,23 +101,33 @@ function getClientIdentifier(req: Request): string {
 }
 
 function rateLimit(key: string, limit: number, windowMs: number) {
-  const now = Date.now();
-  const entry = rateStore.get(key);
-  if (!entry || now > entry.reset) {
-    const reset = now + windowMs;
-    rateStore.set(key, { count: 1, reset });
-    return { allowed: true, remaining: limit - 1, reset, limit };
+  try {
+    const now = Date.now();
+    const entry = rateStore.get(key);
+    if (!entry || now > entry.reset) {
+      const reset = now + windowMs;
+      rateStore.set(key, { count: 1, reset });
+      return { allowed: true, remaining: limit - 1, reset, limit };
+    }
+    if (entry.count >= limit) {
+      return { allowed: false, remaining: 0, reset: entry.reset, limit };
+    }
+    entry.count += 1;
+    return { allowed: true, remaining: Math.max(0, limit - entry.count), reset: entry.reset, limit };
+  } catch (error) {
+    console.warn('Rate limiting failed, allowing request:', error);
+    return { allowed: true, remaining: limit - 1, reset: Date.now() + windowMs, limit };
   }
-  if (entry.count >= limit) {
-    return { allowed: false, remaining: 0, reset: entry.reset, limit };
-  }
-  entry.count += 1;
-  return { allowed: true, remaining: Math.max(0, limit - entry.count), reset: entry.reset, limit };
 }
 
-const groq = new Groq({
-  apiKey: Deno.env.get('GROQ_API_KEY'),
-});
+// Initialize Groq with validation
+function initializeGroq() {
+  const apiKey = Deno.env.get('GROQ_API_KEY');
+  if (!apiKey) {
+    throw new Error('GROQ_API_KEY environment variable is required');
+  }
+  return new Groq({ apiKey });
+}
 
 interface TransactionData {
   id: string;
@@ -141,6 +161,7 @@ async function generateBudgetPredictions(
   currency: string = 'USD'
 ): Promise<BudgetRecommendation> {
   try {
+    const groq = initializeGroq();
     const analysisData = analyzeTransactionPatterns(transactions);
     const prompt = createBudgetAnalysisPrompt(analysisData, monthlyIncome, currency);
     
@@ -165,8 +186,14 @@ async function generateBudgetPredictions(
       throw new Error('No response from Groq API');
     }
 
-    const recommendation = JSON.parse(response);
-    return validateAndFormatRecommendation(recommendation as BudgetRecommendation, monthlyIncome);
+    try {
+      const recommendation = JSON.parse(response);
+      return validateAndFormatRecommendation(recommendation as BudgetRecommendation, monthlyIncome);
+    } catch (parseError) {
+      console.error('Failed to parse budget AI response:', parseError);
+      console.error('Raw response:', response);
+      return getFallbackBudgetRecommendation(transactions, monthlyIncome);
+    }
 
   } catch (error) {
     console.error('Error generating budget predictions:', error);
@@ -344,11 +371,23 @@ function validateAndFormatRecommendation(
   recommendation: BudgetRecommendation,
   monthlyIncome: number
 ): BudgetRecommendation {
+  // Validate input
+  if (!recommendation || typeof recommendation !== 'object') {
+    throw new Error('Invalid recommendation format');
+  }
+
+  // Ensure required fields exist
+  if (!recommendation.categories || !Array.isArray(recommendation.categories)) {
+    recommendation.categories = [];
+  }
+
   const maxBudget = monthlyIncome * 0.8;
-  if (recommendation.totalBudget > maxBudget) {
+  if (recommendation.totalBudget > maxBudget && recommendation.totalBudget > 0) {
+    const reductionFactor = recommendation.totalBudget > 0 
+      ? maxBudget / recommendation.totalBudget 
+      : 1;
+      
     recommendation.totalBudget = maxBudget;
-    
-    const reductionFactor = maxBudget / recommendation.totalBudget;
     recommendation.categories = recommendation.categories.map((cat) => ({
       ...cat,
       suggestedAmount: cat.suggestedAmount * reductionFactor
@@ -438,6 +477,16 @@ async function generateSpendingPredictions(transactions: TransactionData[], curr
 
 Deno.serve(async (req) => {
   const startTime = Date.now();
+  
+  try {
+    validateEnvironment();
+  } catch (error) {
+    console.error('Environment validation failed:', error);
+    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+      status: 500,
+      headers: corsHeaders,
+    });
+  }
   
   // Enhanced security logging
   console.log(`Budget AI Request: ${req.method} ${req.url}`, {

@@ -1,6 +1,16 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.7.1';
 import Groq from 'npm:groq-sdk@0.7.0';
 
+// Environment validation
+function validateEnvironment() {
+  const required = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'GROQ_API_KEY'];
+  const missing = required.filter(key => !Deno.env.get(key));
+  
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+}
+
 // Enhanced input validation
 interface ValidatedRequest {
   userId?: string;
@@ -111,23 +121,33 @@ function getClientIdentifier(req: Request): string {
 }
 
 function rateLimit(key: string, limit: number, windowMs: number) {
-  const now = Date.now();
-  const entry = rateStore.get(key);
-  if (!entry || now > entry.reset) {
-    const reset = now + windowMs;
-    rateStore.set(key, { count: 1, reset });
-    return { allowed: true, remaining: limit - 1, reset, limit };
+  try {
+    const now = Date.now();
+    const entry = rateStore.get(key);
+    if (!entry || now > entry.reset) {
+      const reset = now + windowMs;
+      rateStore.set(key, { count: 1, reset });
+      return { allowed: true, remaining: limit - 1, reset, limit };
+    }
+    if (entry.count >= limit) {
+      return { allowed: false, remaining: 0, reset: entry.reset, limit };
+    }
+    entry.count += 1;
+    return { allowed: true, remaining: Math.max(0, limit - entry.count), reset: entry.reset, limit };
+  } catch (error) {
+    console.warn('Rate limiting failed, allowing request:', error);
+    return { allowed: true, remaining: limit - 1, reset: Date.now() + windowMs, limit };
   }
-  if (entry.count >= limit) {
-    return { allowed: false, remaining: 0, reset: entry.reset, limit };
-  }
-  entry.count += 1;
-  return { allowed: true, remaining: Math.max(0, limit - entry.count), reset: entry.reset, limit };
 }
 
-const groq = new Groq({
-  apiKey: Deno.env.get('GROQ_API_KEY'),
-});
+// Initialize Groq with validation
+function initializeGroq() {
+  const apiKey = Deno.env.get('GROQ_API_KEY');
+  if (!apiKey) {
+    throw new Error('GROQ_API_KEY environment variable is required');
+  }
+  return new Groq({ apiKey });
+}
 
 interface FinancialRiskData {
   profile?: {
@@ -174,6 +194,7 @@ interface FinancialRiskData {
 
 async function analyzeFinancialRisk(financialData: FinancialRiskData): Promise<string> {
   try {
+    const groq = initializeGroq();
     const dataString = JSON.stringify(financialData);
     
     const completion = await groq.chat.completions.create({
@@ -250,6 +271,19 @@ function calculateHealthScore(analysis: string): number {
 
 Deno.serve(async (req) => {
   const startTime = Date.now();
+  
+  try {
+    validateEnvironment();
+  } catch (error) {
+    console.error('Environment validation failed:', error);
+    return new Response(JSON.stringify({ 
+      error: 'Server configuration error',
+      analysis: 'Risk analysis is temporarily unavailable due to configuration issues.'
+    }), {
+      status: 500,
+      headers: corsHeaders,
+    });
+  }
   
   // Enhanced security logging
   console.log(`Risk Prediction Request: ${req.method} ${req.url}`, {

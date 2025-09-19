@@ -1,6 +1,16 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.7.1';
 import Groq from 'npm:groq-sdk@0.7.0';
 
+// Environment validation
+function validateEnvironment() {
+  const required = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'GROQ_API_KEY'];
+  const missing = required.filter(key => !Deno.env.get(key));
+  
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+}
+
 // Enhanced input validation
 interface ValidatedRequest {
   userId: string;
@@ -75,23 +85,33 @@ function getClientIdentifier(req: Request): string {
 }
 
 function rateLimit(key: string, limit: number, windowMs: number) {
-  const now = Date.now();
-  const entry = rateStore.get(key);
-  if (!entry || now > entry.reset) {
-    const reset = now + windowMs;
-    rateStore.set(key, { count: 1, reset });
-    return { allowed: true, remaining: limit - 1, reset, limit };
+  try {
+    const now = Date.now();
+    const entry = rateStore.get(key);
+    if (!entry || now > entry.reset) {
+      const reset = now + windowMs;
+      rateStore.set(key, { count: 1, reset });
+      return { allowed: true, remaining: limit - 1, reset, limit };
+    }
+    if (entry.count >= limit) {
+      return { allowed: false, remaining: 0, reset: entry.reset, limit };
+    }
+    entry.count += 1;
+    return { allowed: true, remaining: Math.max(0, limit - entry.count), reset: entry.reset, limit };
+  } catch (error) {
+    console.warn('Rate limiting failed, allowing request:', error);
+    return { allowed: true, remaining: limit - 1, reset: Date.now() + windowMs, limit };
   }
-  if (entry.count >= limit) {
-    return { allowed: false, remaining: 0, reset: entry.reset, limit };
-  }
-  entry.count += 1;
-  return { allowed: true, remaining: Math.max(0, limit - entry.count), reset: entry.reset, limit };
 }
 
-const groq = new Groq({
-  apiKey: Deno.env.get('GROQ_API_KEY'),
-});
+// Initialize Groq with validation
+function initializeGroq() {
+  const apiKey = Deno.env.get('GROQ_API_KEY');
+  if (!apiKey) {
+    throw new Error('GROQ_API_KEY environment variable is required');
+  }
+  return new Groq({ apiKey });
+}
 
 interface FinancialData {
   transactions: Array<{
@@ -134,6 +154,7 @@ interface AIInsight {
 
 async function generateFinancialInsights(data: FinancialData): Promise<AIInsight[]> {
   try {
+    const groq = initializeGroq();
     const prompt = createFinancialAnalysisPrompt(data);
     
     const completion = await groq.chat.completions.create({
@@ -157,24 +178,34 @@ async function generateFinancialInsights(data: FinancialData): Promise<AIInsight
       throw new Error('No response from Groq API');
     }
 
-    const insights = JSON.parse(response) as Array<{
-      type?: string;
-      title?: string;
-      description?: string;
-      impact?: 'high' | 'medium' | 'low';
-      action?: string;
-      priority?: number;
-    }>;
-    
-    return insights.map((insight, index: number): AIInsight => ({
-      id: `ai-${Date.now()}-${index}`,
-      type: (insight.type as 'spending' | 'saving' | 'investment' | 'budget' | 'goal') || 'spending',
-      title: insight.title || 'Financial Insight',
-      description: insight.description || '',
-      impact: insight.impact || 'medium',
-      action: insight.action || '',
-      priority: insight.priority || index + 1
-    })) as AIInsight[];
+    try {
+      const insights = JSON.parse(response) as Array<{
+        type?: string;
+        title?: string;
+        description?: string;
+        impact?: 'high' | 'medium' | 'low';
+        action?: string;
+        priority?: number;
+      }>;
+      
+      if (!Array.isArray(insights)) {
+        throw new Error('Response is not an array');
+      }
+      
+      return insights.map((insight, index: number): AIInsight => ({
+        id: `ai-${Date.now()}-${index}`,
+        type: (insight.type as 'spending' | 'saving' | 'investment' | 'budget' | 'goal') || 'spending',
+        title: insight.title || 'Financial Insight',
+        description: insight.description || '',
+        impact: insight.impact || 'medium',
+        action: insight.action || '',
+        priority: insight.priority || index + 1
+      })) as AIInsight[];
+    } catch (parseError) {
+      console.error('Failed to parse AI response:', parseError);
+      console.error('Raw response:', response);
+      return getFallbackInsights(data);
+    }
 
   } catch (error) {
     console.error('Error generating AI insights:', error);
@@ -288,6 +319,16 @@ function getFallbackInsights(data: FinancialData): AIInsight[] {
 
 Deno.serve(async (req) => {
   const startTime = Date.now();
+  
+  try {
+    validateEnvironment();
+  } catch (error) {
+    console.error('Environment validation failed:', error);
+    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+      status: 500,
+      headers: corsHeaders,
+    });
+  }
   
   // Enhanced security logging
   console.log(`AI Insights Request: ${req.method} ${req.url}`, {
