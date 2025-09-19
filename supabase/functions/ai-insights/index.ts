@@ -166,15 +166,15 @@ async function generateFinancialInsights(data: FinancialData): Promise<AIInsight
       priority?: number;
     }>;
     
-    return insights.map((insight, index: number) => ({
+    return insights.map((insight, index: number): AIInsight => ({
       id: `ai-${Date.now()}-${index}`,
-      type: insight.type || 'spending',
+      type: (insight.type as 'spending' | 'saving' | 'investment' | 'budget' | 'goal') || 'spending',
       title: insight.title || 'Financial Insight',
       description: insight.description || '',
       impact: insight.impact || 'medium',
       action: insight.action || '',
       priority: insight.priority || index + 1
-    }));
+    })) as AIInsight[];
 
   } catch (error) {
     console.error('Error generating AI insights:', error);

@@ -166,7 +166,7 @@ async function generateBudgetPredictions(
     }
 
     const recommendation = JSON.parse(response);
-    return validateAndFormatRecommendation(recommendation, monthlyIncome);
+    return validateAndFormatRecommendation(recommendation as BudgetRecommendation, monthlyIncome);
 
   } catch (error) {
     console.error('Error generating budget predictions:', error);
@@ -341,20 +341,7 @@ Focus on practical, achievable recommendations based on the user's actual spendi
 }
 
 function validateAndFormatRecommendation(
-  recommendation: {
-    totalBudget: number;
-    categories: Array<{
-      category: string;
-      suggestedAmount: number;
-      confidence: number;
-      reasoning: string;
-      trend: 'increasing' | 'decreasing' | 'stable';
-      seasonalFactor: number;
-    }>;
-    savingsRate: number;
-    emergencyFund: number;
-    insights: string[];
-  },
+  recommendation: BudgetRecommendation,
   monthlyIncome: number
 ): BudgetRecommendation {
   const maxBudget = monthlyIncome * 0.8;

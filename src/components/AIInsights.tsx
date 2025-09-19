@@ -92,7 +92,7 @@ export default function AIInsights() {
         const duration = enhancedMonitor.endTimer('ai_insights_generation');
         enhancedMonitor.trackAPICall('ai-insights', 'POST', 200, duration, user.id);
         
-        // generateAIInsights returns AIInsight[]
+        // Transform API insights to component format
         return apiInsights.map((insight, index) => ({
           id: insight.id || `insight-${index}`,
           type: insight.type as 'spending' | 'saving' | 'budget' | 'investment',

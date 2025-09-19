@@ -162,6 +162,14 @@ interface FinancialRiskData {
   monthlyExpenses?: number;
   monthlyIncome?: number;
   currency?: string;
+  upcomingBills?: Array<{
+    amount: number;
+    status: string;
+  }>;
+  budgetUtilization?: Array<{
+    category: string;
+    utilization: number;
+  }>;
 }
 
 async function analyzeFinancialRisk(financialData: FinancialRiskData): Promise<string> {
@@ -355,7 +363,7 @@ Deno.serve(async (req) => {
       const healthScore = calculateHealthScore(analysis);
 
       return new Response(JSON.stringify({
-        riskPredictions: analysis,
+        analysis: analysis,
         healthScore: healthScore,
         analysisData: {
           totalDebt: comprehensiveFinancialData.totalDebt,

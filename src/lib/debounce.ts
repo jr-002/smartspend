@@ -124,12 +124,12 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
 export function debounceAPICall<T extends (...args: unknown[]) => Promise<unknown>>(
   func: T,
   wait: number = 500
-): ((...args: Parameters<T>) => ReturnType<T> | undefined) & { cancel: () => void } {
+): ((...args: Parameters<T>) => Promise<Awaited<ReturnType<T>> | undefined>) & { cancel: () => void } {
   return debounce(func, wait, {
     leading: false,
     trailing: true,
     maxWait: wait * 3, // Prevent indefinite delays
-  });
+  }) as ((...args: Parameters<T>) => Promise<Awaited<ReturnType<T>> | undefined>) & { cancel: () => void };
 }
 
 // Throttle function for high-frequency events

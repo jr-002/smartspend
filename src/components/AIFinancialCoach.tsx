@@ -91,7 +91,7 @@ const AIFinancialCoach = () => {
     enhancedMonitor.startTimer('ai_coach_response');
 
     try {
-      const aiResponse = await debouncedGenerateAdvice(inputMessage);
+      const aiResponse = await generateFinancialAdvice(inputMessage);
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',

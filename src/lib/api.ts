@@ -1,7 +1,6 @@
 // API client for handling all API requests
 import { supabase } from '@/integrations/supabase/client';
 import { captureException } from './sentry';
-import { monitoredAPICall } from './monitoring';
 import { resourceAwareAPICall } from './resource-monitor';
 import { queuedAPICall } from './request-queue';
 import { enhancedMonitor } from './enhanced-monitoring';
@@ -72,17 +71,15 @@ export async function generateAIInsights(userId: string): Promise<AIInsight[]> {
 
   try {
     const result = await resourceAwareAPICall(
-      () => monitoredAPICall('ai-insights', async () => {
-        return queuedAPICall(
-          async () => {
-            const response = await supabase.functions.invoke('ai-insights', {
-              body: { userId }
-            });
-            return response;
-          },
-          3 // High priority for AI insights
-        );
-      }),
+      () => queuedAPICall(
+        async () => {
+          const response = await supabase.functions.invoke('ai-insights', {
+            body: { userId }
+          });
+          return response;
+        },
+        3 // High priority for AI insights
+      ),
       () => ({ data: { insights: getFallbackInsights() }, error: null })
     );
 
@@ -146,9 +143,12 @@ export async function generateBudgetRecommendations(userId: string): Promise<Bud
   try {
     const { data, error } = await resourceAwareAPICall(
       () => queuedAPICall(
-        () => supabase.functions.invoke('budget-ai', {
+        async () => {
+          const response = await supabase.functions.invoke('budget-ai', {
           body: { userId }
-        }),
+          });
+          return response;
+        },
         2 // Medium priority
       ),
       () => ({ data: { recommendations: getFallbackBudgetRecommendations() }, error: null })
@@ -185,17 +185,17 @@ export async function generateBudgetRecommendations(userId: string): Promise<Bud
 
 export async function generateSpendingPredictions(userId: string): Promise<Record<string, number>> {
   try {
-    const { data, error } = await supabase.functions.invoke('budget-ai', {
+    const response = await supabase.functions.invoke('budget-ai', {
       body: { userId, type: 'predictions' }
     });
 
-    if (error) {
-      console.error('Error calling budget-ai function for predictions:', error);
+    if (response.error) {
+      console.error('Error calling budget-ai function for predictions:', response.error);
       // Return empty object as fallback
       return {};
     }
 
-    return data.predictions || {};
+    return response.data?.predictions || {};
   } catch (error) {
     console.error('Error in generateSpendingPredictions:', error);
     return {};
@@ -221,9 +221,12 @@ export async function generateFinancialAdvice(userContext: string): Promise<stri
   try {
     const { data, error } = await resourceAwareAPICall(
       () => queuedAPICall(
-        () => supabase.functions.invoke('ai-coach', {
+        async () => {
+          const response = await supabase.functions.invoke('ai-coach', {
           body: { userContext }
-        }),
+          });
+          return response;
+        },
         3 // High priority for user interactions
       ),
       () => ({ data: { advice: getFallbackFinancialAdvice(userContext) }, error: null })
@@ -254,12 +257,12 @@ export async function analyzeFinancialRisk(financialData: Record<string, unknown
   enhancedMonitor.trackUserAction('risk_analysis');
 
   try {
-    const { data, error } = await supabase.functions.invoke('risk-prediction', {
+    const response = await supabase.functions.invoke('risk-prediction', {
       body: { financialData }
     });
 
-    if (error) {
-      console.error('Error calling risk-prediction function:', error);
+    if (response.error) {
+      console.error('Error calling risk-prediction function:', response.error);
       enhancedMonitor.trackError(error, { 
         category: 'risk_prediction', 
         severity: 'medium' 
@@ -268,7 +271,7 @@ export async function analyzeFinancialRisk(financialData: Record<string, unknown
       return getFallbackRiskAnalysis();
     }
 
-    return data.analysis || '';
+    return response.data?.analysis || '';
   } catch (error) {
     console.error('Error in analyzeFinancialRisk:', error);
     enhancedMonitor.trackError(error instanceof Error ? error : new Error('Unknown error'), { 
