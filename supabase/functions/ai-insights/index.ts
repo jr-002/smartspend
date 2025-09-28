@@ -108,8 +108,15 @@ function rateLimit(key: string, limit: number, windowMs: number) {
 function initializeGroq() {
   const apiKey = Deno.env.get('GROQ_API_KEY');
   if (!apiKey) {
-    throw new Error('GROQ_API_KEY environment variable is required');
+    console.error('GROQ_API_KEY environment variable is missing');
+    throw new Error('AI service configuration error - API key not found');
   }
+  
+  if (apiKey.length < 10) {
+    console.error('GROQ_API_KEY appears to be invalid (too short)');
+    throw new Error('AI service configuration error - invalid API key');
+  }
+  
   return new Groq({ apiKey });
 }
 
@@ -154,7 +161,14 @@ interface AIInsight {
 
 async function generateFinancialInsights(data: FinancialData): Promise<AIInsight[]> {
   try {
-    const groq = initializeGroq();
+    let groq;
+    try {
+      groq = initializeGroq();
+    } catch (initError) {
+      console.error('Failed to initialize Groq for insights:', initError);
+      return getFallbackInsights(data);
+    }
+    
     const prompt = createFinancialAnalysisPrompt(data);
     
     const completion = await groq.chat.completions.create({
@@ -208,7 +222,11 @@ async function generateFinancialInsights(data: FinancialData): Promise<AIInsight
     }
 
   } catch (error) {
-    console.error('Error generating AI insights:', error);
+    console.error('Error generating AI insights:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    });
     return getFallbackInsights(data);
   }
 }

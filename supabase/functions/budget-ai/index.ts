@@ -124,8 +124,15 @@ function rateLimit(key: string, limit: number, windowMs: number) {
 function initializeGroq() {
   const apiKey = Deno.env.get('GROQ_API_KEY');
   if (!apiKey) {
-    throw new Error('GROQ_API_KEY environment variable is required');
+    console.error('GROQ_API_KEY environment variable is missing');
+    throw new Error('AI service configuration error - API key not found');
   }
+  
+  if (apiKey.length < 10) {
+    console.error('GROQ_API_KEY appears to be invalid (too short)');
+    throw new Error('AI service configuration error - invalid API key');
+  }
+  
   return new Groq({ apiKey });
 }
 
@@ -161,7 +168,14 @@ async function generateBudgetPredictions(
   currency: string = 'USD'
 ): Promise<BudgetRecommendation> {
   try {
-    const groq = initializeGroq();
+    let groq;
+    try {
+      groq = initializeGroq();
+    } catch (initError) {
+      console.error('Failed to initialize Groq for budget predictions:', initError);
+      return getFallbackBudgetRecommendation(transactions, monthlyIncome);
+    }
+    
     const analysisData = analyzeTransactionPatterns(transactions);
     const prompt = createBudgetAnalysisPrompt(analysisData, monthlyIncome, currency);
     
@@ -196,7 +210,11 @@ async function generateBudgetPredictions(
     }
 
   } catch (error) {
-    console.error('Error generating budget predictions:', error);
+    console.error('Error generating budget predictions:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    });
     return getFallbackBudgetRecommendation(transactions, monthlyIncome);
   }
 }

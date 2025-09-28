@@ -144,8 +144,15 @@ function rateLimit(key: string, limit: number, windowMs: number) {
 function initializeGroq() {
   const apiKey = Deno.env.get('GROQ_API_KEY');
   if (!apiKey) {
-    throw new Error('GROQ_API_KEY environment variable is required');
+    console.error('GROQ_API_KEY environment variable is missing');
+    throw new Error('AI service configuration error - API key not found');
   }
+  
+  if (apiKey.length < 10) {
+    console.error('GROQ_API_KEY appears to be invalid (too short)');
+    throw new Error('AI service configuration error - invalid API key');
+  }
+  
   return new Groq({ apiKey });
 }
 
@@ -194,7 +201,14 @@ interface FinancialRiskData {
 
 async function analyzeFinancialRisk(financialData: FinancialRiskData): Promise<string> {
   try {
-    const groq = initializeGroq();
+    let groq;
+    try {
+      groq = initializeGroq();
+    } catch (initError) {
+      console.error('Failed to initialize Groq for risk analysis:', initError);
+      return 'Risk analysis is temporarily unavailable due to service configuration issues. Please contact support or try again later.';
+    }
+    
     const dataString = JSON.stringify(financialData);
     
     const completion = await groq.chat.completions.create({
@@ -221,7 +235,16 @@ Format your response as a structured analysis that includes the numerical health
 
     return completion.choices[0]?.message?.content || 'Unable to analyze risk at this time. Please ensure you have sufficient financial data and try again.';
   } catch (error) {
-    console.error('Error analyzing financial risk:', error);
+    console.error('Error analyzing financial risk:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    });
+    
+    if (error instanceof Error && error.message.includes('API key')) {
+      return 'Risk analysis is temporarily unavailable due to service configuration issues. Please contact support.';
+    }
+    
     return 'Risk analysis is temporarily unavailable. Please try again later or consult with a financial advisor for a comprehensive risk assessment.';
   }
 }

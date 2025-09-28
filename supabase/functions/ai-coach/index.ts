@@ -163,14 +163,27 @@ function rateLimit(key: string, limit: number, windowMs: number) {
 function initializeGroq() {
   const apiKey = Deno.env.get('GROQ_API_KEY');
   if (!apiKey) {
-    throw new Error('GROQ_API_KEY environment variable is required');
+    console.error('GROQ_API_KEY environment variable is missing');
+    throw new Error('AI service configuration error - API key not found');
   }
+  
+  if (apiKey.length < 10) {
+    console.error('GROQ_API_KEY appears to be invalid (too short)');
+    throw new Error('AI service configuration error - invalid API key');
+  }
+  
   return new Groq({ apiKey });
 }
 
 async function generateFinancialAdvice(userContext: string): Promise<string> {
   try {
-    const groq = initializeGroq();
+    let groq;
+    try {
+      groq = initializeGroq();
+    } catch (initError) {
+      console.error('Failed to initialize Groq:', initError);
+      return 'I apologize, but the AI coaching service is currently unavailable due to a configuration issue. Please contact support or try again later.';
+    }
     
     const completion = await groq.chat.completions.create({
       messages: [
@@ -188,9 +201,28 @@ async function generateFinancialAdvice(userContext: string): Promise<string> {
       maxTokens: 800,
     });
 
-    return completion.choices[0]?.message?.content || 'I apologize, but I\'m unable to provide advice at this time. Please try again later or consider consulting with a human financial advisor for personalized guidance.';
+    const content = completion.choices[0]?.message?.content;
+    if (!content) {
+      console.warn('Groq API returned empty response');
+      return 'I apologize, but I\'m unable to provide advice at this time. Please try again later or consider consulting with a human financial advisor for personalized guidance.';
+    }
+    
+    return content;
   } catch (error) {
-    console.error('Error generating financial advice:', error);
+    console.error('Error generating financial advice:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    });
+    
+    if (error instanceof Error && error.message.includes('API key')) {
+      return 'The AI coaching service is currently unavailable due to a configuration issue. Please contact support.';
+    }
+    
+    if (error instanceof Error && error.message.includes('rate limit')) {
+      return 'The AI service is currently experiencing high demand. Please try again in a few minutes.';
+    }
+    
     return 'I\'m experiencing technical difficulties right now. Please try again in a few moments, or consider speaking with a qualified financial advisor for immediate assistance.';
   }
 }
