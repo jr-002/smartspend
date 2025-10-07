@@ -4,7 +4,7 @@ import { User, Session, AuthError } from '@supabase/supabase-js';
 interface UserProfile {
   id: string;
   name: string;
-  monthly_income: number;
+  monthly_income: number | null;
   currency: string;
   created_at: string;
   updated_at: string;

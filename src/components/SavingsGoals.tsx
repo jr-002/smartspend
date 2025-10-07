@@ -266,7 +266,7 @@ const SavingsGoals = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {goals.map((goal) => {
           const progress = (goal.current_amount / goal.target_amount) * 100;
-          const daysLeft = Math.ceil((new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+          const daysLeft = goal.deadline ? Math.ceil((new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null;
           
           return (
             <Card key={goal.id} className="card-clean">
@@ -307,10 +307,12 @@ const SavingsGoals = () => {
                     <p className="text-lg sm:text-xl font-bold">{formatCurrency(goal.current_amount, profile?.currency || "USD")}</p>
                     <p className="text-subtle">of {formatCurrency(goal.target_amount, profile?.currency || "USD")}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-foreground">{daysLeft > 0 ? `${daysLeft} days left` : 'Overdue'}</p>
-                    <p className="text-subtle">{goal.deadline}</p>
-                  </div>
+                  {goal.deadline && (
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-foreground">{daysLeft && daysLeft > 0 ? `${daysLeft} days left` : 'Overdue'}</p>
+                      <p className="text-subtle">{goal.deadline}</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2">

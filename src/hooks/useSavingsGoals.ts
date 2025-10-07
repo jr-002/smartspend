@@ -6,12 +6,13 @@ import { toast } from '@/hooks/use-toast';
 export interface SavingsGoal {
   id: string;
   name: string;
-  description?: string;
+  description?: string | null;
   target_amount: number;
   current_amount: number;
-  deadline: string;
+  deadline: string | null;
   created_at?: string;
   updated_at?: string;
+  user_id?: string;
 }
 
 export interface NewSavingsGoal {
