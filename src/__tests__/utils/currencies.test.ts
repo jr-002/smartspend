@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect } from 'vitest';
 import { formatCurrency, getCurrencyByCode, getDefaultCurrency } from '@/utils/currencies';
 

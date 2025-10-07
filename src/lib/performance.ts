@@ -122,7 +122,9 @@ export function memoize<T extends (...args: unknown[]) => ReturnType<T>>(
     // Clean up cache if it gets too large
     if (cache.size > 100) {
       const firstKey = cache.keys().next().value;
-      cache.delete(firstKey);
+      if (firstKey) {
+        cache.delete(firstKey);
+      }
     }
     
     return result;
@@ -191,11 +193,13 @@ export class PerformanceMonitor {
 export function logMemoryUsage(label: string): void {
   if ('memory' in performance) {
     const memory = (performance as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number; } }).memory;
-    console.log(`Memory Usage (${label}):`, {
-      used: `${Math.round(memory.usedJSHeapSize / 1024 / 1024)} MB`,
-      total: `${Math.round(memory.totalJSHeapSize / 1024 / 1024)} MB`,
-      limit: `${Math.round(memory.jsHeapSizeLimit / 1024 / 1024)} MB`,
-    });
+    if (memory) {
+      console.log(`Memory Usage (${label}):`, {
+        used: `${Math.round(memory.usedJSHeapSize / 1024 / 1024)} MB`,
+        total: `${Math.round(memory.totalJSHeapSize / 1024 / 1024)} MB`,
+        limit: `${Math.round(memory.jsHeapSizeLimit / 1024 / 1024)} MB`,
+      });
+    }
   }
 }
 

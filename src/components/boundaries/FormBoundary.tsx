@@ -32,7 +32,7 @@ class FormBoundary extends Component<Props, State> {
     this.state = {
       hasError: false,
       error: null,
-      savedFormData: null,
+      savedFormData: {} as Record<string, unknown>,
       retryCount: 0,
     };
   }
@@ -132,7 +132,7 @@ class FormBoundary extends Component<Props, State> {
   handleClearSavedData = () => {
     try {
       localStorage.removeItem(this.storageKey);
-      this.setState({ savedFormData: null });
+      this.setState({ savedFormData: {} as Record<string, unknown> });
     } catch (error) {
       console.warn('Failed to clear saved form data:', error);
     }

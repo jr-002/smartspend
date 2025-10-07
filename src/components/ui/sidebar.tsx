@@ -17,8 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { sidebarMenuButtonVariants } from "@/lib/sidebar-utils"
-import { SidebarContext } from "@/lib/sidebar-context-utils"
-import type { SidebarContextType } from "@/lib/sidebar-context-utils"
+import { SidebarContext, type SidebarContextType } from "@/lib/sidebar-context-utils"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7

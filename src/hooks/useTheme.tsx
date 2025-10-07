@@ -1,7 +1,5 @@
-
-import { createContext, useContext, useEffect, useState } from "react";
-import { ThemeProviderContext, Theme } from "@/lib/theme-context-utils";
-import { useTheme } from "@/lib/theme-utils";
+import { useEffect, useState } from "react";
+import { ThemeProviderContext } from "@/lib/theme-context-utils";
 
 type Theme = "light" | "dark" | "system";
 

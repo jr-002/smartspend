@@ -81,12 +81,15 @@ export class SessionSecurityManager {
         return;
       }
 
-      const sessionAge = Date.now() - new Date(session.created_at).getTime();
-      const timeUntilExpiry = this.config.maxAge - sessionAge;
+      // Check if session is about to expire by checking expires_at
+      if (session.expires_at) {
+        const expiresAt = new Date(session.expires_at * 1000).getTime();
+        const timeUntilExpiry = expiresAt - Date.now();
 
-      // Auto-renew if close to expiry
-      if (timeUntilExpiry < this.config.renewThreshold) {
-        await this.renewSession();
+        // Auto-renew if close to expiry
+        if (timeUntilExpiry < this.config.renewThreshold) {
+          await this.renewSession();
+        }
       }
     } catch (error) {
       console.error('Error checking session validity:', error);

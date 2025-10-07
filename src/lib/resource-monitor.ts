@@ -32,8 +32,10 @@ class ResourceMonitor {
 
   private isMemoryLow(): boolean {
     if ('memory' in performance) {
-      const memory = performance.memory;
-      return memory.usedJSHeapSize > this.memoryThreshold;
+      const memory = (performance as { memory?: { usedJSHeapSize: number } }).memory;
+      if (memory) {
+        return memory.usedJSHeapSize > this.memoryThreshold;
+      }
     }
     return false;
   }
