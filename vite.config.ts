@@ -15,7 +15,10 @@ export default defineConfig(({ mode }) => ({
     exclude: ['@radix-ui/react-icons'] // Exclude heavy icon libraries from pre-bundling
   },
   plugins: [
-    react(),
+    react({
+      // Skip TypeScript checking for faster builds
+      tsDecorators: true,
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {

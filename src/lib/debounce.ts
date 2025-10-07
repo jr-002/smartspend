@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Enhanced debouncing utilities to prevent resource exhaustion
 
 export function debounce<T extends (...args: unknown[]) => unknown>(

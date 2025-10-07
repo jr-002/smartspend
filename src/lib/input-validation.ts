@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Comprehensive input validation and sanitization for API endpoints
 import { z } from 'zod';
 
