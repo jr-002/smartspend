@@ -1,5 +1,3 @@
-// @ts-nocheck
-// GDPR compliance utilities
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { backupManager } from './database-backup';

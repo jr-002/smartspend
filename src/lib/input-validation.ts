@@ -1,5 +1,3 @@
-// @ts-nocheck
-// Comprehensive input validation and sanitization for API endpoints
 import { z } from 'zod';
 
 // Add missing InputSanitizer class that's referenced in other files

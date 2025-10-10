@@ -226,16 +226,9 @@ What specific area would you like me to dive deeper into?`;
   const toggleVoiceInput = () => {
     if (!isListening) {
       try {
-        // Safe speech recognition with proper type checking
-        interface ExtendedWindow extends Window {
-          webkitSpeechRecognition?: any;
-          SpeechRecognition?: any;
-        }
+        const SpeechRecognitionConstructor = window.webkitSpeechRecognition || window.SpeechRecognition;
 
-        const extWindow = window as ExtendedWindow;
-        const SpeechRecognition = extWindow.webkitSpeechRecognition || extWindow.SpeechRecognition;
-        
-        if (!SpeechRecognition) {
+        if (!SpeechRecognitionConstructor) {
           toast({
             title: "Speech Recognition Not Supported",
             description: "Your browser doesn't support speech recognition.",
@@ -244,7 +237,7 @@ What specific area would you like me to dive deeper into?`;
           return;
         }
 
-        const recognition = new SpeechRecognition();
+        const recognition = new SpeechRecognitionConstructor();
         
         recognition.continuous = false;
         recognition.interimResults = false;
@@ -254,7 +247,7 @@ What specific area would you like me to dive deeper into?`;
           setIsListening(true);
         };
         
-        recognition.onresult = (event: any) => {
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
           try {
             const transcript = event.results[0][0].transcript;
             setInputMessage(transcript);
@@ -269,7 +262,7 @@ What specific area would you like me to dive deeper into?`;
           setIsListening(false);
         };
         
-        recognition.onerror = (event: any) => {
+        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
           console.error('Speech recognition error:', event.error);
           setIsListening(false);
           toast({
