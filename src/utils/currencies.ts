@@ -1,4 +1,3 @@
-
 export interface Currency {
   code: string;
   symbol: string;
@@ -102,6 +101,98 @@ export const formatCurrency = (amount: number, currencyCode: string): string => 
   return `${currency.symbol}${amount.toLocaleString()}`;
 };
 
+const COUNTRY_CURRENCY_MAP: { [key: string]: string } = {
+  'US': 'USD', 'United States': 'USD',
+  'GB': 'GBP', 'United Kingdom': 'GBP',
+  'EU': 'EUR', 'Germany': 'EUR', 'France': 'EUR', 'Spain': 'EUR', 'Italy': 'EUR', 'Netherlands': 'EUR',
+  'JP': 'JPY', 'Japan': 'JPY',
+  'NG': 'NGN', 'Nigeria': 'NGN',
+  'ZA': 'ZAR', 'South Africa': 'ZAR',
+  'KE': 'KES', 'Kenya': 'KES',
+  'GH': 'GHS', 'Ghana': 'GHS',
+  'EG': 'EGP', 'Egypt': 'EGP',
+  'IN': 'INR', 'India': 'INR',
+  'CN': 'CNY', 'China': 'CNY',
+  'KR': 'KRW', 'South Korea': 'KRW',
+  'SG': 'SGD', 'Singapore': 'SGD',
+  'HK': 'HKD', 'Hong Kong': 'HKD',
+  'TH': 'THB', 'Thailand': 'THB',
+  'MY': 'MYR', 'Malaysia': 'MYR',
+  'ID': 'IDR', 'Indonesia': 'IDR',
+  'PK': 'PKR', 'Pakistan': 'PKR',
+  'BD': 'BDT', 'Bangladesh': 'BDT',
+  'LK': 'LKR', 'Sri Lanka': 'LKR',
+  'PH': 'PHP', 'Philippines': 'PHP',
+  'AE': 'AED', 'United Arab Emirates': 'AED',
+  'SA': 'SAR', 'Saudi Arabia': 'SAR',
+  'QA': 'QAR', 'Qatar': 'QAR',
+  'KW': 'KWD', 'Kuwait': 'KWD',
+  'BH': 'BHD', 'Bahrain': 'BHD',
+  'OM': 'OMR', 'Oman': 'OMR',
+  'JO': 'JOD', 'Jordan': 'JOD',
+  'LB': 'LBP', 'Lebanon': 'LBP',
+  'CH': 'CHF', 'Switzerland': 'CHF',
+  'SE': 'SEK', 'Sweden': 'SEK',
+  'NO': 'NOK', 'Norway': 'NOK',
+  'DK': 'DKK', 'Denmark': 'DKK',
+  'PL': 'PLN', 'Poland': 'PLN',
+  'CZ': 'CZK', 'Czech Republic': 'CZK',
+  'HU': 'HUF', 'Hungary': 'HUF',
+  'RO': 'RON', 'Romania': 'RON',
+  'BG': 'BGN', 'Bulgaria': 'BGN',
+  'HR': 'HRK', 'Croatia': 'HRK',
+  'RS': 'RSD', 'Serbia': 'RSD',
+  'RU': 'RUB', 'Russia': 'RUB',
+  'UA': 'UAH', 'Ukraine': 'UAH',
+  'TR': 'TRY', 'Turkey': 'TRY',
+  'CA': 'CAD', 'Canada': 'CAD',
+  'MX': 'MXN', 'Mexico': 'MXN',
+  'BR': 'BRL', 'Brazil': 'BRL',
+  'AR': 'ARS', 'Argentina': 'ARS',
+  'CL': 'CLP', 'Chile': 'CLP',
+  'CO': 'COP', 'Colombia': 'COP',
+  'PE': 'PEN', 'Peru': 'PEN',
+  'UY': 'UYU', 'Uruguay': 'UYU',
+  'AU': 'AUD', 'Australia': 'AUD',
+  'NZ': 'NZD', 'New Zealand': 'NZD',
+};
+
+export const detectCurrencyFromLocation = async (): Promise<Currency> => {
+  try {
+    const response = await fetch('https://ipapi.co/json/');
+    if (!response.ok) throw new Error('Failed to fetch location');
+
+    const data = await response.json();
+    const countryCode = data.country_code || data.country;
+    const countryName = data.country_name;
+
+    const currencyCode = COUNTRY_CURRENCY_MAP[countryCode] || COUNTRY_CURRENCY_MAP[countryName];
+
+    if (currencyCode) {
+      const currency = getCurrencyByCode(currencyCode);
+      if (currency) {
+        localStorage.setItem('detected_currency', currencyCode);
+        return currency;
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to detect currency from location:', error);
+  }
+
+  const savedCurrency = localStorage.getItem('detected_currency');
+  if (savedCurrency) {
+    const currency = getCurrencyByCode(savedCurrency);
+    if (currency) return currency;
+  }
+
+  return CURRENCIES.find(c => c.code === 'USD') || CURRENCIES[0];
+};
+
 export const getDefaultCurrency = (): Currency => {
+  const savedCurrency = localStorage.getItem('detected_currency');
+  if (savedCurrency) {
+    const currency = getCurrencyByCode(savedCurrency);
+    if (currency) return currency;
+  }
   return CURRENCIES.find(c => c.code === 'USD') || CURRENCIES[0];
 };

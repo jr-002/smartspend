@@ -58,16 +58,16 @@ const Dashboard = () => {
 
               <div className="flex items-center space-x-6 pt-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">50K+</div>
-                  <div className="text-sm text-muted-foreground">Active Users</div>
+                  <div className="text-2xl font-bold text-foreground">AI-Powered</div>
+                  <div className="text-sm text-muted-foreground">Insights</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">$2.5B+</div>
-                  <div className="text-sm text-muted-foreground">Money Tracked</div>
+                  <div className="text-2xl font-bold text-foreground">Multi-Currency</div>
+                  <div className="text-sm text-muted-foreground">Support</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">4.9★</div>
-                  <div className="text-sm text-muted-foreground">App Rating</div>
+                  <div className="text-2xl font-bold text-foreground">Secure</div>
+                  <div className="text-sm text-muted-foreground">Bank-Level</div>
                 </div>
               </div>
             </div>

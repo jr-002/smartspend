@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,7 @@ import {
   Check
 } from "lucide-react";
 import CurrencySelector from "./CurrencySelector";
-import { getDefaultCurrency } from "@/utils/currencies";
+import { getDefaultCurrency, detectCurrencyFromLocation } from "@/utils/currencies";
 import { useAuth } from "@/contexts/AuthContext";
 import { passwordSchema, emailSchema, nameSchema, currencyCodeSchema } from "@/utils/validation";
 
@@ -56,6 +56,17 @@ const WelcomeScreen = () => {
   });
 
   const { signUp, signIn } = useAuth();
+
+  useEffect(() => {
+    const detectCurrency = async () => {
+      const detectedCurrency = await detectCurrencyFromLocation();
+      setFormData(prev => ({
+        ...prev,
+        currency: detectedCurrency.code
+      }));
+    };
+    detectCurrency();
+  }, []);
 
   // Real-time password validation
   const validatePassword = (password: string) => {
@@ -399,16 +410,16 @@ const WelcomeScreen = () => {
 
                   <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-8 pt-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-slate-900 dark:text-white">50K+</div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">Active Users</div>
+                      <div className="text-2xl font-bold text-slate-900 dark:text-white">AI-Powered</div>
+                      <div className="text-sm text-slate-600 dark:text-slate-400">Smart Insights</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-slate-900 dark:text-white">$2.5B+</div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">Money Tracked</div>
+                      <div className="text-2xl font-bold text-slate-900 dark:text-white">150+</div>
+                      <div className="text-sm text-slate-600 dark:text-slate-400">Currencies</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-slate-900 dark:text-white">4.9★</div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">App Rating</div>
+                      <div className="text-2xl font-bold text-slate-900 dark:text-white">Secure</div>
+                      <div className="text-sm text-slate-600 dark:text-slate-400">Bank-Level</div>
                     </div>
                   </div>
                 </div>
@@ -583,7 +594,7 @@ const WelcomeScreen = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Star className="w-4 h-4" />
-                    <span>50k+ happy users</span>
+                    <span>Global currency support</span>
                   </div>
                 </div>
               </div>
