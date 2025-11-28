@@ -5,11 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
-import { Calculator, AlertTriangle, TrendingUp, TrendingDown, Target, Brain, Loader2, Sparkles, Zap, Plus, Trash2 } from "lucide-react";
+import { Calculator, TrendingUp, TrendingDown, Target, Loader2, Plus, Trash2 } from "lucide-react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useBudgets, type NewBudget } from "@/hooks/useBudgets";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,7 +27,7 @@ interface BudgetCategory {
 const SmartBudgeting = () => {
   const { transactions = [], loading: transactionsLoading } = useTransactions();
   const { budgets = [], loading: budgetsLoading, addBudget, deleteBudget } = useBudgets();
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   
   const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -103,7 +100,6 @@ const SmartBudgeting = () => {
     if (transactionsLoading || budgetsLoading) return;
     
     // Ensure we have arrays to work with
-    const safeTransactions = Array.isArray(transactions) ? transactions : [];
     const safeBudgets = Array.isArray(budgets) ? budgets : [];
     
     const currentMonthSpending = getCurrentMonthSpending();

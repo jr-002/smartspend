@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Card,
@@ -34,11 +34,10 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Edit, Trash2, Loader2, Plus } from "lucide-react";
-import { useTransactions, Transaction, NewTransaction } from "@/hooks/useTransactions";
+import { useTransactions, Transaction } from "@/hooks/useTransactions";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/utils/currencies";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { toast } from "@/hooks/use-toast";
 import { DatePicker } from "@/components/DatePicker";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

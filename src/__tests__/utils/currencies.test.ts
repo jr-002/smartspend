@@ -16,8 +16,8 @@ describe('Currency Utils', () => {
     });
 
     it('handles null/undefined amounts', () => {
-      expect(formatCurrency(null as number | null, 'USD')).toBe('$0');
-      expect(formatCurrency(undefined as number | undefined, 'USD')).toBe('$0');
+      expect(formatCurrency(null as unknown as number, 'USD')).toBe('$0');
+      expect(formatCurrency(undefined as unknown as number, 'USD')).toBe('$0');
       expect(formatCurrency(NaN, 'USD')).toBe('$0');
     });
 

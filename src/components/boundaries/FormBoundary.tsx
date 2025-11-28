@@ -208,7 +208,7 @@ class FormBoundary extends Component<Props, State> {
   }
 
   render() {
-    const { children, fallback, formName = 'Form' } = this.props;
+    const { children, fallback, formName: _formName = 'Form' } = this.props;
     const { hasError, savedFormData, retryCount } = this.state;
 
     if (hasError) {

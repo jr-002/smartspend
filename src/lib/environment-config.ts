@@ -1,5 +1,5 @@
 // Enhanced environment configuration for different deployment stages
-import { env, isDevelopment, isProduction } from './environment';
+import { isDevelopment, isProduction } from './environment';
 
 interface AppConfig {
   api: {

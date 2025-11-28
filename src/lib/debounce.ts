@@ -13,7 +13,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   let lastInvokeTime = 0;
   let timerId: NodeJS.Timeout | undefined;
   let lastArgs: Parameters<T> | undefined;
-  let lastThis: ThisParameterType<T>;
+  let lastThis: unknown;
   let result: ReturnType<T> | undefined;
 
   function invokeFunc(time: number) {
@@ -21,9 +21,9 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     const thisArg = lastThis;
 
     lastArgs = undefined;
-    lastThis = undefined as ThisParameterType<T>;
+    lastThis = undefined;
     lastInvokeTime = time;
-    result = func.apply(thisArg, args);
+    result = func.apply(thisArg, args) as ReturnType<T>;
     return result;
   }
 
@@ -55,10 +55,11 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     );
   }
 
-  function timerExpired() {
+  function timerExpired(): void {
     const time = Date.now();
     if (shouldInvoke(time)) {
-      return trailingEdge(time);
+      trailingEdge(time);
+      return;
     }
     timerId = setTimeout(timerExpired, remainingWait(time));
   }
@@ -70,7 +71,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
       return invokeFunc(time);
     }
     lastArgs = undefined;
-    lastThis = undefined as ThisParameterType<T>;
+    lastThis = undefined;
     return result;
   }
 
@@ -81,7 +82,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     lastInvokeTime = 0;
     lastArgs = undefined;
     lastCallTime = undefined;
-    lastThis = undefined as ThisParameterType<T>;
+    lastThis = undefined;
     timerId = undefined;
   }
 
@@ -89,12 +90,12 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     return timerId === undefined ? result : trailingEdge(Date.now());
   }
 
-  function debounced(...args: Parameters<T>): ReturnType<T> | undefined {
+  function debounced(this: unknown, ...args: Parameters<T>): ReturnType<T> | undefined {
     const time = Date.now();
     const isInvoking = shouldInvoke(time);
 
     lastArgs = args;
-    lastThis = this as ThisParameterType<T>;
+    lastThis = this;
     lastCallTime = time;
 
     if (isInvoking) {
@@ -139,16 +140,16 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
   let lastFunc: NodeJS.Timeout;
   let lastRan: number;
 
-  function throttled(...args: Parameters<T>) {
+  function throttled(this: unknown, ...args: Parameters<T>) {
     if (!inThrottle) {
-      func.apply(this as ThisParameterType<T>, args);
+      func.apply(this, args);
       lastRan = Date.now();
       inThrottle = true;
     } else {
       clearTimeout(lastFunc);
       lastFunc = setTimeout(() => {
         if (Date.now() - lastRan >= limit) {
-          func.apply(this as ThisParameterType<T>, args);
+          func.apply(this, args);
           lastRan = Date.now();
         }
       }, limit - (Date.now() - lastRan));

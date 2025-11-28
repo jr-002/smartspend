@@ -175,7 +175,7 @@ class DataBoundary extends Component<Props, State> {
   }
 
   render() {
-    const { children, fallback, componentName = 'Data Component', showOfflineMessage = true } = this.props;
+    const { children, fallback, componentName: _componentName = 'Data Component', showOfflineMessage = true } = this.props;
     const { hasError, isOnline } = this.state;
 
     // Show offline message if configured and offline

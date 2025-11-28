@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -47,9 +47,6 @@ const EnhancedDashboard = () => {
   const totalBudgets = safeBudgets.length;
 
   // Calculate savings goals metrics
-  const totalSavingsGoalAmount = safeSavingsGoals
-    .filter(goal => typeof goal?.target_amount === 'number')
-    .reduce((sum, goal) => sum + goal.target_amount, 0);
   const totalCurrentSavings = safeSavingsGoals
     .filter(goal => typeof goal?.current_amount === 'number')
     .reduce((sum, goal) => sum + goal.current_amount, 0);

@@ -1,6 +1,3 @@
-import { useEffect, useMemo } from 'react';
-import { debounce } from '@/lib/performance';
-
 // Component that handles notification triggers
 // This is a utility hook that should be used in the main app component
 

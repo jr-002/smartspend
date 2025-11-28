@@ -1,5 +1,4 @@
 // Advanced rate limiting with persistence and intelligent limits
-import { supabase } from '@/integrations/supabase/client';
 
 export interface RateLimitConfig {
   maxRequests: number;

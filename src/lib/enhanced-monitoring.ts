@@ -1,6 +1,5 @@
 // Enhanced monitoring and alerting system
 import { captureException, captureMessage } from '@/lib/sentry';
-import { supabase } from '@/integrations/supabase/client';
 
 export interface MonitoringEvent {
   type: 'error' | 'warning' | 'info' | 'security' | 'performance';
@@ -163,12 +162,6 @@ class EnhancedMonitor {
     }
   }
 
-  // Performance metric tracking
-  private trackPerformance(metric: PerformanceMetric) {
-    // Log performance data locally
-    console.log('Performance metric:', metric);
-  }
-
   // Alert system
   private triggerAlert(event: MonitoringEvent) {
     console.warn(`🚨 ALERT [${event.severity.toUpperCase()}]:`, event);
@@ -200,22 +193,6 @@ class EnhancedMonitor {
       severity: event.severity,
       timestamp: new Date(event.timestamp).toISOString(),
     });
-  }
-
-  // Get security event severity
-  private getSecuritySeverity(eventType: string): 'low' | 'medium' | 'high' | 'critical' {
-    switch (eventType) {
-      case 'injection_attempt':
-        return 'critical';
-      case 'rate_limit_exceeded':
-        return 'medium';
-      case 'invalid_auth':
-        return 'medium';
-      case 'suspicious_activity':
-        return 'high';
-      default:
-        return 'low';
-    }
   }
 
   // User action tracking for behavior analysis

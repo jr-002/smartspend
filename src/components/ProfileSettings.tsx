@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { User, Settings, Loader2 } from 'lucide-react';
+import { Settings, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CURRENCIES } from '@/utils/currencies';
 
