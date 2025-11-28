@@ -44,7 +44,7 @@ export class PerformanceMonitor {
     }
   }
 
-  trackUserAction(action: string, metadata?: Record<string, unknown>): void {
+  trackUserAction(action: string, _metadata?: Record<string, unknown>): void {
     captureMessage(`User action: ${action}`, 'info');
     
     // Track performance-critical actions

@@ -101,27 +101,33 @@ export class GDPRComplianceManager {
       await this.exportUserData(userId);
 
       // Delete user data in correct order (respecting foreign key constraints)
-      const deletionOrder = [
-        'notifications',
-        'investments', 
-        'debts',
-        'bills',
-        'savings_goals',
-        'budgets',
-        'transactions',
-        'profiles'
-      ];
-
-      for (const table of deletionOrder) {
-        const { error } = await supabase
-          .from(table)
-          .delete()
-          .eq(table === 'profiles' ? 'id' : 'user_id', userId);
-
-        if (error) {
-          console.error(`Error deleting from ${table}:`, error);
-          throw error;
-        }
+      // Delete from notifications
+      await supabase.from('notifications').delete().eq('user_id', userId);
+      
+      // Delete from investments
+      await supabase.from('investments').delete().eq('user_id', userId);
+      
+      // Delete from debts
+      await supabase.from('debts').delete().eq('user_id', userId);
+      
+      // Delete from bills
+      await supabase.from('bills').delete().eq('user_id', userId);
+      
+      // Delete from savings_goals
+      await supabase.from('savings_goals').delete().eq('user_id', userId);
+      
+      // Delete from budgets
+      await supabase.from('budgets').delete().eq('user_id', userId);
+      
+      // Delete from transactions
+      await supabase.from('transactions').delete().eq('user_id', userId);
+      
+      // Delete from profiles (uses id instead of user_id)
+      const { error: profileError } = await supabase.from('profiles').delete().eq('id', userId);
+      
+      if (profileError) {
+        console.error('Error deleting profile:', profileError);
+        throw profileError;
       }
 
       // Delete auth user (this should be done last)

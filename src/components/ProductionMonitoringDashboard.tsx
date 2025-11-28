@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
@@ -13,17 +12,15 @@ import {
   CheckCircle, 
   Clock,
   TrendingUp,
-  Users,
   Server
 } from 'lucide-react';
-import { enhancedMonitor } from '@/lib/enhanced-monitoring';
 import { resourceMonitor } from '@/lib/resource-monitor';
 import { sessionSecurity } from '@/lib/session-security';
 import LoadTestingPanel from './LoadTestingPanel';
 import DataManagementPanel from './DataManagementPanel';
 
-const ProductionMonitoringDashboard: React.FC = () => {
-  const [systemStatus, setSystemStatus] = useState({
+const ProductionMonitoringDashboard = () => {
+  const [systemStatus] = useState({
     overall: 'healthy',
     api: 'operational',
     database: 'operational',

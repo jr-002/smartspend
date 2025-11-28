@@ -247,18 +247,19 @@ function sanitizeObjectInputs(obj: unknown): void {
     });
   } else if (typeof obj === 'object' && obj !== null) {
     Object.keys(obj).forEach(key => {
-      if (typeof obj[key] === 'string') {
+      const objRecord = obj as Record<string, unknown>;
+      if (typeof objRecord[key] === 'string') {
         try {
           if (key.toLowerCase().includes('context') || key.toLowerCase().includes('prompt')) {
-            obj[key] = InputSanitizer.sanitizeAIPrompt(obj[key]);
+            objRecord[key] = InputSanitizer.sanitizeAIPrompt(objRecord[key] as string);
           } else {
-            obj[key] = InputSanitizer.sanitizeString(obj[key]);
+            objRecord[key] = InputSanitizer.sanitizeString(objRecord[key] as string);
           }
         } catch (error) {
           console.warn(`Failed to sanitize field ${key}:`, error);
         }
-      } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-        sanitizeObjectInputs(obj[key]);
+      } else if (typeof objRecord[key] === 'object' && objRecord[key] !== null) {
+        sanitizeObjectInputs(objRecord[key]);
       }
     });
   }

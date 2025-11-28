@@ -9,7 +9,6 @@ import { Send, Bot, User, Sparkles, Mic, MicOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/utils/currencies";
 import { generateFinancialAdvice } from "@/lib/api";
-import { debounceAPICall } from "@/lib/debounce";
 import { resourceMonitor } from "@/lib/resource-monitor";
 import { enhancedMonitor } from "@/lib/enhanced-monitoring";
 
@@ -35,8 +34,6 @@ const AIFinancialCoach = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
 
-  // Debounce the AI advice generation to prevent rapid-fire requests
-  const debouncedGenerateAdvice = debounceAPICall(generateFinancialAdvice, 1000);
   const currency = profile?.currency || 'USD';
   const quickQuestions = [
     "Can I afford this purchase?",
@@ -226,7 +223,7 @@ What specific area would you like me to dive deeper into?`;
   const toggleVoiceInput = () => {
     if (!isListening) {
       try {
-        const SpeechRecognitionConstructor = window.webkitSpeechRecognition || window.SpeechRecognition;
+        const SpeechRecognitionConstructor = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
 
         if (!SpeechRecognitionConstructor) {
           toast({
@@ -247,7 +244,7 @@ What specific area would you like me to dive deeper into?`;
           setIsListening(true);
         };
         
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
+        recognition.onresult = (event: any) => {
           try {
             const transcript = event.results[0][0].transcript;
             setInputMessage(transcript);
@@ -262,7 +259,7 @@ What specific area would you like me to dive deeper into?`;
           setIsListening(false);
         };
         
-        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        recognition.onerror = (event: any) => {
           console.error('Speech recognition error:', event.error);
           setIsListening(false);
           toast({

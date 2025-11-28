@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard, AlertTriangle, Calculator, TrendingDown, Plus, Loader2 } from "lucide-react";
+import { CreditCard, AlertTriangle, Calculator, TrendingDown, Loader2 } from "lucide-react";
 import { useDebts } from "@/hooks/useDebts";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/utils/currencies";
@@ -57,15 +57,6 @@ const DebtManagement = () => {
   const totalMinimumPayment = debts.reduce((sum, debt) => sum + debt.minimum_payment, 0);
   const totalOriginalAmount = debts.reduce((sum, debt) => sum + debt.original_amount, 0);
   const totalPaidOff = totalOriginalAmount - totalDebt;
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-destructive text-destructive-foreground';
-      case 'medium': return 'bg-warning text-warning-foreground';
-      case 'low': return 'bg-success text-success-foreground';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
 
   const getSortedDebts = () => {
     if (strategy === 'snowball') {

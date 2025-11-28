@@ -1,12 +1,11 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, ChevronsUpDown, Search } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CURRENCIES, Currency, getCurrencyByCode } from "@/utils/currencies";
+import { CURRENCIES, getCurrencyByCode } from "@/utils/currencies";
 
 interface CurrencySelectorProps {
   value: string;

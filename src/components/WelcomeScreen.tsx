@@ -33,7 +33,7 @@ import {
 import CurrencySelector from "./CurrencySelector";
 import { getDefaultCurrency, detectCurrencyFromLocation } from "@/utils/currencies";
 import { useAuth } from "@/contexts/AuthContext";
-import { passwordSchema, emailSchema, nameSchema, currencyCodeSchema } from "@/utils/validation";
+import { emailSchema, nameSchema, currencyCodeSchema } from "@/utils/validation";
 
 const WelcomeScreen = () => {
   const [step, setStep] = useState(1);

@@ -54,15 +54,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "bills_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       budgets: {
         Row: {
@@ -92,15 +84,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "budgets_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       debts: {
         Row: {
@@ -122,7 +106,7 @@ export type Database = {
           created_at?: string
           due_date: string
           id?: string
-          interest_rate: number
+          interest_rate?: number
           minimum_payment: number
           name: string
           original_amount: number
@@ -145,15 +129,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "debts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       investments: {
         Row: {
@@ -169,7 +145,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          current_value?: number
+          current_value: number
           id?: string
           initial_investment: number
           name: string
@@ -197,10 +173,10 @@ export type Database = {
           data: Json | null
           id: string
           message: string
-          priority: Database["public"]["Enums"]["notification_priority"]
+          priority: string
           read: boolean
           title: string
-          type: Database["public"]["Enums"]["notification_type"]
+          type: string
           updated_at: string
           user_id: string
         }
@@ -209,10 +185,10 @@ export type Database = {
           data?: Json | null
           id?: string
           message: string
-          priority?: Database["public"]["Enums"]["notification_priority"]
+          priority?: string
           read?: boolean
           title: string
-          type: Database["public"]["Enums"]["notification_type"]
+          type: string
           updated_at?: string
           user_id: string
         }
@@ -221,10 +197,10 @@ export type Database = {
           data?: Json | null
           id?: string
           message?: string
-          priority?: Database["public"]["Enums"]["notification_priority"]
+          priority?: string
           read?: boolean
           title?: string
-          type?: Database["public"]["Enums"]["notification_type"]
+          type?: string
           updated_at?: string
           user_id?: string
         }
@@ -291,15 +267,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "savings_goals_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       transactions: {
         Row: {
@@ -310,6 +278,7 @@ export type Database = {
           description: string
           id: string
           transaction_type: string
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -320,6 +289,7 @@ export type Database = {
           description: string
           id?: string
           transaction_type: string
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -330,34 +300,49 @@ export type Database = {
           description?: string
           id?: string
           transaction_type?: string
+          updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "transactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_old_notifications: { Args: never; Returns: undefined }
+      create_bill_notification: {
+        Args: {
+          p_amount: number
+          p_bill_name: string
+          p_days_until_due: number
+          p_due_date: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      create_budget_notification: {
+        Args: {
+          p_budget: number
+          p_category: string
+          p_spent: number
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      create_goal_notification: {
+        Args: {
+          p_achievement_type: string
+          p_current_amount: number
+          p_goal_name: string
+          p_target_amount: number
+          p_user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
-      notification_priority: "high" | "medium" | "low"
-      notification_type:
-        | "budget"
-        | "bill"
-        | "goal"
-        | "investment"
-        | "spending"
-        | "system"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -484,16 +469,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      notification_priority: ["high", "medium", "low"],
-      notification_type: [
-        "budget",
-        "bill",
-        "goal",
-        "investment",
-        "spending",
-        "system",
-      ],
-    },
+    Enums: {},
   },
 } as const

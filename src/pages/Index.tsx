@@ -50,19 +50,7 @@ const Index = () => {
   const { user, profile, signOut } = useAuth();
 
   // Prevent multiple simultaneous component loads
-  const [loadedComponents, setLoadedComponents] = useState(new Set(['dashboard']));
   const [resourceStatus, setResourceStatus] = useState(resourceMonitor.getResourceStatus());
-  
-  const handleTabChange = (tabId: string) => {
-    // Check resources before switching tabs
-    if (!resourceMonitor.canMakeRequest()) {
-      console.warn('Deferring tab change due to resource constraints');
-      setTimeout(() => setActiveTab(tabId), 1000);
-      return;
-    }
-    
-    setActiveTab(tabId);
-  };
 
   // Monitor resource usage
   useEffect(() => {
