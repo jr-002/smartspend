@@ -223,7 +223,9 @@ What specific area would you like me to dive deeper into?`;
   const toggleVoiceInput = () => {
     if (!isListening) {
       try {
-        const SpeechRecognitionConstructor = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+        const SpeechRecognitionConstructor =
+          (window as Window).webkitSpeechRecognition ||
+          (window as Window).SpeechRecognition;
 
         if (!SpeechRecognitionConstructor) {
           toast({
@@ -244,7 +246,7 @@ What specific area would you like me to dive deeper into?`;
           setIsListening(true);
         };
         
-        recognition.onresult = (event: any) => {
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
           try {
             const transcript = event.results[0][0].transcript;
             setInputMessage(transcript);
@@ -259,7 +261,7 @@ What specific area would you like me to dive deeper into?`;
           setIsListening(false);
         };
         
-        recognition.onerror = (event: any) => {
+        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
           console.error('Speech recognition error:', event.error);
           setIsListening(false);
           toast({
