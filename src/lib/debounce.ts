@@ -13,17 +13,14 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   let lastInvokeTime = 0;
   let timerId: NodeJS.Timeout | undefined;
   let lastArgs: Parameters<T> | undefined;
-  let lastThis: unknown;
   let result: ReturnType<T> | undefined;
 
   function invokeFunc(time: number) {
     const args = lastArgs!;
-    const thisArg = lastThis;
 
     lastArgs = undefined;
-    lastThis = undefined;
     lastInvokeTime = time;
-    result = func.apply(thisArg, args) as ReturnType<T>;
+    result = func(...args) as ReturnType<T>;
     return result;
   }
 
@@ -71,7 +68,6 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
       return invokeFunc(time);
     }
     lastArgs = undefined;
-    lastThis = undefined;
     return result;
   }
 
@@ -82,7 +78,6 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     lastInvokeTime = 0;
     lastArgs = undefined;
     lastCallTime = undefined;
-    lastThis = undefined;
     timerId = undefined;
   }
 
@@ -90,12 +85,11 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     return timerId === undefined ? result : trailingEdge(Date.now());
   }
 
-  function debounced(this: unknown, ...args: Parameters<T>): ReturnType<T> | undefined {
+  const debounced = (...args: Parameters<T>): ReturnType<T> | undefined => {
     const time = Date.now();
     const isInvoking = shouldInvoke(time);
 
     lastArgs = args;
-    lastThis = this;
     lastCallTime = time;
 
     if (isInvoking) {
@@ -111,7 +105,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
       timerId = setTimeout(timerExpired, wait);
     }
     return result;
-  }
+  };
 
   debounced.cancel = cancel;
   debounced.flush = flush;
@@ -140,21 +134,21 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
   let lastFunc: NodeJS.Timeout;
   let lastRan: number;
 
-  function throttled(this: unknown, ...args: Parameters<T>) {
+  const throttled = (...args: Parameters<T>) => {
     if (!inThrottle) {
-      func.apply(this, args);
+      func(...args);
       lastRan = Date.now();
       inThrottle = true;
     } else {
       clearTimeout(lastFunc);
       lastFunc = setTimeout(() => {
         if (Date.now() - lastRan >= limit) {
-          func.apply(this, args);
+          func(...args);
           lastRan = Date.now();
         }
       }, limit - (Date.now() - lastRan));
     }
-  }
+  };
 
   throttled.cancel = () => {
     clearTimeout(lastFunc);
