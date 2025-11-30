@@ -203,8 +203,15 @@ export async function generateSpendingPredictions(userId: string): Promise<Recor
 }
 
 export async function generateFinancialAdvice(userContext: string): Promise<string> {
-  if (!userContext?.trim()) {
-    return "Please provide more details about your financial question so I can give you better advice.";
+  const trimmedContext = userContext?.trim() || '';
+  
+  // Validate minimum length before calling edge function
+  if (trimmedContext.length < 10) {
+    return "Please provide more details about your financial question (at least 10 characters) so I can give you better advice.";
+  }
+  
+  if (trimmedContext.length > 2000) {
+    return "Your question is too long. Please keep it under 2000 characters.";
   }
 
   // Rate limiting check
@@ -223,13 +230,13 @@ export async function generateFinancialAdvice(userContext: string): Promise<stri
       () => queuedAPICall(
         async () => {
           const response = await supabase.functions.invoke('ai-coach', {
-            body: { userContext }
+            body: { userContext: trimmedContext }
           });
           return response;
         },
         3 // High priority for user interactions
       ),
-      () => ({ data: { advice: getFallbackFinancialAdvice(userContext) }, error: null })
+      () => ({ data: { advice: getFallbackFinancialAdvice(trimmedContext) }, error: null })
     );
 
     if (error) {
@@ -238,17 +245,17 @@ export async function generateFinancialAdvice(userContext: string): Promise<stri
         category: 'ai_coach', 
         severity: 'medium' 
       });
-      return getFallbackFinancialAdvice(userContext);
+      return getFallbackFinancialAdvice(trimmedContext);
     }
 
-    return data.advice || getFallbackFinancialAdvice(userContext);
+    return data.advice || getFallbackFinancialAdvice(trimmedContext);
   } catch (error) {
     console.error('Error in generateFinancialAdvice:', error);
     enhancedMonitor.trackError(error instanceof Error ? error : new Error('Unknown error'), { 
       category: 'financial_advice', 
       severity: 'medium' 
     });
-    return getFallbackFinancialAdvice(userContext);
+    return getFallbackFinancialAdvice(trimmedContext);
   }
 }
 

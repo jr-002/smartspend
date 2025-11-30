@@ -31,14 +31,12 @@ export class ContentSecurityPolicy {
       'object-src': ["'none'"],
       'base-uri': ["'self'"],
       'form-action': ["'self'"],
-      'frame-ancestors': ["'none'"],
       'upgrade-insecure-requests': [],
       ...this.config.customDirectives
     };
 
-    if (this.config.reportUri) {
-      directives['report-uri'] = [this.config.reportUri];
-    }
+    // Note: frame-ancestors and report-uri are ignored in meta tags
+    // These should only be set via HTTP headers (see vercel.json)
 
     return Object.entries(directives)
       .map(([directive, sources]) => {
@@ -133,6 +131,9 @@ export class ContentSecurityPolicy {
     if (import.meta.env.VITE_SENTRY_DSN) {
       sources.push('https://*.sentry.io');
     }
+    
+    // IP location API for currency detection
+    sources.push('https://ipapi.co');
     
     // WebSocket connections
     sources.push('wss:');
