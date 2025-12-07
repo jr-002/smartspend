@@ -43,14 +43,22 @@ export async function validateAuthToken(token: string): Promise<AuthContext> {
       };
     }
 
+    // Fetch user roles from database
+    const { data: userRoles } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const roles = userRoles?.map(r => r.role as string) || ['user'];
+
     const authContext: AuthContext = {
       user: {
         id: user.id,
         email: user.email || '',
-        role: 'user', // Default role since no role column exists
+        role: roles[0] || 'user',
       },
       isAuthenticated: true,
-      hasRole: (role: string) => role === 'user', // Simple role check
+      hasRole: (role: string) => roles.includes(role),
     };
 
     return authContext;
