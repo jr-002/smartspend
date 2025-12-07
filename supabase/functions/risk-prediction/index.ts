@@ -11,17 +11,22 @@ function validateEnvironment() {
   }
 }
 
-// Enhanced input validation
-interface ValidatedRequest {
-  userId?: string;
-  financialData?: FinancialRiskData;
+// Extract user ID from JWT token
+function extractUserIdFromToken(authHeader: string | null): string | null {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  try {
+    const token = authHeader.replace('Bearer ', '');
+    const payload = JSON.parse(atob(token.split('.')[1] || ''));
+    return payload.sub || null;
+  } catch {
+    return null;
+  }
 }
 
-function sanitizeUserId(userId: unknown): string {
-  if (typeof userId !== 'string') {
-    throw new Error('User ID must be a string');
-  }
-
+function validateUUID(userId: string): string {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   
   if (!uuidRegex.test(userId)) {
@@ -29,6 +34,11 @@ function sanitizeUserId(userId: unknown): string {
   }
 
   return userId.toLowerCase();
+}
+
+// Enhanced input validation
+interface ValidatedRequest {
+  financialData?: FinancialRiskData;
 }
 
 function validateFinancialData(data: unknown): FinancialRiskData | undefined {
@@ -59,21 +69,12 @@ function validateFinancialData(data: unknown): FinancialRiskData | undefined {
 
 function validateRequest(body: unknown): ValidatedRequest {
   if (!body || typeof body !== 'object') {
-    throw new Error('Request body must be a valid JSON object');
+    return {};
   }
 
-  const { userId, financialData } = body as Record<string, unknown>;
-
-  // At least one of userId or financialData must be provided
-  if (!userId && !financialData) {
-    throw new Error('Either userId or financialData must be provided');
-  }
+  const { financialData } = body as Record<string, unknown>;
 
   const result: ValidatedRequest = {};
-
-  if (userId) {
-    result.userId = sanitizeUserId(userId);
-  }
 
   if (financialData) {
     result.financialData = validateFinancialData(financialData);
@@ -346,11 +347,25 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Extract user ID from JWT token for security
+    const authHeader = req.headers.get('Authorization');
+    const authenticatedUserId = extractUserIdFromToken(authHeader);
+    
     // Enhanced request validation and sanitization
     const requestBody = await req.json();
     const validatedData = validateRequest(requestBody);
 
-    if (validatedData.userId && !validatedData.financialData) {
+    // If no financial data provided, fetch from database using authenticated user
+    if (!validatedData.financialData) {
+      if (!authenticatedUserId) {
+        return new Response(JSON.stringify({ error: 'Authentication required' }), {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+      
+      const validatedUserId = validateUUID(authenticatedUserId);
+      
       const supabase = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -361,7 +376,6 @@ Deno.serve(async (req) => {
         }
       );
 
-      const authHeader = req.headers.get('Authorization');
       if (authHeader) {
         supabase.auth.setSession({
           access_token: authHeader.replace('Bearer ', ''),
@@ -370,12 +384,12 @@ Deno.serve(async (req) => {
       }
 
       const [transactionsResult, budgetsResult, savingsGoalsResult, billsResult, debtsResult, profileResult] = await Promise.all([
-        supabase.from('transactions').select('*').eq('user_id', validatedData.userId).order('date', { ascending: false }).limit(100),
-        supabase.from('budgets').select('*').eq('user_id', validatedData.userId),
-        supabase.from('savings_goals').select('*').eq('user_id', validatedData.userId),
-        supabase.from('bills').select('*').eq('user_id', validatedData.userId),
-        supabase.from('debts').select('*').eq('user_id', validatedData.userId),
-        supabase.from('profiles').select('*').eq('id', validatedData.userId).single()
+        supabase.from('transactions').select('*').eq('user_id', validatedUserId).order('date', { ascending: false }).limit(100),
+        supabase.from('budgets').select('*').eq('user_id', validatedUserId),
+        supabase.from('savings_goals').select('*').eq('user_id', validatedUserId),
+        supabase.from('bills').select('*').eq('user_id', validatedUserId),
+        supabase.from('debts').select('*').eq('user_id', validatedUserId),
+        supabase.from('profiles').select('*').eq('id', validatedUserId).single()
       ]);
 
       if (transactionsResult.error || profileResult.error) {

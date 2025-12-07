@@ -11,16 +11,22 @@ function validateEnvironment() {
   }
 }
 
-// Enhanced input validation
-interface ValidatedRequest {
-  userId: string;
+// Extract user ID from JWT token
+function extractUserIdFromToken(authHeader: string | null): string | null {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  try {
+    const token = authHeader.replace('Bearer ', '');
+    const payload = JSON.parse(atob(token.split('.')[1] || ''));
+    return payload.sub || null;
+  } catch {
+    return null;
+  }
 }
 
-function sanitizeUserId(userId: unknown): string {
-  if (typeof userId !== 'string') {
-    throw new Error('User ID must be a string');
-  }
-
+function validateUUID(userId: string): string {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   
   if (!uuidRegex.test(userId)) {
@@ -28,22 +34,6 @@ function sanitizeUserId(userId: unknown): string {
   }
 
   return userId.toLowerCase();
-}
-
-function validateRequest(body: unknown): ValidatedRequest {
-  if (!body || typeof body !== 'object') {
-    throw new Error('Request body must be a valid JSON object');
-  }
-
-  const { userId } = body as Record<string, unknown>;
-
-  if (!userId) {
-    throw new Error('userId is required');
-  }
-
-  return {
-    userId: sanitizeUserId(userId),
-  };
 }
 
 // Enhanced security headers with comprehensive protection
@@ -386,9 +376,18 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Enhanced request validation and sanitization
-    const requestBody = await req.json();
-    const validatedData = validateRequest(requestBody);
+    // Extract user ID from JWT token for security
+    const authHeader = req.headers.get('Authorization');
+    const authenticatedUserId = extractUserIdFromToken(authHeader);
+    
+    if (!authenticatedUserId) {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401,
+        headers: corsHeaders,
+      });
+    }
+    
+    const validatedUserId = validateUUID(authenticatedUserId);
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -400,7 +399,6 @@ Deno.serve(async (req) => {
       }
     );
 
-    const authHeader = req.headers.get('Authorization');
     if (authHeader) {
       supabase.auth.setSession({
         access_token: authHeader.replace('Bearer ', ''),
@@ -409,11 +407,11 @@ Deno.serve(async (req) => {
     }
 
     const [transactionsResult, budgetsResult, savingsGoalsResult, billsResult, profileResult] = await Promise.all([
-      supabase.from('transactions').select('*').eq('user_id', validatedData.userId).order('date', { ascending: false }),
-      supabase.from('budgets').select('*').eq('user_id', validatedData.userId),
-      supabase.from('savings_goals').select('*').eq('user_id', validatedData.userId),
-      supabase.from('bills').select('*').eq('user_id', validatedData.userId),
-      supabase.from('profiles').select('*').eq('id', validatedData.userId).limit(1)
+      supabase.from('transactions').select('*').eq('user_id', validatedUserId).order('date', { ascending: false }),
+      supabase.from('budgets').select('*').eq('user_id', validatedUserId),
+      supabase.from('savings_goals').select('*').eq('user_id', validatedUserId),
+      supabase.from('bills').select('*').eq('user_id', validatedUserId),
+      supabase.from('profiles').select('*').eq('id', validatedUserId).limit(1)
     ]);
 
     if (transactionsResult.error || budgetsResult.error || savingsGoalsResult.error || billsResult.error) {
