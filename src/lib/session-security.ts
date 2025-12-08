@@ -75,9 +75,15 @@ export class SessionSecurityManager {
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
       
+      // Only handle session issues if user was previously logged in
+      // Don't redirect unauthenticated users - they haven't signed in yet
       if (error || !session) {
-        console.warn('Invalid session detected, redirecting to login');
-        this.handleSessionExpiry();
+        // Check if user was previously authenticated by looking for auth storage
+        const hasAuthHistory = localStorage.getItem('sb-gxvsmnmgrxovbsmdkdqf-auth-token');
+        if (hasAuthHistory) {
+          console.warn('Session expired, clearing auth state');
+          this.handleSessionExpiry();
+        }
         return;
       }
 
