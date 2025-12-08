@@ -41,6 +41,13 @@ export const useBills = () => {
 
     try {
       setLoading(true);
+      
+      // Check if Supabase env vars are configured (for Vercel deployment)
+      // This is just a warning - hardcoded credentials in client.ts will work as fallback
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        console.warn('VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not set - using hardcoded credentials');
+      }
+      
       setError(null);
 
       const { data, error: fetchError } = await supabase
