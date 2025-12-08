@@ -41,12 +41,6 @@ export const useBills = () => {
 
     try {
       setLoading(true);
-      
-      // Check if Supabase is properly configured
-      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        throw new Error('Supabase configuration is missing. Please check your environment variables.');
-      }
-      
       setError(null);
 
       const { data, error: fetchError } = await supabase
