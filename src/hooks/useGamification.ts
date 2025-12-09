@@ -447,13 +447,14 @@ export function useGamification(): UseGamificationReturn {
           await addPoints(POINT_VALUES.SAVINGS_GOAL_CREATED, 'New savings goal created');
           await checkAndAwardAchievement('goal_setter');
           break;
-        case 'savings_goal_updated':
+        case 'savings_goal_updated': {
           const { currentAmount, targetAmount } = event.data as { currentAmount: number; targetAmount: number };
           const percentage = (currentAmount / targetAmount) * 100;
           if (percentage >= 50 && percentage < 100) {
             await checkAndAwardAchievement('halfway_there');
           }
           break;
+        }
         case 'savings_goal_completed':
           await addPoints(POINT_VALUES.SAVINGS_GOAL_COMPLETED, 'Savings goal completed!');
           await checkAndAwardAchievement('goal_achieved');
