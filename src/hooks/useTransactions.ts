@@ -1,9 +1,8 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-
+import { emitTransactionAdded } from '@/lib/gamification-events';
 export interface Transaction {
   id: string;
   description: string;
@@ -120,6 +119,10 @@ export const useTransactions = () => {
       };
 
       setTransactions(prev => [transformedTransaction, ...prev]);
+      
+      // Emit gamification event
+      emitTransactionAdded();
+      
       toast({
         title: "Success",
         description: "Transaction added successfully.",
