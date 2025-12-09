@@ -233,6 +233,54 @@ export type Database = {
         }
         Relationships: []
       }
+      savings_challenges: {
+        Row: {
+          challenge_type: string
+          created_at: string
+          current_amount: number
+          description: string | null
+          end_date: string
+          id: string
+          points_reward: number
+          start_date: string
+          status: string
+          target_amount: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_type: string
+          created_at?: string
+          current_amount?: number
+          description?: string | null
+          end_date: string
+          id?: string
+          points_reward?: number
+          start_date?: string
+          status?: string
+          target_amount?: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_type?: string
+          created_at?: string
+          current_amount?: number
+          description?: string | null
+          end_date?: string
+          id?: string
+          points_reward?: number
+          start_date?: string
+          status?: string
+          target_amount?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       savings_goals: {
         Row: {
           created_at: string
@@ -300,6 +348,63 @@ export type Database = {
           description?: string
           id?: string
           transaction_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_gamification: {
+        Row: {
+          created_at: string
+          current_level: number
+          current_streak: number
+          id: string
+          last_activity_date: string | null
+          longest_streak: number
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_level?: number
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_level?: number
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          total_points?: number
           updated_at?: string
           user_id?: string
         }

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { emitSavingsGoalCreated, emitSavingsGoalUpdated, emitSavingsGoalCompleted } from '@/lib/gamification-events';
 
 export interface SavingsGoal {
   id: string;
@@ -93,6 +94,10 @@ export const useSavingsGoals = () => {
       }
 
       setGoals(prev => [...prev, data]);
+      
+      // Emit gamification event
+      emitSavingsGoalCreated();
+      
       toast({
         title: "Success",
         description: "Savings goal created successfully.",
@@ -140,10 +145,16 @@ export const useSavingsGoals = () => {
       }
 
       setGoals(prev => 
-        prev.map(goal => 
-          goal.id === id ? { ...goal, ...data } : goal
+        prev.map(g => 
+          g.id === id ? { ...g, ...data } : g
         )
       );
+
+      // Emit gamification events
+      emitSavingsGoalUpdated(newAmount, goal.target_amount);
+      if (newAmount >= goal.target_amount) {
+        emitSavingsGoalCompleted();
+      }
 
       toast({
         title: "Success",
