@@ -22,6 +22,9 @@ interface State {
 }
 
 class DataBoundary extends Component<Props, State> {
+  private onlineDebounceTimeout: ReturnType<typeof setTimeout> | null = null;
+  private offlineDebounceTimeout: ReturnType<typeof setTimeout> | null = null;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -62,6 +65,13 @@ class DataBoundary extends Component<Props, State> {
   componentWillUnmount() {
     window.removeEventListener('online', this.handleOnline);
     window.removeEventListener('offline', this.handleOffline);
+    // Clear any pending timeouts
+    if (this.onlineDebounceTimeout) {
+      clearTimeout(this.onlineDebounceTimeout);
+    }
+    if (this.offlineDebounceTimeout) {
+      clearTimeout(this.offlineDebounceTimeout);
+    }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
@@ -102,21 +112,41 @@ class DataBoundary extends Component<Props, State> {
   }
 
   handleOnline = () => {
-    this.setState({ isOnline: true });
-    
-    // If we were offline and now online, try to recover
-    if (this.state.hasError && this.state.errorType === 'network') {
-      setTimeout(() => {
-        this.setState({
-          hasError: false,
-          error: null,
-        });
-      }, 1000);
+    // Debounce online event to prevent rapid state changes
+    if (this.onlineDebounceTimeout) {
+      clearTimeout(this.onlineDebounceTimeout);
     }
+    
+    this.onlineDebounceTimeout = setTimeout(() => {
+      // Only update if we're actually online now
+      if (navigator.onLine && !this.state.isOnline) {
+        this.setState({ isOnline: true });
+        
+        // If we were offline and now online, try to recover after a delay
+        if (this.state.hasError && this.state.errorType === 'network') {
+          setTimeout(() => {
+            this.setState({
+              hasError: false,
+              error: null,
+            });
+          }, 2000);
+        }
+      }
+    }, 500);
   };
 
   handleOffline = () => {
-    this.setState({ isOnline: false });
+    // Debounce offline event to prevent rapid state changes
+    if (this.offlineDebounceTimeout) {
+      clearTimeout(this.offlineDebounceTimeout);
+    }
+    
+    this.offlineDebounceTimeout = setTimeout(() => {
+      // Only update if we're actually offline now
+      if (!navigator.onLine && this.state.isOnline) {
+        this.setState({ isOnline: false });
+      }
+    }, 500);
   };
 
   handleRetry = () => {

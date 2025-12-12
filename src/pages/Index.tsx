@@ -209,7 +209,7 @@ const Index = () => {
                   />
                 }
               >
-                <ActiveComponent />
+                <ActiveComponent onNavigate={setActiveTab} />
               </Suspense>
             </div>
           </main>
