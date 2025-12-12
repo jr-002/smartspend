@@ -5,16 +5,205 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard, AlertTriangle, Calculator, TrendingDown, Loader2 } from "lucide-react";
-import { useDebts } from "@/hooks/useDebts";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { CreditCard, AlertTriangle, Calculator, TrendingDown, Loader2, Plus } from "lucide-react";
+import { useDebts, NewDebt } from "@/hooks/useDebts";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/utils/currencies";
 import EmptyState from "./EmptyState";
 
 const DebtManagement = () => {
-  const { debts, loading } = useDebts();
+  const { debts, loading, addDebt } = useDebts();
   const { profile } = useAuth();
   const [strategy, setStrategy] = useState<'snowball' | 'avalanche'>('avalanche');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newDebt, setNewDebt] = useState<NewDebt>({
+    name: '',
+    type: 'credit_card',
+    balance: 0,
+    original_amount: 0,
+    interest_rate: 0,
+    minimum_payment: 0,
+    due_date: new Date().toISOString().split('T')[0],
+    priority: 'medium',
+  });
+
+  const handleAddDebt = async () => {
+    if (!newDebt.name || newDebt.balance <= 0) {
+      return;
+    }
+    
+    setIsSubmitting(true);
+    const success = await addDebt({
+      ...newDebt,
+      original_amount: newDebt.original_amount || newDebt.balance,
+    });
+    
+    if (success) {
+      setNewDebt({
+        name: '',
+        type: 'credit_card',
+        balance: 0,
+        original_amount: 0,
+        interest_rate: 0,
+        minimum_payment: 0,
+        due_date: new Date().toISOString().split('T')[0],
+        priority: 'medium',
+      });
+      setIsDialogOpen(false);
+    }
+    setIsSubmitting(false);
+  };
+
+  const AddDebtDialog = () => (
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild>
+        <Button className="gap-2">
+          <Plus className="w-4 h-4" />
+          Add Debt
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Add New Debt</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Debt Name</Label>
+            <Input
+              id="name"
+              placeholder="e.g., Credit Card, Car Loan"
+              value={newDebt.name}
+              onChange={(e) => setNewDebt({ ...newDebt, name: e.target.value })}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="type">Debt Type</Label>
+            <Select
+              value={newDebt.type}
+              onValueChange={(value) => setNewDebt({ ...newDebt, type: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="credit_card">Credit Card</SelectItem>
+                <SelectItem value="personal_loan">Personal Loan</SelectItem>
+                <SelectItem value="car_loan">Car Loan</SelectItem>
+                <SelectItem value="student_loan">Student Loan</SelectItem>
+                <SelectItem value="mortgage">Mortgage</SelectItem>
+                <SelectItem value="medical">Medical Debt</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="balance">Current Balance</Label>
+              <Input
+                id="balance"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={newDebt.balance || ''}
+                onChange={(e) => setNewDebt({ ...newDebt, balance: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="original">Original Amount</Label>
+              <Input
+                id="original"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={newDebt.original_amount || ''}
+                onChange={(e) => setNewDebt({ ...newDebt, original_amount: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="interest">Interest Rate (%)</Label>
+              <Input
+                id="interest"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                placeholder="0.00"
+                value={newDebt.interest_rate || ''}
+                onChange={(e) => setNewDebt({ ...newDebt, interest_rate: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="minimum">Minimum Payment</Label>
+              <Input
+                id="minimum"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={newDebt.minimum_payment || ''}
+                onChange={(e) => setNewDebt({ ...newDebt, minimum_payment: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="due_date">Due Date</Label>
+              <Input
+                id="due_date"
+                type="date"
+                value={newDebt.due_date}
+                onChange={(e) => setNewDebt({ ...newDebt, due_date: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="priority">Priority</Label>
+              <Select
+                value={newDebt.priority}
+                onValueChange={(value: 'high' | 'medium' | 'low') => setNewDebt({ ...newDebt, priority: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <Button 
+            onClick={handleAddDebt} 
+            className="w-full" 
+            disabled={isSubmitting || !newDebt.name || newDebt.balance <= 0}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Adding...
+              </>
+            ) : (
+              'Add Debt'
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 
   if (loading) {
     return (
@@ -24,6 +213,7 @@ const DebtManagement = () => {
             <h2 className="text-2xl font-bold text-foreground">Debt Management</h2>
             <p className="text-muted-foreground">Track and manage your debts</p>
           </div>
+          <AddDebtDialog />
         </div>
         
         <Card className="shadow-card bg-gradient-card border-0">
@@ -46,9 +236,10 @@ const DebtManagement = () => {
             <h2 className="text-2xl font-bold text-foreground">Debt Management</h2>
             <p className="text-muted-foreground">Track and manage your debts</p>
           </div>
+          <AddDebtDialog />
         </div>
         
-        <EmptyState type="debts" />
+        <EmptyState type="debts" onAdd={() => setIsDialogOpen(true)} />
       </div>
     );
   }
@@ -68,6 +259,15 @@ const DebtManagement = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header with Add Button */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Debt Management</h2>
+          <p className="text-muted-foreground">Track and manage your debts</p>
+        </div>
+        <AddDebtDialog />
+      </div>
+
       {/* Debt Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="shadow-card bg-gradient-card border-0">
