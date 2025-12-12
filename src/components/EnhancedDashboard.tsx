@@ -11,7 +11,11 @@ import { useSavingsGoals } from "@/hooks/useSavingsGoals";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/utils/currencies";
 
-const EnhancedDashboard = () => {
+interface EnhancedDashboardProps {
+  onNavigate?: (tabId: string) => void;
+}
+
+const EnhancedDashboard = ({ onNavigate }: EnhancedDashboardProps) => {
   const { transactions, loading: transactionsLoading } = useTransactions();
   const { bills, loading: billsLoading } = useBills();
   const { budgets, loading: budgetsLoading } = useBudgets();
@@ -167,7 +171,12 @@ const EnhancedDashboard = () => {
                 <ArrowUpDown className="w-5 h-5 text-primary" />
                 Recent Transactions
               </CardTitle>
-              <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary hover:text-primary/80"
+                onClick={() => onNavigate?.('transactions')}
+              >
                 View All
               </Button>
             </div>
@@ -211,7 +220,7 @@ const EnhancedDashboard = () => {
                 <ArrowUpDown className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
                 <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">No transactions yet</h3>
                 <p className="text-muted-foreground mb-4">Start by adding your first transaction</p>
-                <Button className="bg-primary hover:bg-primary/90">
+                <Button className="bg-primary hover:bg-primary/90" onClick={() => onNavigate?.('transactions')}>
                   Add Transaction
                 </Button>
               </div>
@@ -227,7 +236,12 @@ const EnhancedDashboard = () => {
                 <FileText className="w-5 h-5 text-primary" />
                 Bills Overview
               </CardTitle>
-              <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary hover:text-primary/80"
+                onClick={() => onNavigate?.('bills')}
+              >
                 Manage Bills
               </Button>
             </div>
@@ -277,7 +291,7 @@ const EnhancedDashboard = () => {
                 <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
                 <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">No bills added</h3>
                 <p className="text-muted-foreground mb-4">Add your first bill to track payments</p>
-                <Button className="bg-primary hover:bg-primary/90">
+                <Button className="bg-primary hover:bg-primary/90" onClick={() => onNavigate?.('bills')}>
                   Add Bill
                 </Button>
               </div>
@@ -294,9 +308,14 @@ const EnhancedDashboard = () => {
               <Coins className="w-5 h-5 text-primary" />
               Budget Overview
             </CardTitle>
-            <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
-              Manage Budgets
-            </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary hover:text-primary/80"
+                onClick={() => onNavigate?.('budgeting')}
+              >
+                Manage Budgets
+              </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -353,7 +372,7 @@ const EnhancedDashboard = () => {
               <Coins className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
               <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">No budgets created</h3>
               <p className="text-muted-foreground mb-4">Create your first budget to track spending</p>
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button className="bg-primary hover:bg-primary/90" onClick={() => onNavigate?.('budgeting')}>
                 Create Budget
               </Button>
             </div>
@@ -369,19 +388,35 @@ const EnhancedDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <Button variant="outline" className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
+            <Button 
+              variant="outline" 
+              className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30"
+              onClick={() => onNavigate?.('transactions')}
+            >
               <ArrowUpDown className="w-6 h-6 text-primary" />
               <span className="text-xs sm:text-sm font-medium">Add Transaction</span>
             </Button>
-            <Button variant="outline" className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
+            <Button 
+              variant="outline" 
+              className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30"
+              onClick={() => onNavigate?.('budgeting')}
+            >
               <Calculator className="w-6 h-6 text-primary" />
               <span className="text-xs sm:text-sm font-medium">Create Budget</span>
             </Button>
-            <Button variant="outline" className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
+            <Button 
+              variant="outline" 
+              className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30"
+              onClick={() => onNavigate?.('goals')}
+            >
               <Target className="w-6 h-6 text-primary" />
               <span className="text-xs sm:text-sm font-medium">Set Goal</span>
             </Button>
-            <Button variant="outline" className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30">
+            <Button 
+              variant="outline" 
+              className="h-auto p-3 sm:p-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30"
+              onClick={() => onNavigate?.('ai-insights')}
+            >
               <Brain className="w-6 h-6 text-primary" />
               <span className="text-xs sm:text-sm font-medium">AI Insights</span>
             </Button>
