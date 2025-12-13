@@ -53,10 +53,10 @@ export class SessionSecurityManager {
   }
 
   private startSessionMonitoring(): void {
-    // Check session validity every minute
+    // Check session validity every 5 minutes to avoid excessive checks
     this.sessionTimer = setInterval(() => {
       this.checkSessionValidity();
-    }, 60000);
+    }, 300000);
 
     this.resetInactivityTimer();
   }
@@ -74,16 +74,19 @@ export class SessionSecurityManager {
   private async checkSessionValidity(): Promise<void> {
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
-      
-      // Only handle session issues if user was previously logged in
-      // Don't redirect unauthenticated users - they haven't signed in yet
-      if (error || !session) {
-        // Check if user was previously authenticated by looking for auth storage
+
+      // If there's a critical error (not just missing session), handle it
+      if (error && error.message && !error.message.includes('not authenticated')) {
+        console.error('Critical session error:', error);
         const hasAuthHistory = localStorage.getItem('sb-gxvsmnmgrxovbsmdkdqf-auth-token');
         if (hasAuthHistory) {
-          console.warn('Session expired, clearing auth state');
           this.handleSessionExpiry();
         }
+        return;
+      }
+
+      // Skip checks if there's no session - user hasn't logged in
+      if (!session) {
         return;
       }
 

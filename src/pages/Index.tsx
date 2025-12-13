@@ -52,11 +52,11 @@ const Index = () => {
   // Prevent multiple simultaneous component loads
   const [resourceStatus, setResourceStatus] = useState(resourceMonitor.getResourceStatus());
 
-  // Monitor resource usage
+  // Monitor resource usage - check every 30 seconds to avoid excessive polling
   useEffect(() => {
     const interval = setInterval(() => {
       setResourceStatus(resourceMonitor.getResourceStatus());
-    }, 5000);
+    }, 30000);
 
     return () => clearInterval(interval);
   }, []);

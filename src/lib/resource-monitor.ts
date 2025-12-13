@@ -1,9 +1,9 @@
 // Resource monitoring and management utility
 class ResourceMonitor {
   private static instance: ResourceMonitor;
-  private memoryThreshold = 500 * 1024 * 1024; // 500MB - much more reasonable
+  private memoryThreshold = 400 * 1024 * 1024; // 400MB - very high threshold
   private requestCount = 0;
-  private maxRequestsPerMinute = 200; // Increased to prevent false positives
+  private maxRequestsPerMinute = 300; // Very high threshold to prevent false positives
   private requestTimestamps: number[] = [];
 
   static getInstance(): ResourceMonitor {

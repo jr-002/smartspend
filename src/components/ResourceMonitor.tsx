@@ -12,14 +12,14 @@ const ResourceMonitor: React.FC = () => {
     const interval = setInterval(() => {
       const status = resourceMonitor.getResourceStatus();
       setResourceStatus(status);
-      
-      // Show warning if resources are low
+
+      // Show warning only if resources are critically low
       const memoryUsage = status.memoryUsage?.used || 0;
-      const isHighMemory = memoryUsage > 150; // 150MB threshold
-      const isHighRequestRate = status.recentRequests > 25;
-      
+      const isHighMemory = memoryUsage > 350; // 350MB threshold - very high
+      const isHighRequestRate = status.recentRequests > 200; // 200+ requests is excessive
+
       setShowWarning(isHighMemory || isHighRequestRate || !status.canMakeRequest);
-    }, 3000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
