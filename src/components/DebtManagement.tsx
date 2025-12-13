@@ -10,10 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { CreditCard, AlertTriangle, Calculator, TrendingDown, Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { CreditCard, AlertTriangle, Calculator, TrendingDown, Loader2, Plus, Pencil, Trash2, DollarSign, History } from "lucide-react";
 import { useDebts, NewDebt, Debt } from "@/hooks/useDebts";
+import { useDebtPayments } from "@/hooks/useDebtPayments";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/utils/currencies";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import EmptyState from "./EmptyState";
 
 const DebtManagement = () => {
@@ -402,12 +405,21 @@ interface DebtCardProps {
 
 const DebtCard = ({ debt, rank, currency, onUpdate, onDelete }: DebtCardProps) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [newBalance, setNewBalance] = useState(debt.balance);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [paymentNotes, setPaymentNotes] = useState('');
+  const [isAddingPayment, setIsAddingPayment] = useState(false);
+
+  const { payments, addPayment, deletePayment, getTotalPayments, loading: paymentsLoading } = useDebtPayments(debt.id);
 
   const progressPercentage = ((debt.original_amount - debt.balance) / debt.original_amount) * 100;
   const payoffMonths = debt.minimum_payment > 0 ? Math.ceil(debt.balance / debt.minimum_payment) : 0;
+  const totalPaid = getTotalPayments(debt.id);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -431,6 +443,27 @@ const DebtCard = ({ debt, rank, currency, onUpdate, onDelete }: DebtCardProps) =
     setIsDeleting(true);
     await onDelete(debt.id);
     setIsDeleting(false);
+  };
+
+  const handleAddPayment = async () => {
+    if (paymentAmount <= 0) return;
+    
+    setIsAddingPayment(true);
+    const success = await addPayment({
+      debt_id: debt.id,
+      amount: paymentAmount,
+      payment_date: paymentDate,
+      notes: paymentNotes || undefined,
+    });
+    
+    if (success) {
+      // Also update the debt balance
+      await onUpdate(debt.id, Math.max(0, debt.balance - paymentAmount));
+      setPaymentAmount(0);
+      setPaymentNotes('');
+      setIsPaymentOpen(false);
+    }
+    setIsAddingPayment(false);
   };
 
   return (
@@ -537,7 +570,7 @@ const DebtCard = ({ debt, rank, currency, onUpdate, onDelete }: DebtCardProps) =
         </div>
         <Progress value={progressPercentage} className="h-2" />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 pt-4 border-t">
           <div>
             <p className="text-sm font-medium text-foreground">Minimum Payment</p>
             <p className="text-lg font-bold text-foreground">{formatCurrency(debt.minimum_payment, currency)}</p>
@@ -547,16 +580,148 @@ const DebtCard = ({ debt, rank, currency, onUpdate, onDelete }: DebtCardProps) =
             <p className="text-sm font-medium text-foreground">Payoff Time</p>
             <p className="text-lg font-bold text-foreground">{payoffMonths} months</p>
           </div>
+
+          <div>
+            <p className="text-sm font-medium text-foreground">Total Paid</p>
+            <p className="text-lg font-bold text-success">{formatCurrency(totalPaid, currency)}</p>
+          </div>
           
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex-1"
-              onClick={() => setIsEditOpen(true)}
-            >
-              Update Balance
-            </Button>
+            {/* Make Payment Button */}
+            <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="flex-1 gap-1">
+                  <DollarSign className="h-4 w-4" />
+                  Pay
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Record Payment: {debt.name}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="paymentAmount">Payment Amount</Label>
+                    <Input
+                      id="paymentAmount"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={paymentAmount || ''}
+                      onChange={(e) => setPaymentAmount(parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="paymentDate">Payment Date</Label>
+                    <Input
+                      id="paymentDate"
+                      type="date"
+                      value={paymentDate}
+                      onChange={(e) => setPaymentDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="paymentNotes">Notes (optional)</Label>
+                    <Textarea
+                      id="paymentNotes"
+                      placeholder="e.g., Monthly payment, Extra payment..."
+                      value={paymentNotes}
+                      onChange={(e) => setPaymentNotes(e.target.value)}
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleAddPayment} 
+                    className="w-full" 
+                    disabled={isAddingPayment || paymentAmount <= 0}
+                  >
+                    {isAddingPayment ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Recording...
+                      </>
+                    ) : (
+                      'Record Payment'
+                    )}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Payment History Button */}
+            <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="flex-1 gap-1">
+                  <History className="h-4 w-4" />
+                  History
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Payment History: {debt.name}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                    <span className="text-sm text-muted-foreground">Total Payments</span>
+                    <span className="text-lg font-bold text-success">{formatCurrency(totalPaid, currency)}</span>
+                  </div>
+                  
+                  {paymentsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  ) : payments.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No payments recorded yet.
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[300px]">
+                      <div className="space-y-3">
+                        {payments.map((payment) => (
+                          <div key={payment.id} className="flex items-start justify-between p-3 border rounded-lg">
+                            <div>
+                              <p className="font-semibold text-foreground">
+                                {formatCurrency(payment.amount, currency)}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {new Date(payment.payment_date).toLocaleDateString()}
+                              </p>
+                              {payment.notes && (
+                                <p className="text-sm text-muted-foreground mt-1">{payment.notes}</p>
+                              )}
+                            </div>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Payment</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this payment of {formatCurrency(payment.amount, currency)}?
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => deletePayment(payment.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>
