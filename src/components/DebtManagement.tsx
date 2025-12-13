@@ -9,14 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CreditCard, AlertTriangle, Calculator, TrendingDown, Loader2, Plus } from "lucide-react";
-import { useDebts, NewDebt } from "@/hooks/useDebts";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { CreditCard, AlertTriangle, Calculator, TrendingDown, Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { useDebts, NewDebt, Debt } from "@/hooks/useDebts";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/utils/currencies";
 import EmptyState from "./EmptyState";
 
 const DebtManagement = () => {
-  const { debts, loading, addDebt } = useDebts();
+  const { debts, loading, addDebt, updateDebtBalance, deleteDebt } = useDebts();
   const { profile } = useAuth();
   const [strategy, setStrategy] = useState<'snowball' | 'avalanche'>('avalanche');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -350,7 +351,14 @@ const DebtManagement = () => {
               
               <div className="space-y-4">
                 {getSortedDebts().map((debt, index) => (
-                  <DebtCard key={debt.id} debt={debt} rank={index + 1} currency={profile?.currency || "USD"} />
+                  <DebtCard 
+                    key={debt.id} 
+                    debt={debt} 
+                    rank={index + 1} 
+                    currency={profile?.currency || "USD"}
+                    onUpdate={updateDebtBalance}
+                    onDelete={deleteDebt}
+                  />
                 ))}
               </div>
             </TabsContent>
@@ -366,7 +374,14 @@ const DebtManagement = () => {
               
               <div className="space-y-4">
                 {getSortedDebts().map((debt, index) => (
-                  <DebtCard key={debt.id} debt={debt} rank={index + 1} currency={profile?.currency || "USD"} />
+                  <DebtCard 
+                    key={debt.id} 
+                    debt={debt} 
+                    rank={index + 1} 
+                    currency={profile?.currency || "USD"}
+                    onUpdate={updateDebtBalance}
+                    onDelete={deleteDebt}
+                  />
                 ))}
               </div>
             </TabsContent>
@@ -378,23 +393,21 @@ const DebtManagement = () => {
 };
 
 interface DebtCardProps {
-  debt: {
-    id: string;
-    name: string;
-    type: string;
-    balance: number;
-    original_amount: number;
-    interest_rate: number;
-    minimum_payment: number;
-    priority: string;
-  };
+  debt: Debt;
   rank: number;
   currency: string;
+  onUpdate: (id: string, newBalance: number) => Promise<boolean>;
+  onDelete: (id: string) => Promise<boolean>;
 }
 
-const DebtCard = ({ debt, rank, currency }: DebtCardProps) => {
+const DebtCard = ({ debt, rank, currency, onUpdate, onDelete }: DebtCardProps) => {
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [newBalance, setNewBalance] = useState(debt.balance);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const progressPercentage = ((debt.original_amount - debt.balance) / debt.original_amount) * 100;
-  const payoffMonths = Math.ceil(debt.balance / debt.minimum_payment);
+  const payoffMonths = debt.minimum_payment > 0 ? Math.ceil(debt.balance / debt.minimum_payment) : 0;
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -403,6 +416,21 @@ const DebtCard = ({ debt, rank, currency }: DebtCardProps) => {
       case 'low': return 'bg-success text-success-foreground';
       default: return 'bg-muted text-muted-foreground';
     }
+  };
+
+  const handleUpdateBalance = async () => {
+    setIsUpdating(true);
+    const success = await onUpdate(debt.id, newBalance);
+    if (success) {
+      setIsEditOpen(false);
+    }
+    setIsUpdating(false);
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    await onDelete(debt.id);
+    setIsDeleting(false);
   };
 
   return (
@@ -422,11 +450,81 @@ const DebtCard = ({ debt, rank, currency }: DebtCardProps) => {
             </div>
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-2xl font-bold text-foreground">{formatCurrency(debt.balance, currency)}</p>
-          <p className="text-sm text-muted-foreground">
-            {debt.interest_rate}% APR
-          </p>
+        <div className="flex items-start gap-2">
+          <div className="text-right mr-2">
+            <p className="text-2xl font-bold text-foreground">{formatCurrency(debt.balance, currency)}</p>
+            <p className="text-sm text-muted-foreground">
+              {debt.interest_rate}% APR
+            </p>
+          </div>
+          
+          {/* Edit Button */}
+          <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon" className="h-8 w-8">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Update Balance: {debt.name}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newBalance">New Balance</Label>
+                  <Input
+                    id="newBalance"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={newBalance}
+                    onChange={(e) => setNewBalance(parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+                <Button 
+                  onClick={handleUpdateBalance} 
+                  className="w-full" 
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Balance'
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Delete Button */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Debt</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete "{debt.name}"? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
       
@@ -451,11 +549,13 @@ const DebtCard = ({ debt, rank, currency }: DebtCardProps) => {
           </div>
           
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="flex-1">
-              Calculate
-            </Button>
-            <Button size="sm" className="flex-1 bg-gradient-primary">
-              Pay Extra
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1"
+              onClick={() => setIsEditOpen(true)}
+            >
+              Update Balance
             </Button>
           </div>
         </div>
