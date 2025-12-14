@@ -19,7 +19,6 @@ import {
   Trophy,
   Users,
   AlertTriangle,
-  Activity,
 } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar, { SidebarCategory } from "@/components/AppSidebar";
@@ -43,7 +42,7 @@ const GamifiedSavings = lazy(() => import("@/components/GamifiedSavings"));
 const SmartIncomeSplitter = lazy(() => import("@/components/SmartIncomeSplitter"));
 const CommunityBudgetTemplates = lazy(() => import("@/components/CommunityBudgetTemplates"));
 const FinancialRiskPredictor = lazy(() => import("@/components/FinancialRiskPredictor"));
-const ProductionMonitoringDashboard = lazy(() => import("@/components/ProductionMonitoringDashboard"));
+
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -124,14 +123,6 @@ const Index = () => {
         { id: "notifications", label: "Notifications", icon: Bell, component: NotificationCenter },
       ]
     },
-    {
-      id: "admin",
-      label: "System",
-      defaultOpen: false,
-      items: [
-        { id: "monitoring", label: "Monitoring", icon: Activity, component: ProductionMonitoringDashboard },
-      ]
-    }
   ], []);
 
   const allItems = sidebarCategories.flatMap(category => category.items);
